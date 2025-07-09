@@ -42,6 +42,9 @@ export default function Dashboard() {
   const [isEditingAccounts, setIsEditingAccounts] = useState(false);
   const [editedAccountBalances, setEditedAccountBalances] = useState<Record<string, string>>({});
 
+  const [isEditingIncome, setIsEditingIncome] = useState(false);
+  const [incomeInput, setIncomeInput] = useState("");
+
   const { monthlyIncome, monthlyExpenses, netBalance, incomeChange, expenseChange } = useMemo(() => {
     const now = new Date();
     const currentMonthStart = startOfMonth(now);
@@ -137,6 +140,32 @@ export default function Dashboard() {
   const handleAccountBalanceChange = (accountId: string, value: string) => {
     setEditedAccountBalances(prev => ({ ...prev, [accountId]: value }));
   };
+
+  const handleEditIncomeClick = () => {
+    setIncomeInput('');
+    setIsEditingIncome(true);
+  };
+
+  const handleSaveIncome = () => {
+    const newAmount = parseFloat(incomeInput);
+    if (!isNaN(newAmount) && newAmount > 0) {
+      handleAddTransaction({
+        type: 'income',
+        amount: newAmount,
+        category: 'Salary',
+        date: new Date(),
+        paymentMethod: 'UPI',
+        notes: 'Monthly Salary'
+      });
+    }
+    setIsEditingIncome(false);
+    setIncomeInput("");
+  };
+
+  const handleCancelEditIncome = () => {
+    setIsEditingIncome(false);
+    setIncomeInput("");
+  };
   
   return (
     <main className="flex-1 overflow-y-auto p-4 md:p-8">
@@ -155,23 +184,53 @@ export default function Dashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Monthly Income</CardTitle>
-            <div className="flex items-center">
-                <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => openTransactionSheet('income')}>
-                    <PlusCircle className="h-4 w-4" />
-                    <span className="sr-only">Add Income</span>
-                </Button>
-                <ArrowUpRight className="h-4 w-4 text-green-500" />
+            <div className="flex items-center gap-1">
+              {isEditingIncome ? (
+                <>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleSaveIncome}>
+                    <Check className="h-4 w-4" />
+                    <span className="sr-only">Save Income</span>
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCancelEditIncome}>
+                    <X className="h-4 w-4" />
+                    <span className="sr-only">Cancel</span>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleEditIncomeClick}>
+                    <Pencil className="h-4 w-4" />
+                    <span className="sr-only">Add/Edit Income</span>
+                  </Button>
+                  <ArrowUpRight className="h-4 w-4 text-green-500" />
+                </>
+              )}
             </div>
           </CardHeader>
           <CardContent>
-            <div className="font-headline text-2xl font-bold flex items-center">
-              <IndianRupee className="h-6 w-6" />{monthlyIncome.toLocaleString('en-IN')}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {Number.isFinite(incomeChange)
-                ? `${incomeChange >= 0 ? '+' : ''}${incomeChange.toFixed(1)}% from last month`
-                : 'No data for last month'}
-            </p>
+             {isEditingIncome ? (
+              <div className="flex items-center gap-2 pt-2">
+                <IndianRupee className="h-6 w-6 text-muted-foreground" />
+                <Input
+                  type="number"
+                  placeholder="Add Salary Amount"
+                  value={incomeInput}
+                  onChange={(e) => setIncomeInput(e.target.value)}
+                  className="h-auto border-0 p-0 text-2xl font-bold font-headline focus-visible:ring-0 focus-visible:ring-offset-0"
+                />
+              </div>
+            ) : (
+              <>
+                <div className="font-headline text-2xl font-bold flex items-center">
+                  <IndianRupee className="h-6 w-6" />{monthlyIncome.toLocaleString('en-IN')}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {Number.isFinite(incomeChange)
+                    ? `${incomeChange >= 0 ? '+' : ''}${incomeChange.toFixed(1)}% from last month`
+                    : 'No data for last month'}
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
         <Card>

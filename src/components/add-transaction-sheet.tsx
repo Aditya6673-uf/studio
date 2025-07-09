@@ -48,6 +48,9 @@ const formSchema = z.object({
     path: ["customCategory"],
 });
 
+const incomeCategories = ["Freelancing", "Salary", "Stock Market Investment", "Other"];
+const expenseCategories = ["Food", "Rent", "EMI", "Entertainment", "SIP", "Stock Market Investment", "Other"];
+
 
 type AddTransactionSheetProps = {
   isOpen: boolean
@@ -70,6 +73,10 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
     },
   })
 
+  const watchedType = form.watch("type");
+  const watchedCategory = form.watch("category");
+  const categories = watchedType === 'income' ? incomeCategories : expenseCategories;
+
   React.useEffect(() => {
     if (isOpen) {
       form.reset({
@@ -84,7 +91,9 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
     }
   }, [isOpen, defaultType, form]);
 
-  const watchedCategory = form.watch("category");
+  React.useEffect(() => {
+    form.resetField("category", { defaultValue: "" });
+  }, [watchedType, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const { customCategory, ...transactionData } = values;
@@ -161,22 +170,16 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Food">Food</SelectItem>
-                      <SelectItem value="Rent">Rent</SelectItem>
-                      <SelectItem value="Freelancing">Freelancing</SelectItem>
-                      <SelectItem value="EMI">EMI</SelectItem>
-                      <SelectItem value="Entertainment">Entertainment</SelectItem>
-                      <SelectItem value="Salary">Salary</SelectItem>
-                      <SelectItem value="SIP">SIP</SelectItem>
-                      <SelectItem value="Stock Market Investment">Stock Market Investment</SelectItem>
-                      <SelectItem value="Other">Other</SelectItem>
+                       {categories.map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
