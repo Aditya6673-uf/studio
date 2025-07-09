@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Camera } from 'lucide-react';
+import { Camera, Trash2 } from 'lucide-react';
 
 export default function ProfilePage() {
   const [avatarSrc, setAvatarSrc] = useState("https://placehold.co/96x96.png");
@@ -21,6 +21,13 @@ export default function ProfilePage() {
         setAvatarSrc(e.target?.result as string);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDeleteImage = () => {
+    setAvatarSrc("https://placehold.co/96x96.png");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -38,13 +45,26 @@ export default function ProfilePage() {
                 <AvatarImage src={avatarSrc} alt="@aditya" data-ai-hint="male portrait" />
                 <AvatarFallback>AD</AvatarFallback>
               </Avatar>
-              <Label
-                htmlFor="avatar-upload"
-                className="absolute inset-0 flex h-24 w-24 cursor-pointer items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100"
+              <div
+                className="absolute inset-0 flex h-24 w-24 items-center justify-center gap-4 rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100"
               >
-                <Camera className="h-8 w-8" />
-                <span className="sr-only">Upload profile picture</span>
-              </Label>
+                <Label
+                  htmlFor="avatar-upload"
+                  className="cursor-pointer rounded-full p-2 transition-colors hover:bg-black/20"
+                >
+                  <Camera className="h-6 w-6" />
+                  <span className="sr-only">Upload profile picture</span>
+                </Label>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-auto cursor-pointer rounded-full p-2 text-white transition-colors hover:bg-black/20 hover:text-white"
+                  onClick={handleDeleteImage}
+                >
+                  <Trash2 className="h-6 w-6" />
+                  <span className="sr-only">Delete profile picture</span>
+                </Button>
+              </div>
               <Input
                 id="avatar-upload"
                 type="file"
