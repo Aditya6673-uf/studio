@@ -59,7 +59,7 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction }: Add
     resolver: zodResolver(formSchema),
     defaultValues: {
       type: "expense",
-      amount: 0,
+      amount: undefined,
       date: new Date(),
       paymentMethod: "UPI",
       notes: "",
