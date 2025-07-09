@@ -36,8 +36,8 @@ export default function Dashboard() {
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
   const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [budgetAmount, setBudgetAmount] = useState(50000);
-  const [budgetInput, setBudgetInput] = useState(budgetAmount.toString());
+  const [savingsGoal, setSavingsGoal] = useState(25000);
+  const [savingsInput, setSavingsInput] = useState(savingsGoal.toString());
   const [isEditingAccounts, setIsEditingAccounts] = useState(false);
   const [editedAccountBalances, setEditedAccountBalances] = useState<Record<string, string>>({});
 
@@ -54,8 +54,7 @@ export default function Dashboard() {
     return { totalIncome: income, totalExpenses: expenses, netBalance: income - expenses };
   }, [transactions]);
   
-  const budget = { amount: budgetAmount, spent: totalExpenses };
-  const budgetProgress = budget.amount > 0 ? (budget.spent / budget.amount) * 100 : 0;
+  const savingsProgress = savingsGoal > 0 ? (Math.max(0, netBalance) / savingsGoal) * 100 : 0;
 
   const handleAddTransaction = (transaction: Omit<Transaction, 'id'>) => {
     const newTransaction: Transaction = {
@@ -71,12 +70,12 @@ export default function Dashboard() {
     );
   };
 
-  const handleSetBudget = () => {
-    const newAmount = parseFloat(budgetInput);
+  const handleSetSavingsGoal = () => {
+    const newAmount = parseFloat(savingsInput);
     if (!isNaN(newAmount) && newAmount > 0) {
-      setBudgetAmount(newAmount);
+      setSavingsGoal(newAmount);
     } else {
-      setBudgetInput(budgetAmount.toString());
+      setSavingsInput(savingsGoal.toString());
     }
   };
 
@@ -225,29 +224,29 @@ export default function Dashboard() {
         <div className="md:col-span-2 flex flex-col gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Monthly Budget</CardTitle>
+              <CardTitle>Monthly Savings Goal</CardTitle>
             </CardHeader>
             <CardContent>
                <div className="mb-4 space-y-2">
-                <Label htmlFor="budget-input">Set Your Monthly Budget</Label>
+                <Label htmlFor="savings-goal-input">Set Your Monthly Savings Goal</Label>
                 <div className="flex gap-2">
                   <Input
-                    id="budget-input"
+                    id="savings-goal-input"
                     type="number"
-                    placeholder="e.g. 50000"
-                    value={budgetInput}
-                    onChange={(e) => setBudgetInput(e.target.value)}
+                    placeholder="e.g. 25000"
+                    value={savingsInput}
+                    onChange={(e) => setSavingsInput(e.target.value)}
                   />
-                  <Button onClick={handleSetBudget}>Set</Button>
+                  <Button onClick={handleSetSavingsGoal}>Set</Button>
                 </div>
               </div>
               <div className="mb-2 flex justify-between text-sm">
-                <span>Spent: <IndianRupee className="inline h-4 w-4" />{budget.spent.toLocaleString('en-IN')}</span>
-                <span>Total: <IndianRupee className="inline h-4 w-4" />{budget.amount.toLocaleString('en-IN')}</span>
+                <span>Saved: <IndianRupee className="inline h-4 w-4" />{Math.max(0, netBalance).toLocaleString('en-IN')}</span>
+                <span>Goal: <IndianRupee className="inline h-4 w-4" />{savingsGoal.toLocaleString('en-IN')}</span>
               </div>
-              <Progress value={budgetProgress} />
+              <Progress value={savingsProgress} />
               <p className="mt-2 text-xs text-muted-foreground">
-                {budgetProgress > 0 ? `${budgetProgress.toFixed(0)}% of your monthly budget used.` : 'Set a budget to track your spending.'}
+                {savingsProgress > 0 ? `${savingsProgress.toFixed(0)}% of your savings goal achieved.` : 'Set a savings goal to get started.'}
               </p>
             </CardContent>
           </Card>
