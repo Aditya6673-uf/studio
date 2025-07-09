@@ -8,10 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Camera, Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ProfilePage() {
   const [avatarSrc, setAvatarSrc] = useState("https://placehold.co/96x96.png");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -29,6 +31,13 @@ export default function ProfilePage() {
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  };
+
+  const handleSaveChanges = () => {
+    toast({
+      title: "Profile Updated",
+      description: "Your changes have been saved successfully.",
+    });
   };
 
   return (
@@ -88,7 +97,7 @@ export default function ProfilePage() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button className="w-full">Save Changes</Button>
+            <Button className="w-full" onClick={handleSaveChanges}>Save Changes</Button>
           </CardFooter>
         </Card>
       </div>
