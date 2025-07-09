@@ -14,6 +14,7 @@ export default function ProfilePage() {
   const [avatarSrc, setAvatarSrc] = useState("https://placehold.co/96x96.png");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const [isEmailVisible, setIsEmailVisible] = useState(true);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -38,6 +39,7 @@ export default function ProfilePage() {
       title: "Profile Updated",
       description: "Your changes have been saved successfully.",
     });
+    setIsEmailVisible(false);
   };
 
   return (
@@ -91,10 +93,12 @@ export default function ProfilePage() {
               <Label htmlFor="name">Name</Label>
               <Input id="name" defaultValue="Aditya" />
             </div>
-             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" defaultValue="aditya@example.com" />
-            </div>
+            {isEmailVisible && (
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" defaultValue="aditya@example.com" />
+              </div>
+            )}
           </CardContent>
           <CardFooter>
             <Button className="w-full" onClick={handleSaveChanges}>Save Changes</Button>
