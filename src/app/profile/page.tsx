@@ -11,7 +11,7 @@ import { Camera, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function ProfilePage() {
-  const [avatarSrc, setAvatarSrc] = useState("https://placehold.co/96x96.png");
+  const [avatarSrc, setAvatarSrc] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [isEmailVisible, setIsEmailVisible] = useState(true);
@@ -28,7 +28,7 @@ export default function ProfilePage() {
   };
 
   const handleDeleteImage = () => {
-    setAvatarSrc("https://placehold.co/96x96.png");
+    setAvatarSrc("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -53,7 +53,7 @@ export default function ProfilePage() {
           <CardHeader className="items-center text-center">
             <div className="relative group mb-4">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={avatarSrc} alt="@aditya" data-ai-hint="male portrait" />
+                <AvatarImage src={avatarSrc} alt="@aditya" />
                 <AvatarFallback>AD</AvatarFallback>
               </Avatar>
               <div
