@@ -72,6 +72,8 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
       customCategory: ""
     },
   })
+  
+  const [isCalendarOpen, setIsCalendarOpen] = React.useState(false)
 
   const watchedType = form.watch("type");
   const watchedCategory = form.watch("category");
@@ -209,7 +211,7 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Date</FormLabel>
-                  <Popover>
+                  <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
@@ -232,7 +234,17 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
                       <Calendar
                         mode="single"
                         selected={field.value}
-                        onSelect={field.onChange}
+                        onSelect={(date) => {
+                          field.onChange(date)
+                          setIsCalendarOpen(false)
+                        }}
+                        onDayDoubleClick={(date) => {
+                          field.onChange(date)
+                          setIsCalendarOpen(false)
+                        }}
+                        disabled={(date) =>
+                          date > new Date() || date < new Date("1900-01-01")
+                        }
                         initialFocus
                       />
                     </PopoverContent>
