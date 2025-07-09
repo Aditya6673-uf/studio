@@ -46,6 +46,13 @@ export default function Dashboard() {
   const budget = { amount: budgetAmount, spent: totalExpenses };
   const budgetProgress = budget.amount > 0 ? (budget.spent / budget.amount) * 100 : 0;
 
+  const fixedCostTransactions = useMemo(() => {
+    const fixedCategories = ['Rent', 'EMI', 'SIP'];
+    return transactions
+      .filter(t => t.type === 'expense' && fixedCategories.includes(t.category))
+      .sort((a, b) => b.date.getTime() - a.date.getTime());
+  }, [transactions]);
+
   const handleAddTransaction = (transaction: Omit<Transaction, 'id'>) => {
     const newTransaction: Transaction = {
       ...transaction,
@@ -272,6 +279,32 @@ export default function Dashboard() {
                   </li>
                 ))}
               </ul>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+                <CardTitle>Fixed Costs</CardTitle>
+            </CardHeader>
+            <CardContent>
+                {fixedCostTransactions.length > 0 ? (
+                <ul className="space-y-4">
+                    {fixedCostTransactions.slice(0, 5).map(t => (
+                    <li key={t.id} className="flex items-center justify-between gap-4">
+                        <div>
+                        <p className="font-medium">{t.category}</p>
+                        <p className="text-sm text-muted-foreground">
+                            Paid on {format(t.date, 'dd MMM')}
+                        </p>
+                        </div>
+                        <div className="font-mono font-medium flex items-center text-red-600">
+                        -&nbsp;<IndianRupee className="inline h-4 w-4" />{t.amount.toLocaleString('en-IN')}
+                        </div>
+                    </li>
+                    ))}
+                </ul>
+                ) : (
+                <p className="text-sm text-muted-foreground">No fixed costs recorded yet.</p>
+                )}
             </CardContent>
           </Card>
         </div>
