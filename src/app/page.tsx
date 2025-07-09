@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { AddTransactionSheet } from "@/components/add-transaction-sheet";
 import { initialTransactions, initialAccounts } from "@/lib/data";
 import type { Transaction, Account } from "@/lib/types";
-import { format } from "date-fns";
+import { format, startOfMonth, endOfMonth, subMonths, isWithinInterval } from "date-fns";
 import { IndianRupee, ArrowUpRight, ArrowDownLeft, PlusCircle, Landmark, Wallet, CreditCard, Pencil, Check, X, Trash2 } from 'lucide-react';
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -41,17 +41,44 @@ export default function Dashboard() {
   const [isEditingAccounts, setIsEditingAccounts] = useState(false);
   const [editedAccountBalances, setEditedAccountBalances] = useState<Record<string, string>>({});
 
-  const { totalIncome, totalExpenses, netBalance } = useMemo(() => {
-    let income = 0;
-    let expenses = 0;
+  const { monthlyIncome, monthlyExpenses, netBalance, incomeChange, expenseChange } = useMemo(() => {
+    const now = new Date();
+    const currentMonthStart = startOfMonth(now);
+    const currentMonthEnd = endOfMonth(now);
+    const prevMonthStart = startOfMonth(subMonths(now, 1));
+    const prevMonthEnd = endOfMonth(subMonths(now, 1));
+
+    let currentIncome = 0;
+    let currentExpenses = 0;
+    let prevIncome = 0;
+    let prevExpenses = 0;
+
     transactions.forEach(t => {
-      if (t.type === 'income') {
-        income += t.amount;
-      } else {
-        expenses += t.amount;
+      if (isWithinInterval(t.date, { start: currentMonthStart, end: currentMonthEnd })) {
+        if (t.type === 'income') {
+          currentIncome += t.amount;
+        } else {
+          currentExpenses += t.amount;
+        }
+      } else if (isWithinInterval(t.date, { start: prevMonthStart, end: prevMonthEnd })) {
+         if (t.type === 'income') {
+          prevIncome += t.amount;
+        } else {
+          prevExpenses += t.amount;
+        }
       }
     });
-    return { totalIncome: income, totalExpenses: expenses, netBalance: income - expenses };
+    
+    const incomeChangeCalc = prevIncome > 0 ? ((currentIncome - prevIncome) / prevIncome) * 100 : (currentIncome > 0 ? Infinity : 0);
+    const expenseChangeCalc = prevExpenses > 0 ? ((currentExpenses - prevExpenses) / prevExpenses) * 100 : (currentExpenses > 0 ? Infinity : 0);
+
+    return { 
+      monthlyIncome: currentIncome, 
+      monthlyExpenses: currentExpenses, 
+      netBalance: currentIncome - currentExpenses,
+      incomeChange: incomeChangeCalc,
+      expenseChange: expenseChangeCalc
+    };
   }, [transactions]);
   
   const savingsProgress = savingsGoal > 0 ? (Math.max(0, netBalance) / savingsGoal) * 100 : 0;
@@ -121,31 +148,39 @@ export default function Dashboard() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Income</CardTitle>
+            <CardTitle className="text-sm font-medium">Monthly Income</CardTitle>
             <ArrowUpRight className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="font-headline text-2xl font-bold flex items-center">
-              <IndianRupee className="h-6 w-6" />{totalIncome.toLocaleString('en-IN')}
+              <IndianRupee className="h-6 w-6" />{monthlyIncome.toLocaleString('en-IN')}
             </div>
-            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+            <p className="text-xs text-muted-foreground">
+              {Number.isFinite(incomeChange)
+                ? `${incomeChange >= 0 ? '+' : ''}${incomeChange.toFixed(1)}% from last month`
+                : 'No data for last month'}
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
+            <CardTitle className="text-sm font-medium">Monthly Expenses</CardTitle>
             <ArrowDownLeft className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
             <div className="font-headline text-2xl font-bold flex items-center">
-              <IndianRupee className="h-6 w-6" />{totalExpenses.toLocaleString('en-IN')}
+              <IndianRupee className="h-6 w-6" />{monthlyExpenses.toLocaleString('en-IN')}
             </div>
-            <p className="text-xs text-muted-foreground">+12.5% from last month</p>
+            <p className="text-xs text-muted-foreground">
+              {Number.isFinite(expenseChange)
+                ? `${expenseChange >= 0 ? '+' : ''}${expenseChange.toFixed(1)}% from last month`
+                : 'No data for last month'}
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Net Balance</CardTitle>
+            <CardTitle className="text-sm font-medium">Monthly Net Balance</CardTitle>
           </CardHeader>
           <CardContent>
             <div className={`font-headline text-2xl font-bold flex items-center ${netBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
