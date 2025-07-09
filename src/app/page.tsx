@@ -1,6 +1,8 @@
+
 "use client";
 
 import React, { useState, useMemo } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -11,7 +13,7 @@ import { AddTransactionSheet } from "@/components/add-transaction-sheet";
 import { initialTransactions, initialAccounts } from "@/lib/data";
 import type { Transaction, Account } from "@/lib/types";
 import { format } from "date-fns";
-import { IndianRupee, ArrowUpRight, ArrowDownLeft, PlusCircle, Landmark, Wallet, CreditCard } from 'lucide-react';
+import { IndianRupee, ArrowUpRight, ArrowDownLeft, PlusCircle, Landmark, Wallet, CreditCard, Pencil } from 'lucide-react';
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const paymentMethodIcons = {
@@ -177,8 +179,14 @@ export default function Dashboard() {
             </CardContent>
           </Card>
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Accounts</CardTitle>
+              <Button asChild variant="ghost" size="icon" className="h-8 w-8">
+                <Link href="/accounts">
+                  <Pencil className="h-4 w-4" />
+                  <span className="sr-only">Edit Accounts</span>
+                </Link>
+              </Button>
             </CardHeader>
             <CardContent>
               <ul className="space-y-4">
