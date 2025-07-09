@@ -35,6 +35,13 @@ const monthlyData = [
   { month: "Jun", income: 88000, expenses: 72000 },
 ];
 
+const yearlyData = [
+  { year: "2021", income: 950000, expenses: 800000 },
+  { year: "2022", income: 1050000, expenses: 880000 },
+  { year: "2023", income: 1200000, expenses: 950000 },
+  { year: "2024", income: 650000, expenses: 550000 },
+];
+
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
@@ -57,12 +64,22 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
+const formatYAxisValue = (value: number) => {
+  if (value >= 100000) {
+    return `₹${(value / 100000).toFixed(1)}L`;
+  }
+  if (value >= 1000) {
+    return `₹${(value / 1000).toFixed(0)}k`;
+  }
+  return `₹${value}`;
+};
+
 
 const ReportChart = ({ data, dataKey }: { data: any[], dataKey: string }) => (
   <ResponsiveContainer width="100%" height={350}>
     <BarChart data={data}>
       <XAxis dataKey={dataKey} stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-      <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value / 1000}k`} />
+      <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={formatYAxisValue} />
       <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--accent))' }} />
       <Bar dataKey="income" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
       <Bar dataKey="expenses" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
@@ -110,6 +127,7 @@ export default function ReportsPage() {
               <TabsTrigger value="daily">Daily</TabsTrigger>
               <TabsTrigger value="weekly">Weekly</TabsTrigger>
               <TabsTrigger value="monthly">Monthly</TabsTrigger>
+              <TabsTrigger value="yearly">Yearly</TabsTrigger>
             </TabsList>
             <TabsContent value="daily" className="pt-4">
               <ReportChart data={dailyData} dataKey="date" />
@@ -119,6 +137,9 @@ export default function ReportsPage() {
             </TabsContent>
             <TabsContent value="monthly" className="pt-4">
               <ReportChart data={monthlyData} dataKey="month" />
+            </TabsContent>
+            <TabsContent value="yearly" className="pt-4">
+              <ReportChart data={yearlyData} dataKey="year" />
             </TabsContent>
           </Tabs>
         </CardContent>
