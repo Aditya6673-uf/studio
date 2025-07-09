@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,39 +8,26 @@ import { FileDown, IndianRupee } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 import { initialTransactions } from "@/lib/data";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-
-const dailyData = [
-  { date: "Mon", income: 2000, expenses: 1500 },
-  { date: "Tue", income: 0, expenses: 800 },
-  { date: "Wed", income: 5000, expenses: 2200 },
-  { date: "Thu", income: 0, expenses: 500 },
-  { date: "Fri", income: 1500, expenses: 3000 },
-  { date: "Sat", income: 0, expenses: 4500 },
-  { date: "Sun", income: 0, expenses: 1200 },
-];
-
-const weeklyData = [
-  { week: "Week 1", income: 15000, expenses: 12000 },
-  { week: "Week 2", income: 20000, expenses: 18000 },
-  { week: "Week 3", income: 18000, expenses: 16000 },
-  { week: "Week 4", income: 25000, expenses: 22000 },
-];
-
-const monthlyData = [
-  { month: "Jan", income: 80000, expenses: 65000 },
-  { month: "Feb", income: 85000, expenses: 70000 },
-  { month: "Mar", income: 90000, expenses: 75000 },
-  { month: "Apr", income: 82000, expenses: 68000 },
-  { month: "May", income: 95000, expenses: 80000 },
-  { month: "Jun", income: 88000, expenses: 72000 },
-];
-
-const yearlyData = [
-  { year: "2021", income: 950000, expenses: 800000 },
-  { year: "2022", income: 1050000, expenses: 880000 },
-  { year: "2023", income: 1200000, expenses: 950000 },
-  { year: "2024", income: 650000, expenses: 550000 },
-];
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  format,
+  subDays,
+  startOfDay,
+  endOfDay,
+  eachDayOfInterval,
+  subWeeks,
+  startOfWeek,
+  endOfWeek,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  subYears,
+  startOfYear,
+  endOfYear,
+  isWithinInterval,
+} from "date-fns";
+import type { Transaction } from "@/lib/types";
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -74,10 +61,9 @@ const formatYAxisValue = (value: number) => {
   return `₹${value}`;
 };
 
-
-const ReportChart = ({ data, dataKey }: { data: any[], dataKey: string }) => (
+const ReportChart = ({ data, dataKey, onBarClick }: { data: any[], dataKey: string, onBarClick: (data: any) => void }) => (
   <ResponsiveContainer width="100%" height={350}>
-    <BarChart data={data}>
+    <BarChart data={data} onClick={onBarClick}>
       <XAxis dataKey={dataKey} stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
       <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={formatYAxisValue} />
       <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--accent))' }} />
@@ -88,9 +74,67 @@ const ReportChart = ({ data, dataKey }: { data: any[], dataKey: string }) => (
 );
 
 export default function ReportsPage() {
+  const [transactions] = useState<Transaction[]>(initialTransactions);
+  const [selectedTransactions, setSelectedTransactions] = useState<Transaction[] | null>(null);
+  const [dialogTitle, setDialogTitle] = useState("");
+
+  const { dailyData, weeklyData, monthlyData, yearlyData } = useMemo(() => {
+    const processTransactionsForPeriod = (transactionsToProcess: Transaction[], startDate: Date, endDate: Date) => {
+      const periodTransactions = transactionsToProcess.filter(t => isWithinInterval(t.date, { start: startDate, end: endDate }));
+      let income = 0;
+      let expenses = 0;
+      periodTransactions.forEach(t => {
+        if (t.type === 'income') {
+          income += t.amount;
+        } else {
+          expenses += t.amount;
+        }
+      });
+      return { income, expenses, transactions: periodTransactions };
+    };
+
+    const now = new Date();
+    
+    const dailyData = eachDayOfInterval({ start: subDays(now, 6), end: now }).map(date => {
+        const { income, expenses, transactions } = processTransactionsForPeriod(transactions, startOfDay(date), endOfDay(date));
+        return { date: format(date, 'EEE'), income, expenses, transactions, fullDate: format(date, 'dd MMM, yyyy') };
+    });
+
+    const weeklyData = Array.from({ length: 4 }).map((_, i) => {
+        const weekStart = startOfWeek(subWeeks(now, 3 - i));
+        const weekEnd = endOfWeek(subWeeks(now, 3 - i));
+        const { income, expenses, transactions } = processTransactionsForPeriod(transactions, weekStart, weekEnd);
+        return { week: `Week of ${format(weekStart, 'MMM d')}`, income, expenses, transactions };
+    });
+
+    const monthlyData = Array.from({ length: 6 }).map((_, i) => {
+        const monthStart = startOfMonth(subMonths(now, 5 - i));
+        const { income, expenses, transactions } = processTransactionsForPeriod(transactions, monthStart, endOfMonth(monthStart));
+        return { month: format(monthStart, 'MMM yyyy'), income, expenses, transactions };
+    });
+    
+    const yearlyData = Array.from({ length: 4 }).map((_, i) => {
+        const yearStart = startOfYear(subYears(now, 3 - i));
+        const { income, expenses, transactions } = processTransactionsForPeriod(transactions, yearStart, endOfYear(yearStart));
+        return { year: format(yearStart, 'yyyy'), income, expenses, transactions };
+    });
+
+    return { dailyData, weeklyData, monthlyData, yearlyData };
+  }, [transactions]);
+  
+  const handleBarClick = (data: any) => {
+    if (data && data.activePayload && data.activePayload.length > 0) {
+      const payload = data.activePayload[0].payload;
+      if (payload.transactions) {
+        setSelectedTransactions(payload.transactions);
+        setDialogTitle(`Transactions for ${payload.fullDate || payload.week || payload.month || payload.year}`);
+      }
+    }
+  };
+  
   const exportData = () => {
     const headers = "ID,Type,Amount,Category,Date,Payment Method,Notes\n";
-    const csv = initialTransactions.map(t =>
+    const csv = transactions.map(t =>
       `${t.id},${t.type},${t.amount},"${t.category}","${t.date.toISOString()}","${t.paymentMethod}","${t.notes || ''}"`
     ).join("\n");
     const blob = new Blob([headers + csv], { type: 'text/csv;charset=utf-8;' });
@@ -105,6 +149,7 @@ export default function ReportsPage() {
   };
 
   return (
+    <>
     <main className="flex-1 overflow-y-auto p-4 md:p-8">
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -130,20 +175,62 @@ export default function ReportsPage() {
               <TabsTrigger value="yearly">Yearly</TabsTrigger>
             </TabsList>
             <TabsContent value="daily" className="pt-4">
-              <ReportChart data={dailyData} dataKey="date" />
+              <ReportChart data={dailyData} dataKey="date" onBarClick={handleBarClick} />
             </TabsContent>
             <TabsContent value="weekly" className="pt-4">
-              <ReportChart data={weeklyData} dataKey="week" />
+              <ReportChart data={weeklyData} dataKey="week" onBarClick={handleBarClick} />
             </TabsContent>
             <TabsContent value="monthly" className="pt-4">
-              <ReportChart data={monthlyData} dataKey="month" />
+              <ReportChart data={monthlyData} dataKey="month" onBarClick={handleBarClick} />
             </TabsContent>
             <TabsContent value="yearly" className="pt-4">
-              <ReportChart data={yearlyData} dataKey="year" />
+              <ReportChart data={yearlyData} dataKey="year" onBarClick={handleBarClick} />
             </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
     </main>
+
+    <Dialog open={selectedTransactions !== null} onOpenChange={(isOpen) => !isOpen && setSelectedTransactions(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{dialogTitle}</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[60vh] overflow-y-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Method</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {selectedTransactions && selectedTransactions.length > 0 ? (
+                  selectedTransactions.map(t => (
+                    <TableRow key={t.id}>
+                      <TableCell>
+                        <div className="font-medium">{t.category}</div>
+                        <div className="text-sm text-muted-foreground">{t.notes}</div>
+                      </TableCell>
+                      <TableCell>{format(new Date(t.date), 'dd MMM, yyyy')}</TableCell>
+                      <TableCell>{t.paymentMethod}</TableCell>
+                      <TableCell className={`text-right font-medium ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                        {t.type === 'income' ? '+' : '-'} <IndianRupee className="inline h-4 w-4" />{t.amount.toLocaleString('en-IN')}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center">No transactions for this period.</TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

@@ -44,6 +44,24 @@ export const initialTransactions: Transaction[] = [
     paymentMethod: 'Cash',
     notes: 'Movie tickets'
   },
+   // April 2024
+  { id: '6', type: 'income', amount: 60000, category: 'Salary', date: new Date('2024-04-30'), paymentMethod: 'UPI' },
+  { id: '7', type: 'expense', amount: 15000, category: 'Rent', date: new Date('2024-04-05'), paymentMethod: 'Card' },
+  { id: '8', type: 'expense', amount: 4000, category: 'Food', date: new Date('2024-04-10'), paymentMethod: 'UPI' },
+  { id: '9', type: 'expense', amount: 1200, category: 'Entertainment', date: new Date('2024-04-15'), paymentMethod: 'UPI', notes: 'Movie night' },
+  { id: '10', type: 'expense', amount: 10000, category: 'SIP', date: new Date('2024-04-02'), paymentMethod: 'Card' },
+
+  // March 2024
+  { id: '11', type: 'income', amount: 55000, category: 'Salary', date: new Date('2024-03-31'), paymentMethod: 'UPI' },
+  { id: '12', type: 'expense', amount: 15000, category: 'Rent', date: new Date('2024-03-05'), paymentMethod: 'Card' },
+  { id: '13', type: 'expense', amount: 2500, category: 'Entertainment', date: new Date('2024-03-20'), paymentMethod: 'Card', notes: 'Concert tickets' },
+  { id: '14', type: 'expense', amount: 10000, category: 'SIP', date: new Date('2024-03-02'), paymentMethod: 'Card' },
+
+  // Feb 2024
+  { id: '15', type: 'income', amount: 55000, category: 'Salary', date: new Date('2024-02-29'), paymentMethod: 'UPI' },
+  { id: '16', type: 'expense', amount: 15000, category: 'Rent', date: new Date('2024-02-05'), paymentMethod: 'Card' },
+  { id: '17', type: 'expense', amount: 5000, category: 'Entertainment', date: new Date('2024-02-18'), paymentMethod: 'UPI', notes: 'Weekend trip' },
+  { id: '18', type: 'expense', amount: 10000, category: 'SIP', date: new Date('2024-02-02'), paymentMethod: 'Card' },
 ];
 
 export const initialAccounts: Account[] = [
