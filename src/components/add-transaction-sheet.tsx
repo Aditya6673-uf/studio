@@ -136,6 +136,8 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction }: Add
                       <SelectItem value="EMI">EMI</SelectItem>
                       <SelectItem value="Entertainment">Entertainment</SelectItem>
                       <SelectItem value="Salary">Salary</SelectItem>
+                      <SelectItem value="SIP">SIP</SelectItem>
+                      <SelectItem value="Stock Market Investment">Stock Market Investment</SelectItem>
                       <SelectItem value="Other">Other</SelectItem>
                     </SelectContent>
                   </Select>
