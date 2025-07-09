@@ -96,27 +96,27 @@ export default function ReportsPage() {
     const now = new Date();
     
     const dailyData = eachDayOfInterval({ start: subDays(now, 6), end: now }).map(date => {
-        const { income, expenses, transactions } = processTransactionsForPeriod(transactions, startOfDay(date), endOfDay(date));
-        return { date: format(date, 'EEE'), income, expenses, transactions, fullDate: format(date, 'dd MMM, yyyy') };
+        const { income, expenses, transactions: periodTransactions } = processTransactionsForPeriod(transactions, startOfDay(date), endOfDay(date));
+        return { date: format(date, 'EEE'), income, expenses, transactions: periodTransactions, fullDate: format(date, 'dd MMM, yyyy') };
     });
 
     const weeklyData = Array.from({ length: 4 }).map((_, i) => {
         const weekStart = startOfWeek(subWeeks(now, 3 - i));
         const weekEnd = endOfWeek(subWeeks(now, 3 - i));
-        const { income, expenses, transactions } = processTransactionsForPeriod(transactions, weekStart, weekEnd);
-        return { week: `Week of ${format(weekStart, 'MMM d')}`, income, expenses, transactions };
+        const { income, expenses, transactions: periodTransactions } = processTransactionsForPeriod(transactions, weekStart, weekEnd);
+        return { week: `Week of ${format(weekStart, 'MMM d')}`, income, expenses, transactions: periodTransactions };
     });
 
     const monthlyData = Array.from({ length: 6 }).map((_, i) => {
         const monthStart = startOfMonth(subMonths(now, 5 - i));
-        const { income, expenses, transactions } = processTransactionsForPeriod(transactions, monthStart, endOfMonth(monthStart));
-        return { month: format(monthStart, 'MMM yyyy'), income, expenses, transactions };
+        const { income, expenses, transactions: periodTransactions } = processTransactionsForPeriod(transactions, monthStart, endOfMonth(monthStart));
+        return { month: format(monthStart, 'MMM yyyy'), income, expenses, transactions: periodTransactions };
     });
     
     const yearlyData = Array.from({ length: 4 }).map((_, i) => {
         const yearStart = startOfYear(subYears(now, 3 - i));
-        const { income, expenses, transactions } = processTransactionsForPeriod(transactions, yearStart, endOfYear(yearStart));
-        return { year: format(yearStart, 'yyyy'), income, expenses, transactions };
+        const { income, expenses, transactions: periodTransactions } = processTransactionsForPeriod(transactions, yearStart, endOfYear(yearStart));
+        return { year: format(yearStart, 'yyyy'), income, expenses, transactions: periodTransactions };
     });
 
     return { dailyData, weeklyData, monthlyData, yearlyData };
