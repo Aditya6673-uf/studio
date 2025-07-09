@@ -16,17 +16,17 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src="https://placehold.co/40x40.png" alt="@user" />
-            <AvatarFallback>RR</AvatarFallback>
+            <AvatarImage src="https://placehold.co/40x40.png" alt="@aditya" />
+            <AvatarFallback>AD</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">User</p>
+            <p className="text-sm font-medium leading-none">Aditya</p>
             <p className="text-xs leading-none text-muted-foreground">
-              user@example.com
+              aditya@example.com
             </p>
           </div>
         </DropdownMenuLabel>
