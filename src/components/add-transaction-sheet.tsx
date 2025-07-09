@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
+import React from "react"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -52,13 +53,14 @@ type AddTransactionSheetProps = {
   isOpen: boolean
   setIsOpen: (isOpen: boolean) => void
   onAddTransaction: (transaction: Omit<Transaction, 'id'>) => void
+  defaultType?: 'income' | 'expense'
 }
 
-export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction }: AddTransactionSheetProps) {
+export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defaultType }: AddTransactionSheetProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      type: "expense",
+      type: defaultType || "expense",
       amount: undefined,
       date: new Date(),
       paymentMethod: "UPI",
@@ -67,6 +69,20 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction }: Add
       customCategory: ""
     },
   })
+
+  React.useEffect(() => {
+    if (isOpen) {
+      form.reset({
+        type: defaultType || 'expense',
+        amount: undefined,
+        date: new Date(),
+        paymentMethod: "UPI",
+        notes: "",
+        category: "",
+        customCategory: ""
+      });
+    }
+  }, [isOpen, defaultType, form]);
 
   const watchedCategory = form.watch("category");
 
@@ -104,6 +120,7 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction }: Add
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                       className="flex space-x-4"
+                      value={field.value}
                     >
                       <FormItem className="flex items-center space-x-2 space-y-0">
                         <FormControl>

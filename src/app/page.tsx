@@ -36,6 +36,7 @@ export default function Dashboard() {
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
   const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [sheetDefaultType, setSheetDefaultType] = useState<'income' | 'expense' | undefined>(undefined);
   const [savingsGoal, setSavingsGoal] = useState(25000);
   const [savingsInput, setSavingsInput] = useState(savingsGoal.toString());
   const [isEditingAccounts, setIsEditingAccounts] = useState(false);
@@ -82,6 +83,11 @@ export default function Dashboard() {
   }, [transactions]);
   
   const savingsProgress = savingsGoal > 0 ? (Math.max(0, netBalance) / savingsGoal) * 100 : 0;
+
+  const openTransactionSheet = (type?: 'income' | 'expense') => {
+    setSheetDefaultType(type);
+    setIsSheetOpen(true);
+  };
 
   const handleAddTransaction = (transaction: Omit<Transaction, 'id'>) => {
     const newTransaction: Transaction = {
@@ -139,7 +145,7 @@ export default function Dashboard() {
           <SidebarTrigger className="md:hidden" />
           <h1 className="font-headline text-3xl font-bold">Dashboard</h1>
         </div>
-        <Button onClick={() => setIsSheetOpen(true)}>
+        <Button onClick={() => openTransactionSheet()}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Add Transaction
         </Button>
@@ -149,7 +155,13 @@ export default function Dashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Monthly Income</CardTitle>
-            <ArrowUpRight className="h-4 w-4 text-green-500" />
+            <div className="flex items-center">
+                <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => openTransactionSheet('income')}>
+                    <PlusCircle className="h-4 w-4" />
+                    <span className="sr-only">Add Income</span>
+                </Button>
+                <ArrowUpRight className="h-4 w-4 text-green-500" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="font-headline text-2xl font-bold flex items-center">
@@ -165,7 +177,13 @@ export default function Dashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Monthly Expenses</CardTitle>
-            <ArrowDownLeft className="h-4 w-4 text-red-500" />
+            <div className="flex items-center">
+                <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => openTransactionSheet('expense')}>
+                    <PlusCircle className="h-4 w-4" />
+                    <span className="sr-only">Add Expense</span>
+                </Button>
+                <ArrowDownLeft className="h-4 w-4 text-red-500" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="font-headline text-2xl font-bold flex items-center">
@@ -342,6 +360,7 @@ export default function Dashboard() {
         isOpen={isSheetOpen}
         setIsOpen={setIsSheetOpen}
         onAddTransaction={handleAddTransaction}
+        defaultType={sheetDefaultType}
       />
     </main>
   );
