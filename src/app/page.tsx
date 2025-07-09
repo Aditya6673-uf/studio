@@ -2,7 +2,6 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -13,7 +12,7 @@ import { AddTransactionSheet } from "@/components/add-transaction-sheet";
 import { initialTransactions, initialAccounts } from "@/lib/data";
 import type { Transaction, Account } from "@/lib/types";
 import { format } from "date-fns";
-import { IndianRupee, ArrowUpRight, ArrowDownLeft, PlusCircle, Landmark, Wallet, CreditCard, Pencil } from 'lucide-react';
+import { IndianRupee, ArrowUpRight, ArrowDownLeft, PlusCircle, Landmark, Wallet, CreditCard, Pencil, Check, X } from 'lucide-react';
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const paymentMethodIcons = {
@@ -28,6 +27,8 @@ export default function Dashboard() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [budgetAmount, setBudgetAmount] = useState(50000);
   const [budgetInput, setBudgetInput] = useState(budgetAmount.toString());
+  const [isEditingAccounts, setIsEditingAccounts] = useState(false);
+  const [editedAccountBalances, setEditedAccountBalances] = useState<Record<string, string>>({});
 
   const { totalIncome, totalExpenses, netBalance } = useMemo(() => {
     let income = 0;
@@ -60,6 +61,32 @@ export default function Dashboard() {
     } else {
       setBudgetInput(budgetAmount.toString());
     }
+  };
+
+  const handleEditAccountsClick = () => {
+    const initialBalances = accounts.reduce((acc, account) => {
+      acc[account.id] = account.balance.toString();
+      return acc;
+    }, {} as Record<string, string>);
+    setEditedAccountBalances(initialBalances);
+    setIsEditingAccounts(true);
+  };
+
+  const handleSaveAccountBalances = () => {
+    setAccounts(prevAccounts =>
+      prevAccounts.map(account => {
+        const newBalance = parseFloat(editedAccountBalances[account.id]);
+        return {
+          ...account,
+          balance: isNaN(newBalance) ? account.balance : newBalance,
+        };
+      })
+    );
+    setIsEditingAccounts(false);
+  };
+
+  const handleAccountBalanceChange = (accountId: string, value: string) => {
+    setEditedAccountBalances(prev => ({ ...prev, [accountId]: value }));
   };
   
   return (
@@ -181,22 +208,49 @@ export default function Dashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Accounts</CardTitle>
-              <Button asChild variant="ghost" size="icon" className="h-8 w-8">
-                <Link href="/accounts">
-                  <Pencil className="h-4 w-4" />
-                  <span className="sr-only">Edit Accounts</span>
-                </Link>
-              </Button>
+              <div className="flex items-center gap-1">
+                {isEditingAccounts ? (
+                  <>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleSaveAccountBalances}>
+                      <Check className="h-4 w-4" />
+                      <span className="sr-only">Save</span>
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditingAccounts(false)}>
+                      <X className="h-4 w-4" />
+                      <span className="sr-only">Cancel</span>
+                    </Button>
+                  </>
+                ) : (
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleEditAccountsClick}>
+                    <Pencil className="h-4 w-4" />
+                    <span className="sr-only">Edit Accounts</span>
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               <ul className="space-y-4">
                 {accounts.map(account => (
-                  <li key={account.id} className="flex items-center justify-between">
+                  <li key={account.id} className="flex items-center justify-between gap-4">
                     <div>
                       <p className="font-medium">{account.name}</p>
                       <p className="text-sm text-muted-foreground">{account.type}</p>
                     </div>
-                    <div className="font-mono font-medium flex items-center"><IndianRupee className="h-4 w-4" />{account.balance.toLocaleString('en-IN')}</div>
+                    {isEditingAccounts ? (
+                       <div className="flex items-center gap-2">
+                        <IndianRupee className="h-4 w-4 text-muted-foreground" />
+                        <Input
+                          type="number"
+                          value={editedAccountBalances[account.id] || ''}
+                          onChange={(e) => handleAccountBalanceChange(account.id, e.target.value)}
+                          className="h-8 w-28 text-right font-mono"
+                        />
+                      </div>
+                    ) : (
+                      <div className="font-mono font-medium flex items-center">
+                        <IndianRupee className="h-4 w-4" />{account.balance.toLocaleString('en-IN')}
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>
