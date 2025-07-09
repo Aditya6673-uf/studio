@@ -12,7 +12,7 @@ import { AddTransactionSheet } from "@/components/add-transaction-sheet";
 import { initialTransactions, initialAccounts } from "@/lib/data";
 import type { Transaction, Account } from "@/lib/types";
 import { format } from "date-fns";
-import { IndianRupee, ArrowUpRight, ArrowDownLeft, PlusCircle, Landmark, Wallet, CreditCard, Pencil, Check, X } from 'lucide-react';
+import { IndianRupee, ArrowUpRight, ArrowDownLeft, PlusCircle, Landmark, Wallet, CreditCard, Pencil, Check, X, Trash2 } from 'lucide-react';
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const paymentMethodIcons = {
@@ -49,9 +49,15 @@ export default function Dashboard() {
   const handleAddTransaction = (transaction: Omit<Transaction, 'id'>) => {
     const newTransaction: Transaction = {
       ...transaction,
-      id: (transactions.length + 1).toString(),
+      id: new Date().getTime().toString(),
     };
     setTransactions(prev => [newTransaction, ...prev]);
+  };
+  
+  const handleDeleteTransaction = (transactionId: string) => {
+    setTransactions((prevTransactions) =>
+      prevTransactions.filter((transaction) => transaction.id !== transactionId)
+    );
   };
 
   const handleSetBudget = () => {
@@ -153,6 +159,7 @@ export default function Dashboard() {
                   <TableHead>Date</TableHead>
                   <TableHead>Method</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
+                  <TableHead className="w-[50px]"><span className="sr-only">Actions</span></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -168,6 +175,17 @@ export default function Dashboard() {
                     </TableCell>
                     <TableCell className={`text-right font-medium ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
                       {t.type === 'income' ? '+' : '-'} <IndianRupee className="inline h-4 w-4" />{t.amount.toLocaleString('en-IN')}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleDeleteTransaction(t.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Delete transaction</span>
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
