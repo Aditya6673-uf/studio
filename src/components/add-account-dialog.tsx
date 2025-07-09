@@ -104,7 +104,7 @@ export function AddAccountDialog({ isOpen, setIsOpen, onAddAccount }: AddAccount
                 <FormItem>
                   <FormLabel>Current Balance</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="0.00" {...field} />
+                    <Input type="number" placeholder="0.00" {...field} value={field.value ?? ''} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
