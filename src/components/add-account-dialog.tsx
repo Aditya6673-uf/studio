@@ -68,7 +68,7 @@ export function AddAccountDialog({ isOpen, setIsOpen, onAddAccount }: AddAccount
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Account Name</FormLabel>
+                  <FormLabel>Account/Wallet Name</FormLabel>
                   <FormControl>
                     <Input placeholder="e.g., HDFC Bank, PayTM Wallet" {...field} />
                   </FormControl>

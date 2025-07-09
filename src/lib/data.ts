@@ -48,4 +48,6 @@ export const initialTransactions: Transaction[] = [
 
 export const initialAccounts: Account[] = [
     { id: '1', name: 'HDFC Bank', type: 'Bank', balance: 125000 },
+    { id: '2', name: 'PayTM Wallet', type: 'Wallet', balance: 5000 },
+    { id: '3', name: 'ICICI Bank', type: 'Bank', balance: 75000 },
 ];
