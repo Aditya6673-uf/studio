@@ -33,10 +33,20 @@ const formSchema = z.object({
   type: z.enum(["income", "expense"], { required_error: "Please select a transaction type." }),
   amount: z.coerce.number().positive({ message: "Amount must be positive." }),
   category: z.string().min(1, { message: "Please select a category." }),
+  customCategory: z.string().optional(),
   date: z.date({ required_error: "Please select a date." }),
   paymentMethod: z.enum(["UPI", "Cash", "Card"]),
   notes: z.string().optional(),
-})
+}).refine(data => {
+    if (data.category === 'Other') {
+        return !!data.customCategory && data.customCategory.trim().length > 0;
+    }
+    return true;
+}, {
+    message: "Please enter a custom category.",
+    path: ["customCategory"],
+});
+
 
 type AddTransactionSheetProps = {
   isOpen: boolean
@@ -52,11 +62,22 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction }: Add
       amount: 0,
       date: new Date(),
       paymentMethod: "UPI",
+      notes: "",
+      category: "",
+      customCategory: ""
     },
   })
 
+  const watchedCategory = form.watch("category");
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onAddTransaction(values);
+    const { customCategory, ...transactionData } = values;
+    const finalTransaction = {
+      ...transactionData,
+      category: values.category === 'Other' && customCategory ? customCategory : values.category,
+    };
+
+    onAddTransaction(finalTransaction as Omit<Transaction, 'id'>);
     form.reset();
     setIsOpen(false);
   }
@@ -71,7 +92,7 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction }: Add
           </SheetDescription>
         </SheetHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 py-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-4">
             <FormField
               control={form.control}
               name="type"
@@ -146,6 +167,22 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction }: Add
               )}
             />
 
+            {watchedCategory === 'Other' && (
+              <FormField
+                control={form.control}
+                name="customCategory"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Custom Category</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter your custom category" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
             <FormField
               control={form.control}
               name="date"
@@ -203,6 +240,20 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction }: Add
                       <SelectItem value="Card">Card</SelectItem>
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notes</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Optional: Add a note" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
