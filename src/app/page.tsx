@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo } from "react";
@@ -25,6 +24,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const paymentMethodIcons = {
   UPI: <Landmark className="h-4 w-4 text-muted-foreground" />,
@@ -42,7 +50,7 @@ export default function Dashboard() {
   const [isEditingAccounts, setIsEditingAccounts] = useState(false);
   const [editedAccountBalances, setEditedAccountBalances] = useState<Record<string, string>>({});
 
-  const [isEditingIncome, setIsEditingIncome] = useState(false);
+  const [isIncomeDialogOpen, setIsIncomeDialogOpen] = useState(false);
   const [incomeInput, setIncomeInput] = useState("");
 
   const { monthlyIncome, monthlyExpenses, netBalance, incomeChange, expenseChange } = useMemo(() => {
@@ -141,11 +149,6 @@ export default function Dashboard() {
     setEditedAccountBalances(prev => ({ ...prev, [accountId]: value }));
   };
 
-  const handleEditIncomeClick = () => {
-    setIncomeInput('');
-    setIsEditingIncome(true);
-  };
-
   const handleSaveIncome = () => {
     const newAmount = parseFloat(incomeInput);
     if (!isNaN(newAmount) && newAmount > 0) {
@@ -158,13 +161,8 @@ export default function Dashboard() {
         notes: 'Monthly Salary'
       });
     }
-    setIsEditingIncome(false);
     setIncomeInput("");
-  };
-
-  const handleCancelEditIncome = () => {
-    setIsEditingIncome(false);
-    setIncomeInput("");
+    setIsIncomeDialogOpen(false);
   };
   
   return (
@@ -185,52 +183,54 @@ export default function Dashboard() {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Monthly Income</CardTitle>
             <div className="flex items-center gap-1">
-              {isEditingIncome ? (
-                <>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleSaveIncome}>
-                    <Check className="h-4 w-4" />
-                    <span className="sr-only">Save Income</span>
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCancelEditIncome}>
-                    <X className="h-4 w-4" />
-                    <span className="sr-only">Cancel</span>
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleEditIncomeClick}>
+              <Dialog open={isIncomeDialogOpen} onOpenChange={setIsIncomeDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
                     <Pencil className="h-4 w-4" />
                     <span className="sr-only">Add/Edit Income</span>
                   </Button>
-                  <ArrowUpRight className="h-4 w-4 text-green-500" />
-                </>
-              )}
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add Monthly Income</DialogTitle>
+                    <DialogDescription>
+                      Enter your total income for the month. This will be added as a single 'Salary' transaction.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="income-amount" className="text-right">
+                        Amount
+                      </Label>
+                      <Input
+                        id="income-amount"
+                        type="number"
+                        placeholder="Enter income amount"
+                        value={incomeInput}
+                        onChange={(e) => setIncomeInput(e.target.value)}
+                        className="col-span-3"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button onClick={handleSaveIncome}>Save Income</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              <ArrowUpRight className="h-4 w-4 text-green-500" />
             </div>
           </CardHeader>
           <CardContent>
-             {isEditingIncome ? (
-              <div className="flex items-center gap-2 pt-2">
-                <IndianRupee className="h-6 w-6 text-muted-foreground" />
-                <Input
-                  type="number"
-                  placeholder="Add Salary Amount"
-                  value={incomeInput}
-                  onChange={(e) => setIncomeInput(e.target.value)}
-                  className="h-auto border-0 p-0 text-2xl font-bold font-headline focus-visible:ring-0 focus-visible:ring-offset-0"
-                />
+            <>
+              <div className="font-headline text-2xl font-bold flex items-center">
+                <IndianRupee className="h-6 w-6" />{monthlyIncome.toLocaleString('en-IN')}
               </div>
-            ) : (
-              <>
-                <div className="font-headline text-2xl font-bold flex items-center">
-                  <IndianRupee className="h-6 w-6" />{monthlyIncome.toLocaleString('en-IN')}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {Number.isFinite(incomeChange)
-                    ? `${incomeChange >= 0 ? '+' : ''}${incomeChange.toFixed(1)}% from last month`
-                    : 'No data for last month'}
-                </p>
-              </>
-            )}
+              <p className="text-xs text-muted-foreground">
+                {Number.isFinite(incomeChange)
+                  ? `${incomeChange >= 0 ? '+' : ''}${incomeChange.toFixed(1)}% from last month`
+                  : 'No data for last month'}
+              </p>
+            </>
           </CardContent>
         </Card>
         <Card>
