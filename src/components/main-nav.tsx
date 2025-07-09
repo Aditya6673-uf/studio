@@ -22,17 +22,16 @@ export function MainNav() {
     <SidebarMenu>
       {navItems.map((item) => (
         <SidebarMenuItem key={item.href}>
-          <SidebarMenuButton
-            asChild
-            isActive={pathname === item.href}
-            className="w-full justify-start"
-            tooltip={item.label}
-          >
-            <Link href={item.href}>
+          <Link href={item.href}>
+            <SidebarMenuButton
+              isActive={pathname === item.href}
+              className="w-full justify-start"
+              tooltip={item.label}
+            >
               <item.icon className="h-4 w-4" />
               <span>{item.label}</span>
-            </Link>
-          </SidebarMenuButton>
+            </SidebarMenuButton>
+          </Link>
         </SidebarMenuItem>
       ))}
     </SidebarMenu>
