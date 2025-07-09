@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { AddTransactionSheet } from "@/components/add-transaction-sheet";
 import { initialTransactions, initialAccounts } from "@/lib/data";
 import type { Transaction, Account } from "@/lib/types";
@@ -23,6 +24,8 @@ export default function Dashboard() {
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
   const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [budgetAmount, setBudgetAmount] = useState(50000);
+  const [budgetInput, setBudgetInput] = useState(budgetAmount.toString());
 
   const { totalIncome, totalExpenses, netBalance } = useMemo(() => {
     let income = 0;
@@ -37,8 +40,8 @@ export default function Dashboard() {
     return { totalIncome: income, totalExpenses: expenses, netBalance: income - expenses };
   }, [transactions]);
   
-  const budget = { amount: 50000, spent: totalExpenses };
-  const budgetProgress = (budget.spent / budget.amount) * 100;
+  const budget = { amount: budgetAmount, spent: totalExpenses };
+  const budgetProgress = budget.amount > 0 ? (budget.spent / budget.amount) * 100 : 0;
 
   const handleAddTransaction = (transaction: Omit<Transaction, 'id'>) => {
     const newTransaction: Transaction = {
@@ -46,6 +49,15 @@ export default function Dashboard() {
       id: (transactions.length + 1).toString(),
     };
     setTransactions(prev => [newTransaction, ...prev]);
+  };
+
+  const handleSetBudget = () => {
+    const newAmount = parseFloat(budgetInput);
+    if (!isNaN(newAmount) && newAmount > 0) {
+      setBudgetAmount(newAmount);
+    } else {
+      setBudgetInput(budgetAmount.toString());
+    }
   };
   
   return (
@@ -138,16 +150,29 @@ export default function Dashboard() {
         <div className="md:col-span-2 flex flex-col gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Budget</CardTitle>
+              <CardTitle>Monthly Budget</CardTitle>
             </CardHeader>
             <CardContent>
+               <div className="mb-4 space-y-2">
+                <Label htmlFor="budget-input">Set Your Monthly Budget</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="budget-input"
+                    type="number"
+                    placeholder="e.g. 50000"
+                    value={budgetInput}
+                    onChange={(e) => setBudgetInput(e.target.value)}
+                  />
+                  <Button onClick={handleSetBudget}>Set</Button>
+                </div>
+              </div>
               <div className="mb-2 flex justify-between text-sm">
                 <span>Spent: <IndianRupee className="inline h-4 w-4" />{budget.spent.toLocaleString('en-IN')}</span>
                 <span>Total: <IndianRupee className="inline h-4 w-4" />{budget.amount.toLocaleString('en-IN')}</span>
               </div>
               <Progress value={budgetProgress} />
               <p className="mt-2 text-xs text-muted-foreground">
-                {budgetProgress.toFixed(0)}% of your monthly budget used.
+                {budgetProgress > 0 ? `${budgetProgress.toFixed(0)}% of your monthly budget used.` : 'Set a budget to track your spending.'}
               </p>
             </CardContent>
           </Card>
