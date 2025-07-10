@@ -1,8 +1,9 @@
+
 "use client";
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart, Home, Landmark, Repeat } from 'lucide-react';
+import { BarChart, Home, Landmark, Repeat, List } from 'lucide-react';
 import {
   SidebarMenu,
   SidebarMenuItem,
@@ -14,6 +15,7 @@ const navItems = [
   { href: '/reports', label: 'Reports', icon: BarChart },
   { href: '/accounts', label: 'Accounts', icon: Landmark },
   { href: '/fixed-costs', label: 'Fixed Costs', icon: Repeat },
+  { href: '/all-transactions', label: 'All Transactions', icon: List },
 ];
 
 export function MainNav() {
