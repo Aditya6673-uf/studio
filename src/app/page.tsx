@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { AddTransactionSheet } from "@/components/add-transaction-sheet";
 import { initialTransactions, initialAccounts } from "@/lib/data";
 import type { Transaction, Account } from "@/lib/types";
-import { format, startOfMonth, endOfMonth, subMonths, isWithinInterval } from "date-fns";
+import { format, startOfMonth, endOfMonth, subMonths, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { IndianRupee, ArrowUpRight, ArrowDownLeft, PlusCircle, Landmark, Wallet, CreditCard, Pencil, Check, X, Trash2 } from 'lucide-react';
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -93,6 +93,16 @@ export default function Dashboard() {
     };
   }, [transactions]);
   
+  const todaysTransactions = useMemo(() => {
+    const now = new Date();
+    const todayStart = startOfDay(now);
+    const todayEnd = endOfDay(now);
+
+    return transactions
+      .filter(t => isWithinInterval(t.date, { start: todayStart, end: todayEnd }))
+      .sort((a, b) => b.date.getTime() - a.date.getTime());
+  }, [transactions]);
+
   const savingsProgress = savingsGoal > 0 ? (Math.max(0, netBalance) / savingsGoal) * 100 : 0;
 
   const openTransactionSheet = (type?: 'income' | 'expense') => {
@@ -271,63 +281,71 @@ export default function Dashboard() {
       <div className="mt-6 grid gap-6 md:grid-cols-5">
         <Card className="md:col-span-3">
           <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
+            <CardTitle>Today's Transactions</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Category</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>Time</TableHead>
                   <TableHead>Method</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
                   <TableHead className="w-[50px]"><span className="sr-only">Actions</span></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {transactions.slice(0, 5).map(t => (
-                  <TableRow key={t.id}>
-                    <TableCell>
-                      <div className="font-medium">{t.category}</div>
-                      <div className="text-sm text-muted-foreground">{t.notes}</div>
-                    </TableCell>
-                    <TableCell>{format(t.date, 'dd MMM, yyyy')}</TableCell>
-                    <TableCell>
-                      {paymentMethodIcons[t.paymentMethod]}
-                    </TableCell>
-                    <TableCell className={`text-right font-medium ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                      {t.type === 'income' ? '+' : '-'} <IndianRupee className="inline h-4 w-4" />{t.amount.toLocaleString('en-IN')}
-                    </TableCell>
-                    <TableCell>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete transaction</span>
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete this transaction record.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDeleteTransaction(t.id)}>
-                              Continue
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                {todaysTransactions.length > 0 ? (
+                  todaysTransactions.map(t => (
+                    <TableRow key={t.id}>
+                      <TableCell>
+                        <div className="font-medium">{t.category}</div>
+                        <div className="text-sm text-muted-foreground">{t.notes}</div>
+                      </TableCell>
+                      <TableCell>{format(t.date, 'p')}</TableCell>
+                      <TableCell>
+                        {paymentMethodIcons[t.paymentMethod]}
+                      </TableCell>
+                      <TableCell className={`text-right font-medium ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                        {t.type === 'income' ? '+' : '-'} <IndianRupee className="inline h-4 w-4" />{t.amount.toLocaleString('en-IN')}
+                      </TableCell>
+                      <TableCell>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Delete transaction</span>
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete this transaction record.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeleteTransaction(t.id)}>
+                                Continue
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="h-24 text-center">
+                      No transactions recorded today.
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </CardContent>
