@@ -42,21 +42,30 @@ export function PinDialog({ onPinSuccess }: PinDialogProps) {
       setCorrectPin(storedPin);
     }
   }, []);
+  
+  const handleUnlock = () => {
+    if (pin === correctPin) {
+      onPinSuccess();
+    } else {
+      setError("Incorrect PIN. Please try again.");
+      // Reset pin after a short delay to allow user to see the error
+      setTimeout(() => {
+        setPin("");
+      }, 500);
+    }
+  };
+
+  useEffect(() => {
+    if (pin.length === 4) {
+      handleUnlock();
+    }
+  }, [pin]);
 
   const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (/^\d*$/.test(value) && value.length <= 4) {
       setPin(value);
       setError("");
-    }
-  };
-
-  const handleUnlock = () => {
-    if (pin === correctPin) {
-      onPinSuccess();
-    } else {
-      setError("Incorrect PIN. Please try again.");
-      setPin("");
     }
   };
 
@@ -98,7 +107,7 @@ export function PinDialog({ onPinSuccess }: PinDialogProps) {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && pin.length === 4) {
       handleUnlock();
     }
   };
@@ -145,7 +154,7 @@ export function PinDialog({ onPinSuccess }: PinDialogProps) {
           {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
         </div>
         <DialogFooter className="flex-col-reverse items-center justify-center space-y-2 space-y-reverse">
-          <Button onClick={handleUnlock} className="w-full">Unlock with PIN</Button>
+          <Button onClick={handleUnlock} className="w-full" disabled={pin.length < 4}>Unlock with PIN</Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="link" size="sm" className="p-0 h-auto">Forgot PIN?</Button>
