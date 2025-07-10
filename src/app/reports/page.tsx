@@ -3,7 +3,7 @@
 
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileDown, IndianRupee } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
@@ -78,8 +78,9 @@ export default function ReportsPage() {
   const { transactions } = useTransactions();
   const [selectedTransactions, setSelectedTransactions] = useState<Transaction[] | null>(null);
   const [dialogTitle, setDialogTitle] = useState("");
+  const [activeTab, setActiveTab] = useState("monthly");
 
-  const { dailyData, weeklyData, monthlyData, yearlyData } = useMemo(() => {
+  const { dailyData, weeklyData, monthlyData, yearlyData, rangeDescription } = useMemo(() => {
     const processTransactionsForPeriod = (transactionsToProcess: Transaction[], startDate: Date, endDate: Date) => {
       const periodTransactions = transactionsToProcess.filter(t => isWithinInterval(new Date(t.date), { start: startDate, end: endDate }));
       let income = 0;
@@ -96,11 +97,16 @@ export default function ReportsPage() {
 
     const now = new Date();
     
-    const dailyData = eachDayOfInterval({ start: subDays(now, 6), end: now }).map(date => {
+    // Daily
+    const dailyStart = subDays(now, 6);
+    const dailyData = eachDayOfInterval({ start: dailyStart, end: now }).map(date => {
         const { income, expenses, transactions: periodTransactions } = processTransactionsForPeriod(transactions, startOfDay(date), endOfDay(date));
         return { date: format(date, 'EEE'), income, expenses, transactions: periodTransactions, fullDate: format(date, 'dd MMM, yyyy') };
     });
 
+    // Weekly
+    const weeklyStart = startOfWeek(subWeeks(now, 3));
+    const weeklyEnd = endOfWeek(now);
     const weeklyData = Array.from({ length: 4 }).map((_, i) => {
         const weekStart = startOfWeek(subWeeks(now, 3 - i));
         const weekEnd = endOfWeek(subWeeks(now, 3 - i));
@@ -108,20 +114,32 @@ export default function ReportsPage() {
         return { week: `Week of ${format(weekStart, 'MMM d')}`, income, expenses, transactions: periodTransactions };
     });
 
+    // Monthly
+    const monthlyStart = startOfMonth(subMonths(now, 5));
+    const monthlyEnd = endOfMonth(now);
     const monthlyData = Array.from({ length: 6 }).map((_, i) => {
         const monthStart = startOfMonth(subMonths(now, 5 - i));
         const { income, expenses, transactions: periodTransactions } = processTransactionsForPeriod(transactions, monthStart, endOfMonth(monthStart));
         return { month: format(monthStart, 'MMM yyyy'), income, expenses, transactions: periodTransactions };
     });
     
+    // Yearly
+    const yearlyStart = startOfYear(subYears(now, 3));
     const yearlyData = Array.from({ length: 4 }).map((_, i) => {
         const yearStart = startOfYear(subYears(now, 3 - i));
         const { income, expenses, transactions: periodTransactions } = processTransactionsForPeriod(transactions, yearStart, endOfYear(yearStart));
         return { year: format(yearStart, 'yyyy'), income, expenses, transactions: periodTransactions };
     });
 
-    return { dailyData, weeklyData, monthlyData, yearlyData };
-  }, [transactions]);
+    const descriptions: { [key: string]: string } = {
+        daily: `Showing data for the last 7 days (${format(dailyStart, 'dd MMM')} - ${format(now, 'dd MMM, yyyy')})`,
+        weekly: `Showing data for the last 4 weeks (${format(weeklyStart, 'dd MMM')} - ${format(weeklyEnd, 'dd MMM, yyyy')})`,
+        monthly: `Showing data for the last 6 months (${format(monthlyStart, 'MMM yyyy')} - ${format(monthlyEnd, 'MMM yyyy')})`,
+        yearly: `Showing data for the last 4 years (${format(yearlyStart, 'yyyy')} - ${format(now, 'yyyy')})`,
+    };
+
+    return { dailyData, weeklyData, monthlyData, yearlyData, rangeDescription: descriptions[activeTab] };
+  }, [transactions, activeTab]);
   
   const handleBarClick = (data: any) => {
     if (data && data.activePayload && data.activePayload.length > 0) {
@@ -166,9 +184,10 @@ export default function ReportsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Income vs. Expenses</CardTitle>
+          <CardDescription>{rangeDescription}</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="monthly" className="w-full">
+          <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList>
               <TabsTrigger value="daily">Daily</TabsTrigger>
               <TabsTrigger value="weekly">Weekly</TabsTrigger>
