@@ -23,14 +23,29 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
+interface GroupedTransactions {
+  [key: string]: Transaction[];
+}
 
 export default function AllTransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  const allTransactions = useMemo(() => {
-    return transactions.sort((a, b) => b.date.getTime() - a.date.getTime());
+  const groupedTransactions = useMemo(() => {
+    const sorted = transactions.sort((a, b) => b.date.getTime() - a.date.getTime());
+    return sorted.reduce((acc: GroupedTransactions, t) => {
+      const monthYear = format(t.date, 'MMMM yyyy');
+      if (!acc[monthYear]) {
+        acc[monthYear] = [];
+      }
+      acc[monthYear].push(t);
+      return acc;
+    }, {});
   }, [transactions]);
+  
+  const defaultAccordionValue = Object.keys(groupedTransactions)[0] || "";
 
   const handleAddTransaction = (transaction: Omit<Transaction, 'id'>) => {
     const newTransaction: Transaction = {
@@ -69,72 +84,79 @@ export default function AllTransactionsPage() {
             <CardDescription>A complete record of all your income and expenses.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                  <TableHead className="w-[50px]"><span className="sr-only">Actions</span></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {allTransactions.length > 0 ? (
-                  allTransactions.map(t => (
-                    <TableRow key={t.id}>
-                      <TableCell>
-                        <div className="font-medium">{t.category}</div>
-                        {t.notes && <div className="text-sm text-muted-foreground">{t.notes}</div>}
-                      </TableCell>
-                      <TableCell>{format(t.date, 'dd MMM, yyyy')}</TableCell>
-                      <TableCell>
-                        <Badge variant={t.type === 'income' ? 'default' : 'destructive'} className={t.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
-                          {t.type}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className={`text-right font-medium ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                        {t.type === 'income' ? '+' : '-'} <IndianRupee className="inline h-4 w-4" />{t.amount.toLocaleString('en-IN')}
-                      </TableCell>
-                      <TableCell>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Delete transaction</span>
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete this transaction record.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteTransaction(t.id)}>
-                                Continue
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
-                      No transactions recorded yet.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+            {Object.keys(groupedTransactions).length > 0 ? (
+              <Accordion type="single" collapsible defaultValue={defaultAccordionValue} className="w-full">
+                {Object.entries(groupedTransactions).map(([monthYear, monthTransactions]) => (
+                  <AccordionItem value={monthYear} key={monthYear}>
+                    <AccordionTrigger className="text-lg font-medium">{monthYear}</AccordionTrigger>
+                    <AccordionContent>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Description</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Type</TableHead>
+                            <TableHead className="text-right">Amount</TableHead>
+                            <TableHead className="w-[50px]"><span className="sr-only">Actions</span></TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {monthTransactions.map(t => (
+                            <TableRow key={t.id}>
+                              <TableCell>
+                                <div className="font-medium">{t.category}</div>
+                                {t.notes && <div className="text-sm text-muted-foreground">{t.notes}</div>}
+                              </TableCell>
+                              <TableCell>{format(t.date, 'dd MMM, yyyy')}</TableCell>
+                              <TableCell>
+                                <Badge variant={t.type === 'income' ? 'default' : 'destructive'} className={t.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+                                  {t.type}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className={`text-right font-medium ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                                {t.type === 'income' ? '+' : '-'} <IndianRupee className="inline h-4 w-4" />{t.amount.toLocaleString('en-IN')}
+                              </TableCell>
+                              <TableCell>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                      <span className="sr-only">Delete transaction</span>
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete this transaction record.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDeleteTransaction(t.id)}>
+                                        Continue
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            ) : (
+              <div className="h-24 text-center content-center text-muted-foreground">
+                No transactions recorded yet.
+              </div>
+            )}
           </CardContent>
         </Card>
       </main>
