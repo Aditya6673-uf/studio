@@ -24,9 +24,17 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useTransactions } from "@/context/transactions-context";
+import { Separator } from "@/components/ui/separator";
+
+interface MonthlySummary {
+  transactions: Transaction[];
+  totalIncome: number;
+  totalExpense: number;
+  netIncome: number;
+}
 
 interface GroupedTransactions {
-  [key: string]: Transaction[];
+  [key: string]: MonthlySummary;
 }
 
 export default function AllTransactionsPage() {
@@ -38,9 +46,20 @@ export default function AllTransactionsPage() {
     return sorted.reduce((acc: GroupedTransactions, t) => {
       const monthYear = format(new Date(t.date), 'MMMM yyyy');
       if (!acc[monthYear]) {
-        acc[monthYear] = [];
+        acc[monthYear] = {
+          transactions: [],
+          totalIncome: 0,
+          totalExpense: 0,
+          netIncome: 0,
+        };
       }
-      acc[monthYear].push(t);
+      acc[monthYear].transactions.push(t);
+      if (t.type === 'income') {
+        acc[monthYear].totalIncome += t.amount;
+      } else {
+        acc[monthYear].totalExpense += t.amount;
+      }
+      acc[monthYear].netIncome = acc[monthYear].totalIncome - acc[monthYear].totalExpense;
       return acc;
     }, {});
   }, [transactions]);
@@ -72,7 +91,7 @@ export default function AllTransactionsPage() {
           <CardContent>
             {Object.keys(groupedTransactions).length > 0 ? (
               <Accordion type="single" collapsible defaultValue={defaultAccordionValue} className="w-full">
-                {Object.entries(groupedTransactions).map(([monthYear, monthTransactions]) => (
+                {Object.entries(groupedTransactions).map(([monthYear, summary]) => (
                   <AccordionItem value={monthYear} key={monthYear}>
                     <AccordionTrigger className="text-lg font-medium">{monthYear}</AccordionTrigger>
                     <AccordionContent>
@@ -87,7 +106,7 @@ export default function AllTransactionsPage() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {monthTransactions.map(t => (
+                          {summary.transactions.map(t => (
                             <TableRow key={t.id}>
                               <TableCell>
                                 <div className="font-medium">{t.category}</div>
@@ -134,6 +153,27 @@ export default function AllTransactionsPage() {
                           ))}
                         </TableBody>
                       </Table>
+                      <Separator className="my-4" />
+                      <div className="flex justify-end gap-8 px-4 text-sm">
+                        <div className="flex flex-col items-end">
+                            <span className="text-muted-foreground">Total Income</span>
+                            <span className="font-medium text-green-600 flex items-center">
+                                <IndianRupee className="h-4 w-4" />{summary.totalIncome.toLocaleString('en-IN')}
+                            </span>
+                        </div>
+                        <div className="flex flex-col items-end">
+                            <span className="text-muted-foreground">Total Expense</span>
+                            <span className="font-medium text-red-600 flex items-center">
+                                <IndianRupee className="h-4 w-4" />{summary.totalExpense.toLocaleString('en-IN')}
+                            </span>
+                        </div>
+                        <div className="flex flex-col items-end">
+                            <span className="text-muted-foreground">Net Balance</span>
+                            <span className={`font-medium flex items-center ${summary.netIncome >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                <IndianRupee className="h-4 w-4" />{summary.netIncome.toLocaleString('en-IN')}
+                            </span>
+                        </div>
+                      </div>
                     </AccordionContent>
                   </AccordionItem>
                 ))}
