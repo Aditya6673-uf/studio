@@ -33,23 +33,11 @@ import type { Transaction } from "@/lib/types"
 const formSchema = z.object({
   type: z.enum(["income", "expense"], { required_error: "Please select a transaction type." }),
   amount: z.coerce.number().positive({ message: "Amount must be positive." }),
-  category: z.string().min(1, { message: "Please select a category." }),
-  customCategory: z.string().optional(),
+  category: z.string().min(1, { message: "Please enter a category." }),
   date: z.date({ required_error: "Please select a date." }),
   paymentMethod: z.enum(["UPI", "Cash", "Card"]),
   notes: z.string().optional(),
-}).refine(data => {
-    if (data.category === 'Other') {
-        return !!data.customCategory && data.customCategory.trim().length > 0;
-    }
-    return true;
-}, {
-    message: "Please enter a custom category.",
-    path: ["customCategory"],
 });
-
-const incomeCategories = ["Freelancing", "Salary", "Stock Market Investment", "Other"];
-const expenseCategories = ["Food", "Rent", "EMI", "Entertainment", "SIP", "Stock Market Investment", "Other"];
 
 
 type AddTransactionSheetProps = {
@@ -69,15 +57,12 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
       paymentMethod: "UPI",
       notes: "",
       category: "",
-      customCategory: ""
     },
   })
   
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false)
 
   const watchedType = form.watch("type");
-  const watchedCategory = form.watch("category");
-  const categories = watchedType === 'income' ? incomeCategories : expenseCategories;
 
   React.useEffect(() => {
     if (isOpen) {
@@ -88,7 +73,6 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
         paymentMethod: "UPI",
         notes: "",
         category: "",
-        customCategory: ""
       });
     }
   }, [isOpen, defaultType, form]);
@@ -98,13 +82,7 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
   }, [watchedType, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const { customCategory, ...transactionData } = values;
-    const finalTransaction = {
-      ...transactionData,
-      category: values.category === 'Other' && customCategory ? customCategory : values.category,
-    };
-
-    onAddTransaction(finalTransaction as Omit<Transaction, 'id'>);
+    onAddTransaction(values);
     form.reset();
     setIsOpen(false);
   }
@@ -172,38 +150,13 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value || ""}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                       {categories.map(cat => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <Input placeholder="e.g., Food, Salary, Rent" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            {watchedCategory === 'Other' && (
-              <FormField
-                control={form.control}
-                name="customCategory"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Custom Category</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter your custom category" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
 
             <FormField
               control={form.control}
