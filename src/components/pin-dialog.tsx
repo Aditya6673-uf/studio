@@ -44,28 +44,41 @@ export function PinDialog({ onPinSuccess }: PinDialogProps) {
   };
 
   const handleBiometricUnlock = async () => {
-    if (typeof window.PublicKeyCredential === 'undefined') {
+    if (typeof window.PublicKeyCredential === 'undefined' || !navigator.credentials) {
        toast({
         variant: "destructive",
         title: "Biometrics Not Supported",
-        description: "Your browser does not support biometric authentication.",
+        description: "Your browser or device does not support biometric authentication.",
       });
       return;
     }
     
     try {
-      // In a real app, you would use navigator.credentials.get() to verify a credential
-      // For this prototype, we'll simulate a successful check
+      // In a real-world app, you would fetch a challenge from your server here.
+      // For this prototype, we use a static, simplified challenge.
+      const publicKeyCredentialRequestOptions: PublicKeyCredentialRequestOptions = {
+        challenge: new Uint8Array(16), // Dummy challenge
+        allowCredentials: [], // In a real app, you would provide credential IDs
+        timeout: 60000,
+        userVerification: 'preferred',
+      };
+      
+      // This will trigger the browser's biometric prompt (e.g., fingerprint, face ID)
+      await navigator.credentials.get({ publicKey: publicKeyCredentialRequestOptions });
+
+      // If the above line doesn't throw an error, the user has successfully authenticated.
       toast({
-        title: "Biometric Scan Simulated",
+        title: "Biometric Scan Successful",
         description: "Unlocking app...",
       });
-      setTimeout(onPinSuccess, 1000);
+      onPinSuccess();
+
     } catch (err) {
+      console.error("Biometric authentication error:", err);
       toast({
         variant: "destructive",
         title: "Biometric Failed",
-        description: "Could not verify your identity. Please use your PIN.",
+        description: "Could not verify your identity. Please try again or use your PIN.",
       });
     }
   };
