@@ -33,6 +33,7 @@ import {
 } from "date-fns";
 import type { Transaction } from "@/lib/types";
 import { useTransactions } from "@/context/transactions-context";
+import { ExportDataDialog } from "@/components/export-data-dialog";
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -84,6 +85,7 @@ export default function ReportsPage() {
   const [dialogTitle, setDialogTitle] = useState("");
   const [activeTab, setActiveTab] = useState("monthly");
   const [offset, setOffset] = useState(0);
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
   const { dailyData, weeklyData, monthlyData, yearlyData, rangeDescription } = useMemo(() => {
     const processTransactionsForPeriod = (transactionsToProcess: Transaction[], startDate: Date, endDate: Date) => {
@@ -167,20 +169,29 @@ export default function ReportsPage() {
     }
   };
   
-  const exportData = () => {
+  const handleExport = (startDate?: Date, endDate?: Date) => {
+    let transactionsToExport = transactions;
+    if (startDate && endDate) {
+      transactionsToExport = transactions.filter(t => 
+        isWithinInterval(new Date(t.date), { start: startOfDay(startDate), end: endOfDay(endDate) })
+      );
+    }
+    
     const headers = "ID,Type,Amount,Category,Date,Payment Method,Notes\n";
-    const csv = transactions.map(t =>
+    const csv = transactionsToExport.map(t =>
       `${t.id},${t.type},${t.amount},"${t.category}","${new Date(t.date).toISOString()}","${t.paymentMethod}","${t.notes || ''}"`
     ).join("\n");
     const blob = new Blob([headers + csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
+    const fileName = `RupeeRoute_Transactions_${format(startDate || new Date(0), 'yyyy-MM-dd')}_to_${format(endDate || new Date(), 'yyyy-MM-dd')}.csv`;
     link.setAttribute("href", url);
-    link.setAttribute("download", "RupeeRoute_Transactions.csv");
+    link.setAttribute("download", fileName);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    setIsExportDialogOpen(false);
   };
 
   return (
@@ -191,7 +202,7 @@ export default function ReportsPage() {
           <SidebarTrigger className="md:hidden" />
           <h1 className="font-headline text-3xl font-bold">Reports</h1>
         </div>
-        <Button onClick={exportData} variant="outline">
+        <Button onClick={() => setIsExportDialogOpen(true)} variant="outline">
           <FileDown className="mr-2 h-4 w-4" />
           Export Data
         </Button>
@@ -281,6 +292,11 @@ export default function ReportsPage() {
           </div>
         </DialogContent>
       </Dialog>
+      <ExportDataDialog 
+        isOpen={isExportDialogOpen}
+        setIsOpen={setIsExportDialogOpen}
+        onExport={handleExport}
+      />
     </>
   );
 }
