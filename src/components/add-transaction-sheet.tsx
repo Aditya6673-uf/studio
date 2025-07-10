@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import React, { useState } from "react"
+import React from "react"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -25,16 +25,12 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon, MessageSquareText, Sparkles, Star } from "lucide-react"
+import { CalendarIcon, Star } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Calendar } from "@/components/ui/calendar"
 import { format } from "date-fns"
 import type { Transaction } from "@/lib/types"
 import { useLocalStorage } from "@/hooks/use-local-storage"
-import { Textarea } from "./ui/textarea"
-import { parseSms } from "@/ai/flows/parse-sms-flow"
-import { useToast } from "@/hooks/use-toast"
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert"
 
 const formSchema = z.object({
   type: z.enum(["income", "expense"], { required_error: "Please select a transaction type." }),
@@ -55,11 +51,6 @@ type AddTransactionSheetProps = {
 
 export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defaultType }: AddTransactionSheetProps) {
   const [favoriteCategories, setFavoriteCategories] = useLocalStorage<string[]>("favoriteCategories", []);
-  const [showSmsParser, setShowSmsParser] = useState(false);
-  const [smsContent, setSmsContent] = useState("");
-  const [isParsing, setIsParsing] = useState(false);
-  const { toast } = useToast();
-
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -88,8 +79,6 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
         notes: "",
         category: "",
       });
-      setShowSmsParser(false);
-      setSmsContent("");
     }
   }, [isOpen, defaultType, form]);
 
@@ -104,32 +93,6 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
       setFavoriteCategories(favs => favs.filter(f => f !== watchedCategory));
     } else {
       setFavoriteCategories(favs => [...favs, watchedCategory]);
-    }
-  };
-
-  const handleParseSms = async () => {
-    if (!smsContent) return;
-    setIsParsing(true);
-    try {
-      const result = await parseSms(smsContent);
-      form.setValue("type", result.type);
-      form.setValue("amount", result.amount);
-      form.setValue("category", result.category);
-      form.setValue("paymentMethod", result.paymentMethod);
-      form.setValue("notes", result.notes);
-      toast({
-        title: "SMS Parsed Successfully",
-        description: "Transaction details have been filled in.",
-      });
-    } catch (error) {
-      console.error("Failed to parse SMS:", error);
-      toast({
-        variant: "destructive",
-        title: "Parsing Failed",
-        description: "Could not extract transaction details from the SMS.",
-      });
-    } finally {
-      setIsParsing(false);
     }
   };
 
@@ -152,36 +115,8 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
           </SheetDescription>
         </SheetHeader>
         
-        <div className="py-4">
-          <Button variant="outline" className="w-full" onClick={() => setShowSmsParser(!showSmsParser)}>
-              <MessageSquareText className="mr-2 h-4 w-4" />
-              {showSmsParser ? "Hide" : "Parse from SMS"}
-          </Button>
-          {showSmsParser && (
-            <div className="mt-4 space-y-4 rounded-lg border bg-muted/50 p-4">
-               <Alert>
-                <Sparkles className="h-4 w-4" />
-                <AlertTitle>AI-Powered Parsing</AlertTitle>
-                <AlertDescription>
-                  Paste your transaction SMS below and let AI fill out the form for you.
-                </AlertDescription>
-              </Alert>
-              <Textarea
-                placeholder="Paste your transaction SMS here..."
-                value={smsContent}
-                onChange={(e) => setSmsContent(e.target.value)}
-                rows={4}
-              />
-              <Button onClick={handleParseSms} disabled={!smsContent || isParsing} className="w-full">
-                {isParsing ? "Analyzing..." : "Analyze SMS"}
-              </Button>
-            </div>
-          )}
-        </div>
-
-
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-6">
             <FormField
               control={form.control}
               name="type"
