@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { IndianRupee, User } from "lucide-react";
+import { User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "./ui/label";
 
@@ -94,6 +94,7 @@ export function WelcomeDialog({ onSetupSuccess }: WelcomeDialogProps) {
             <Input
               id="pin"
               type="password"
+              inputMode="numeric"
               value={pin}
               onChange={handlePinChange}
               onKeyPress={handleKeyPress}

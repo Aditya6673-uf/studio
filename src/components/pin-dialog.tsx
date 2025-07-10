@@ -129,6 +129,7 @@ export function PinDialog({ onPinSuccess }: PinDialogProps) {
         <div className="py-4 space-y-4">
           <Input
             type="password"
+            inputMode="numeric"
             value={pin}
             onChange={handlePinChange}
             onKeyPress={handleKeyPress}
