@@ -22,10 +22,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useTransactions } from "@/context/transactions-context";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function FixedCostsPage() {
   const { transactions, addTransaction, deleteTransaction } = useTransactions();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [selectedRowIds, setSelectedRowIds] = useState<string[]>([]);
 
   const fixedCostTransactions = useMemo(() => {
     const fixedCategories = ['Rent', 'EMI', 'SIP'];
@@ -33,6 +35,30 @@ export default function FixedCostsPage() {
       .filter(t => t.type === 'expense' && fixedCategories.includes(t.category))
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [transactions]);
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedRowIds(fixedCostTransactions.map(t => t.id));
+    } else {
+      setSelectedRowIds([]);
+    }
+  };
+
+  const handleRowSelect = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedRowIds(prev => [...prev, id]);
+    } else {
+      setSelectedRowIds(prev => prev.filter(rowId => rowId !== id));
+    }
+  };
+
+  const handleDeleteSelected = () => {
+    selectedRowIds.forEach(id => deleteTransaction(id));
+    setSelectedRowIds([]);
+  };
+
+  const isAllSelected = selectedRowIds.length > 0 && selectedRowIds.length === fixedCostTransactions.length;
+  const isSomeSelected = selectedRowIds.length > 0 && selectedRowIds.length < fixedCostTransactions.length;
 
   return (
     <>
@@ -50,6 +76,34 @@ export default function FixedCostsPage() {
             Add Fixed Cost
           </Button>
         </div>
+        
+        {selectedRowIds.length > 0 && (
+          <div className="mb-4 flex items-center justify-between rounded-lg border bg-card p-2 px-4">
+             <span className="text-sm font-medium">{selectedRowIds.length} selected</span>
+             <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Selected
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action will permanently delete {selectedRowIds.length} transaction(s). This cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteSelected}>
+                      Continue
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+          </div>
+        )}
 
         <Card>
           <CardHeader>
@@ -60,6 +114,14 @@ export default function FixedCostsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[50px]">
+                    <Checkbox
+                      checked={isAllSelected}
+                      onCheckedChange={handleSelectAll}
+                      aria-label="Select all rows"
+                      indeterminate={isSomeSelected.toString()}
+                    />
+                  </TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Date Paid</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
@@ -69,7 +131,14 @@ export default function FixedCostsPage() {
               <TableBody>
                 {fixedCostTransactions.length > 0 ? (
                   fixedCostTransactions.map(t => (
-                    <TableRow key={t.id}>
+                    <TableRow key={t.id} data-state={selectedRowIds.includes(t.id) ? "selected" : ""}>
+                      <TableCell>
+                         <Checkbox
+                          checked={selectedRowIds.includes(t.id)}
+                          onCheckedChange={(checked) => handleRowSelect(t.id, !!checked)}
+                          aria-label={`Select row for ${t.category}`}
+                        />
+                      </TableCell>
                       <TableCell>
                         <div className="font-medium">{t.category}</div>
                         {t.notes && <div className="text-sm text-muted-foreground">{t.notes}</div>}
@@ -110,7 +179,7 @@ export default function FixedCostsPage() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
+                    <TableCell colSpan={5} className="h-24 text-center">
                       No fixed costs recorded yet.
                     </TableCell>
                   </TableRow>
