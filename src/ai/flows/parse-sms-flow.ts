@@ -15,10 +15,10 @@ const ParseSmsInputSchema = z.string();
 export type ParseSmsInput = z.infer<typeof ParseSmsInputSchema>;
 
 const ParseSmsOutputSchema = z.object({
-    type: z.enum(['income', 'expense']).describe("The type of transaction. 'income' for money received, 'expense' for money spent."),
+    type: z.enum(['income', 'expense']).describe("The type of transaction. If the SMS says 'credited' or 'received', it is 'income'. If it says 'debited' or 'spent', it is 'expense'."),
     amount: z.number().describe("The numeric amount of the transaction."),
     category: z.string().describe("A suitable category for the transaction, like 'Food', 'Shopping', 'Travel', 'Salary', or the merchant name if it's a specific store."),
-    paymentMethod: z.enum(['UPI', 'Card', 'Cash']).describe("The payment method used. Infer 'Card' for debited/credited to card messages, 'UPI' for UPI messages, 'Cash' if not specified."),
+    paymentMethod: z.enum(['UPI', 'Card', 'Cash']).describe("The payment method used. Infer 'Card' for debited/credited to card messages, 'UPI' for UPI messages. Default to 'Card' if not specified."),
     notes: z.string().optional().describe("Any additional relevant information from the SMS, like merchant name or transaction details."),
 });
 export type ParseSmsOutput = z.infer<typeof ParseSmsOutputSchema>;
@@ -35,7 +35,7 @@ const prompt = ai.definePrompt({
   prompt: `You are an expert at parsing financial transaction SMS messages from Indian banks.
   Analyze the following SMS and extract the transaction details.
 
-  - Determine if it is an 'income' or 'expense'.
+  - Determine if it is an 'income' or 'expense'. If the message mentions "credited", "received", or "deposited", the type is 'income'. If it mentions "debited", "spent", or "withdrawn", the type is 'expense'.
   - Extract the exact numerical 'amount'.
   - Determine a relevant 'category'. If it's a purchase, use the merchant name (e.g., 'Zomato', 'Swiggy'). If it's a salary, use 'Salary'. For generic spends, use 'Shopping' or 'Food'.
   - Infer the 'paymentMethod'. If the SMS mentions UPI, use 'UPI'. If it mentions a Debit or Credit Card, use 'Card'. Default to 'Card' if it's ambiguous but seems like a bank transaction.
