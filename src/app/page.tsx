@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo } from "react";
@@ -8,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AddTransactionSheet } from "@/components/add-transaction-sheet";
-import { initialTransactions, initialAccounts } from "@/lib/data";
+import { initialAccounts } from "@/lib/data";
 import type { Transaction, Account } from "@/lib/types";
 import { format, startOfMonth, endOfMonth, subMonths, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { IndianRupee, ArrowUpRight, ArrowDownLeft, PlusCircle, Landmark, Wallet, CreditCard, Pencil, Check, X, Trash2 } from 'lucide-react';
@@ -33,6 +34,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useTransactions } from "@/context/transactions-context";
 
 const paymentMethodIcons = {
   UPI: <Landmark className="h-4 w-4 text-muted-foreground" />,
@@ -41,7 +43,7 @@ const paymentMethodIcons = {
 };
 
 export default function Dashboard() {
-  const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
+  const { transactions, addTransaction, deleteTransaction } = useTransactions();
   const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [sheetDefaultType, setSheetDefaultType] = useState<'income' | 'expense' | undefined>(undefined);
@@ -66,13 +68,14 @@ export default function Dashboard() {
     let prevExpenses = 0;
 
     transactions.forEach(t => {
-      if (isWithinInterval(t.date, { start: currentMonthStart, end: currentMonthEnd })) {
+      const transactionDate = new Date(t.date);
+      if (isWithinInterval(transactionDate, { start: currentMonthStart, end: currentMonthEnd })) {
         if (t.type === 'income') {
           currentIncome += t.amount;
         } else {
           currentExpenses += t.amount;
         }
-      } else if (isWithinInterval(t.date, { start: prevMonthStart, end: prevMonthEnd })) {
+      } else if (isWithinInterval(transactionDate, { start: prevMonthStart, end: prevMonthEnd })) {
          if (t.type === 'income') {
           prevIncome += t.amount;
         } else {
@@ -99,8 +102,8 @@ export default function Dashboard() {
     const todayEnd = endOfDay(now);
 
     return transactions
-      .filter(t => isWithinInterval(t.date, { start: todayStart, end: todayEnd }))
-      .sort((a, b) => b.date.getTime() - a.date.getTime());
+      .filter(t => isWithinInterval(new Date(t.date), { start: todayStart, end: todayEnd }))
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [transactions]);
 
   const savingsProgress = savingsGoal > 0 ? (Math.max(0, netBalance) / savingsGoal) * 100 : 0;
@@ -109,21 +112,7 @@ export default function Dashboard() {
     setSheetDefaultType(type);
     setIsSheetOpen(true);
   };
-
-  const handleAddTransaction = (transaction: Omit<Transaction, 'id'>) => {
-    const newTransaction: Transaction = {
-      ...transaction,
-      id: new Date().getTime().toString(),
-    };
-    setTransactions(prev => [newTransaction, ...prev]);
-  };
   
-  const handleDeleteTransaction = (transactionId: string) => {
-    setTransactions((prevTransactions) =>
-      prevTransactions.filter((transaction) => transaction.id !== transactionId)
-    );
-  };
-
   const handleSetSavingsGoal = () => {
     const newAmount = parseFloat(savingsInput);
     if (!isNaN(newAmount) && newAmount > 0) {
@@ -162,7 +151,7 @@ export default function Dashboard() {
   const handleSaveIncome = () => {
     const newAmount = parseFloat(incomeInput);
     if (!isNaN(newAmount) && newAmount > 0) {
-      handleAddTransaction({
+      addTransaction({
         type: 'income',
         amount: newAmount,
         category: 'Salary',
@@ -302,7 +291,7 @@ export default function Dashboard() {
                         <div className="font-medium">{t.category}</div>
                         <div className="text-sm text-muted-foreground">{t.notes}</div>
                       </TableCell>
-                      <TableCell>{format(t.date, 'p')}</TableCell>
+                      <TableCell>{format(new Date(t.date), 'p')}</TableCell>
                       <TableCell>
                         {paymentMethodIcons[t.paymentMethod]}
                       </TableCell>
@@ -330,7 +319,7 @@ export default function Dashboard() {
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteTransaction(t.id)}>
+                              <AlertDialogAction onClick={() => deleteTransaction(t.id)}>
                                 Continue
                               </AlertDialogAction>
                             </AlertDialogFooter>
@@ -436,7 +425,7 @@ export default function Dashboard() {
       <AddTransactionSheet
         isOpen={isSheetOpen}
         setIsOpen={setIsSheetOpen}
-        onAddTransaction={handleAddTransaction}
+        onAddTransaction={addTransaction}
         defaultType={sheetDefaultType}
       />
     </main>

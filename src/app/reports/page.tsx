@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo, useState } from "react";
@@ -6,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileDown, IndianRupee } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
-import { initialTransactions } from "@/lib/data";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -28,6 +28,7 @@ import {
   isWithinInterval,
 } from "date-fns";
 import type { Transaction } from "@/lib/types";
+import { useTransactions } from "@/context/transactions-context";
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -74,13 +75,13 @@ const ReportChart = ({ data, dataKey, onBarClick }: { data: any[], dataKey: stri
 );
 
 export default function ReportsPage() {
-  const [transactions] = useState<Transaction[]>(initialTransactions);
+  const { transactions } = useTransactions();
   const [selectedTransactions, setSelectedTransactions] = useState<Transaction[] | null>(null);
   const [dialogTitle, setDialogTitle] = useState("");
 
   const { dailyData, weeklyData, monthlyData, yearlyData } = useMemo(() => {
     const processTransactionsForPeriod = (transactionsToProcess: Transaction[], startDate: Date, endDate: Date) => {
-      const periodTransactions = transactionsToProcess.filter(t => isWithinInterval(t.date, { start: startDate, end: endDate }));
+      const periodTransactions = transactionsToProcess.filter(t => isWithinInterval(new Date(t.date), { start: startDate, end: endDate }));
       let income = 0;
       let expenses = 0;
       periodTransactions.forEach(t => {
@@ -135,7 +136,7 @@ export default function ReportsPage() {
   const exportData = () => {
     const headers = "ID,Type,Amount,Category,Date,Payment Method,Notes\n";
     const csv = transactions.map(t =>
-      `${t.id},${t.type},${t.amount},"${t.category}","${t.date.toISOString()}","${t.paymentMethod}","${t.notes || ''}"`
+      `${t.id},${t.type},${t.amount},"${t.category}","${new Date(t.date).toISOString()}","${t.paymentMethod}","${t.notes || ''}"`
     ).join("\n");
     const blob = new Blob([headers + csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");

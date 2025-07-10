@@ -1,9 +1,9 @@
+
 "use client";
 
 import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { initialTransactions } from "@/lib/data";
 import type { Transaction } from "@/lib/types";
 import { format } from "date-fns";
 import { IndianRupee, Repeat, PlusCircle, Trash2 } from 'lucide-react';
@@ -21,31 +21,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useTransactions } from "@/context/transactions-context";
 
 export default function FixedCostsPage() {
-  const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
+  const { transactions, addTransaction, deleteTransaction } = useTransactions();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const fixedCostTransactions = useMemo(() => {
     const fixedCategories = ['Rent', 'EMI', 'SIP'];
-    return transactions
+    return [...transactions]
       .filter(t => t.type === 'expense' && fixedCategories.includes(t.category))
-      .sort((a, b) => b.date.getTime() - a.date.getTime());
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [transactions]);
-
-  const handleAddTransaction = (transaction: Omit<Transaction, 'id'>) => {
-    const newTransaction: Transaction = {
-      ...transaction,
-      id: new Date().getTime().toString(),
-    };
-    setTransactions(prev => [newTransaction, ...prev]);
-  };
-
-  const handleDeleteTransaction = (transactionId: string) => {
-    setTransactions((prevTransactions) =>
-      prevTransactions.filter((transaction) => transaction.id !== transactionId)
-    );
-  };
 
   return (
     <>
@@ -87,7 +74,7 @@ export default function FixedCostsPage() {
                         <div className="font-medium">{t.category}</div>
                         {t.notes && <div className="text-sm text-muted-foreground">{t.notes}</div>}
                       </TableCell>
-                      <TableCell>{format(t.date, 'dd MMM, yyyy')}</TableCell>
+                      <TableCell>{format(new Date(t.date), 'dd MMM, yyyy')}</TableCell>
                       <TableCell className="text-right font-medium text-red-600">
                         - <IndianRupee className="inline h-4 w-4" />{t.amount.toLocaleString('en-IN')}
                       </TableCell>
@@ -112,7 +99,7 @@ export default function FixedCostsPage() {
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteTransaction(t.id)}>
+                              <AlertDialogAction onClick={() => deleteTransaction(t.id)}>
                                 Continue
                               </AlertDialogAction>
                             </AlertDialogFooter>
@@ -136,7 +123,7 @@ export default function FixedCostsPage() {
       <AddTransactionSheet
         isOpen={isSheetOpen}
         setIsOpen={setIsSheetOpen}
-        onAddTransaction={handleAddTransaction}
+        onAddTransaction={addTransaction}
       />
     </>
   );

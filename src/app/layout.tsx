@@ -11,6 +11,7 @@ import { UserNav } from '@/components/user-nav';
 import { useState, useEffect } from 'react';
 import { PinDialog } from '@/components/pin-dialog';
 import { WelcomeDialog } from '@/components/welcome-dialog';
+import { TransactionsProvider } from '@/context/transactions-context';
 
 export default function RootLayout({
   children,
@@ -55,24 +56,26 @@ export default function RootLayout({
         {!isAuthenticated ? (
           renderAuthScreen()
         ) : (
-          <SidebarProvider>
-            <Sidebar>
-              <SidebarHeader>
-                <Logo />
-              </SidebarHeader>
-              <SidebarContent>
-                <MainNav />
-              </SidebarContent>
-            </Sidebar>
-            <SidebarInset>
-              <div className="flex h-full flex-col">
-                <header className="sticky top-0 z-10 flex h-16 items-center justify-end gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
-                  <UserNav />
-                </header>
-                {children}
-              </div>
-            </SidebarInset>
-          </SidebarProvider>
+          <TransactionsProvider>
+            <SidebarProvider>
+              <Sidebar>
+                <SidebarHeader>
+                  <Logo />
+                </SidebarHeader>
+                <SidebarContent>
+                  <MainNav />
+                </SidebarContent>
+              </Sidebar>
+              <SidebarInset>
+                <div className="flex h-full flex-col">
+                  <header className="sticky top-0 z-10 flex h-16 items-center justify-end gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
+                    <UserNav />
+                  </header>
+                  {children}
+                </div>
+              </SidebarInset>
+            </SidebarProvider>
+          </TransactionsProvider>
         )}
         <Toaster />
       </body>

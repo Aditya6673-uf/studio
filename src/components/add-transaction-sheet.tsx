@@ -45,7 +45,7 @@ const formSchema = z.object({
 type AddTransactionSheetProps = {
   isOpen: boolean
   setIsOpen: (isOpen: boolean) => void
-  onAddTransaction: (transaction: Omit<Transaction, 'id'>) => void
+  onAddTransaction: (transaction: Omit<Transaction, 'id' | 'date'> & { date: Date | string }) => void
   defaultType?: 'income' | 'expense'
 }
 

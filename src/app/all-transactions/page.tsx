@@ -4,7 +4,6 @@
 import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { initialTransactions } from "@/lib/data";
 import type { Transaction } from "@/lib/types";
 import { format } from "date-fns";
 import { IndianRupee, List, PlusCircle, Trash2 } from 'lucide-react';
@@ -24,19 +23,20 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useTransactions } from "@/context/transactions-context";
 
 interface GroupedTransactions {
   [key: string]: Transaction[];
 }
 
 export default function AllTransactionsPage() {
-  const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
+  const { transactions, addTransaction, deleteTransaction } = useTransactions();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const groupedTransactions = useMemo(() => {
-    const sorted = transactions.sort((a, b) => b.date.getTime() - a.date.getTime());
+    const sorted = [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     return sorted.reduce((acc: GroupedTransactions, t) => {
-      const monthYear = format(t.date, 'MMMM yyyy');
+      const monthYear = format(new Date(t.date), 'MMMM yyyy');
       if (!acc[monthYear]) {
         acc[monthYear] = [];
       }
@@ -44,22 +44,8 @@ export default function AllTransactionsPage() {
       return acc;
     }, {});
   }, [transactions]);
-  
+
   const defaultAccordionValue = Object.keys(groupedTransactions)[0] || "";
-
-  const handleAddTransaction = (transaction: Omit<Transaction, 'id'>) => {
-    const newTransaction: Transaction = {
-      ...transaction,
-      id: new Date().getTime().toString(),
-    };
-    setTransactions(prev => [newTransaction, ...prev]);
-  };
-
-  const handleDeleteTransaction = (transactionId: string) => {
-    setTransactions((prevTransactions) =>
-      prevTransactions.filter((transaction) => transaction.id !== transactionId)
-    );
-  };
 
   return (
     <>
@@ -107,7 +93,7 @@ export default function AllTransactionsPage() {
                                 <div className="font-medium">{t.category}</div>
                                 {t.notes && <div className="text-sm text-muted-foreground">{t.notes}</div>}
                               </TableCell>
-                              <TableCell>{format(t.date, 'dd MMM, yyyy')}</TableCell>
+                              <TableCell>{format(new Date(t.date), 'dd MMM, yyyy')}</TableCell>
                               <TableCell>
                                 <Badge variant={t.type === 'income' ? 'default' : 'destructive'} className={t.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
                                   {t.type}
@@ -137,7 +123,7 @@ export default function AllTransactionsPage() {
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
                                       <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => handleDeleteTransaction(t.id)}>
+                                      <AlertDialogAction onClick={() => deleteTransaction(t.id)}>
                                         Continue
                                       </AlertDialogAction>
                                     </AlertDialogFooter>
@@ -163,7 +149,7 @@ export default function AllTransactionsPage() {
       <AddTransactionSheet
         isOpen={isSheetOpen}
         setIsOpen={setIsSheetOpen}
-        onAddTransaction={handleAddTransaction}
+        onAddTransaction={addTransaction}
       />
     </>
   );

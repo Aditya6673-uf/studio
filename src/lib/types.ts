@@ -1,9 +1,10 @@
+
 export type Transaction = {
   id: string;
   type: 'income' | 'expense';
   amount: number;
   category: string;
-  date: Date;
+  date: Date | string; // Allow string for serialization in local storage
   paymentMethod: 'UPI' | 'Cash' | 'Card';
   notes?: string;
 };
