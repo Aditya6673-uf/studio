@@ -1,5 +1,7 @@
 import type { Transaction, Account } from './types';
 
+// This data is used as a fallback for the first load if no user data exists.
+// It will be cleared when a new user signs up.
 export const initialTransactions: Transaction[] = [
   {
     id: '1',

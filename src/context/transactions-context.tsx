@@ -17,7 +17,7 @@ interface TransactionsContextType {
 const TransactionsContext = createContext<TransactionsContextType | undefined>(undefined);
 
 export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
-  const [transactions, setTransactions] = useLocalStorage<Transaction[]>('rupee-route-transactions', initialTransactions);
+  const [transactions, setTransactions] = useLocalStorage<Transaction[]>('rupee-route-transactions', []);
 
   const addTransaction = (transaction: TransactionInput) => {
     const newTransaction: Transaction = {

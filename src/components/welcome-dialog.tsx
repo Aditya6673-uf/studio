@@ -44,6 +44,10 @@ export function WelcomeDialog({ onSetupSuccess }: WelcomeDialogProps) {
       return;
     }
     
+    // Clear any sample data that might exist
+    localStorage.removeItem("rupee-route-transactions");
+    localStorage.removeItem("rupee-route-accounts");
+    
     localStorage.setItem("rupee-route-user", name.trim());
     localStorage.setItem("rupee-route-pin", pin);
     

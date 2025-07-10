@@ -35,6 +35,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useTransactions } from "@/context/transactions-context";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 
 const paymentMethodIcons = {
   UPI: <Landmark className="h-4 w-4 text-muted-foreground" />,
@@ -44,7 +45,7 @@ const paymentMethodIcons = {
 
 export default function Dashboard() {
   const { transactions, addTransaction, deleteTransaction } = useTransactions();
-  const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
+  const [accounts, setAccounts] = useLocalStorage<Account[]>('rupee-route-accounts', initialAccounts);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [sheetDefaultType, setSheetDefaultType] = useState<'income' | 'expense' | undefined>(undefined);
   const [savingsGoal, setSavingsGoal] = useState(25000);
@@ -390,31 +391,37 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-4">
-                {accounts.map(account => (
-                  <li key={account.id} className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="font-medium">{account.name}</p>
-                      <p className="text-sm text-muted-foreground">{account.type}</p>
-                    </div>
-                    {isEditingAccounts ? (
-                       <div className="flex items-center gap-2">
-                        <IndianRupee className="h-4 w-4 text-muted-foreground" />
-                        <Input
-                          type="number"
-                          value={editedAccountBalances[account.id] || ''}
-                          onChange={(e) => handleAccountBalanceChange(account.id, e.target.value)}
-                          className="h-8 w-28 text-right font-mono"
-                        />
+              {accounts.length > 0 ? (
+                <ul className="space-y-4">
+                  {accounts.map(account => (
+                    <li key={account.id} className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="font-medium">{account.name}</p>
+                        <p className="text-sm text-muted-foreground">{account.type}</p>
                       </div>
-                    ) : (
-                      <div className="font-mono font-medium flex items-center">
-                        <IndianRupee className="h-4 w-4" />{account.balance.toLocaleString('en-IN')}
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
+                      {isEditingAccounts ? (
+                         <div className="flex items-center gap-2">
+                          <IndianRupee className="h-4 w-4 text-muted-foreground" />
+                          <Input
+                            type="number"
+                            value={editedAccountBalances[account.id] || ''}
+                            onChange={(e) => handleAccountBalanceChange(account.id, e.target.value)}
+                            className="h-8 w-28 text-right font-mono"
+                          />
+                        </div>
+                      ) : (
+                        <div className="font-mono font-medium flex items-center">
+                          <IndianRupee className="h-4 w-4" />{account.balance.toLocaleString('en-IN')}
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="h-24 text-center content-center text-muted-foreground">
+                  No accounts added yet.
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -428,5 +435,3 @@ export default function Dashboard() {
     </main>
   );
 }
-
-    

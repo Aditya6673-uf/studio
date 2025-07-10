@@ -8,6 +8,7 @@ import { initialAccounts } from "@/lib/data";
 import type { Account } from "@/lib/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { AddAccountDialog } from "@/components/add-account-dialog";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 
 const accountIcons = {
   Bank: <Landmark className="h-8 w-8 text-primary" />,
@@ -15,7 +16,7 @@ const accountIcons = {
 };
 
 export default function AccountsPage() {
-  const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
+  const [accounts, setAccounts] = useLocalStorage<Account[]>('rupee-route-accounts', initialAccounts);
   const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
   const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
 
@@ -54,22 +55,31 @@ export default function AccountsPage() {
             </CardContent>
           </Card>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {accounts.map(account => (
-              <Card key={account.id} className="flex flex-col">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-lg font-medium">{account.name}</CardTitle>
-                  {accountIcons[account.type]}
-                </CardHeader>
-                <CardContent className="flex-grow flex flex-col justify-end">
-                  <div className="text-sm text-muted-foreground">{account.type} Account</div>
-                  <div className="font-headline text-2xl font-bold flex items-center">
-                    <IndianRupee className="h-6 w-6" />{account.balance.toLocaleString('en-IN')}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {accounts.length > 0 ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {accounts.map(account => (
+                <Card key={account.id} className="flex flex-col">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-lg font-medium">{account.name}</CardTitle>
+                    {accountIcons[account.type]}
+                  </CardHeader>
+                  <CardContent className="flex-grow flex flex-col justify-end">
+                    <div className="text-sm text-muted-foreground">{account.type} Account</div>
+                    <div className="font-headline text-2xl font-bold flex items-center">
+                      <IndianRupee className="h-6 w-6" />{account.balance.toLocaleString('en-IN')}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="h-48 flex flex-col items-center justify-center text-center text-muted-foreground">
+                <p>No accounts added yet.</p>
+                <p className="text-sm">Click "Add Account" to get started.</p>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </main>
       <AddAccountDialog
