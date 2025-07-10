@@ -177,7 +177,7 @@ export default function Dashboard() {
         </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Monthly Income</CardTitle>
@@ -265,6 +265,31 @@ export default function Dashboard() {
             <p className="text-xs text-muted-foreground">Your financial health</p>
           </CardContent>
         </Card>
+        <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Monthly Savings Goal</CardTitle>
+            </CardHeader>
+            <CardContent>
+               <div className="mb-2 space-y-1">
+                <div className="flex gap-2">
+                  <Input
+                    id="savings-goal-input"
+                    type="number"
+                    placeholder="e.g. 25000"
+                    value={savingsInput}
+                    onChange={(e) => setSavingsInput(e.target.value)}
+                    className="h-8"
+                  />
+                  <Button onClick={handleSetSavingsGoal} size="sm" className="h-8">Set</Button>
+                </div>
+              </div>
+              <div className="mb-1 flex justify-between text-xs">
+                <span>Saved: <IndianRupee className="inline h-3 w-3" />{Math.max(0, netBalance).toLocaleString('en-IN')}</span>
+                <span>Goal: <IndianRupee className="inline h-3 w-3" />{savingsGoal.toLocaleString('en-IN')}</span>
+              </div>
+              <Progress value={savingsProgress} className="h-2"/>
+            </CardContent>
+          </Card>
       </div>
 
       <div className="mt-6 grid gap-6 md:grid-cols-5">
@@ -342,34 +367,6 @@ export default function Dashboard() {
 
         <div className="md:col-span-2 flex flex-col gap-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Monthly Savings Goal</CardTitle>
-            </CardHeader>
-            <CardContent>
-               <div className="mb-4 space-y-2">
-                <Label htmlFor="savings-goal-input">Set Your Monthly Savings Goal</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="savings-goal-input"
-                    type="number"
-                    placeholder="e.g. 25000"
-                    value={savingsInput}
-                    onChange={(e) => setSavingsInput(e.target.value)}
-                  />
-                  <Button onClick={handleSetSavingsGoal}>Set</Button>
-                </div>
-              </div>
-              <div className="mb-2 flex justify-between text-sm">
-                <span>Saved: <IndianRupee className="inline h-4 w-4" />{Math.max(0, netBalance).toLocaleString('en-IN')}</span>
-                <span>Goal: <IndianRupee className="inline h-4 w-4" />{savingsGoal.toLocaleString('en-IN')}</span>
-              </div>
-              <Progress value={savingsProgress} />
-              <p className="mt-2 text-xs text-muted-foreground">
-                {savingsProgress > 0 ? `${savingsProgress.toFixed(0)}% of your savings goal achieved.` : 'Set a savings goal to get started.'}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Accounts</CardTitle>
               <div className="flex items-center gap-1">
@@ -431,3 +428,5 @@ export default function Dashboard() {
     </main>
   );
 }
+
+    
