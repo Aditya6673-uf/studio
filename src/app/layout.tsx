@@ -32,6 +32,14 @@ export default function RootLayout({
     setUserExists(true); // Ensure userExists is updated after signup/login
   };
   
+  const handleLogout = () => {
+    localStorage.removeItem("rupee-route-pin");
+    localStorage.removeItem("rupee-route-user");
+    localStorage.removeItem("rupee-route-transactions");
+    localStorage.removeItem("favoriteCategories");
+    window.location.reload();
+  };
+
   const renderAuthScreen = () => {
     if (userExists === null) {
       // Still checking for user, render nothing or a loading spinner
@@ -69,7 +77,7 @@ export default function RootLayout({
               <SidebarInset>
                 <div className="flex h-full flex-col">
                   <header className="sticky top-0 z-10 flex h-16 items-center justify-end gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
-                    <UserNav />
+                    <UserNav onLogout={handleLogout} />
                   </header>
                   {children}
                 </div>

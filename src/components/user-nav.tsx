@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 
-export function UserNav() {
+export function UserNav({ onLogout }: { onLogout: () => void }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -38,7 +39,7 @@ export function UserNav() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={onLogout}>
           Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
