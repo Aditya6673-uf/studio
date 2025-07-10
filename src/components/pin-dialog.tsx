@@ -14,6 +14,17 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Fingerprint, IndianRupee } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type PinDialogProps = {
   onPinSuccess: () => void;
@@ -60,6 +71,7 @@ export function PinDialog({ onPinSuccess }: PinDialogProps) {
     }
     
     try {
+      // This is a simplified check. A real implementation would involve storing and verifying credentials.
       const publicKeyCredentialRequestOptions: PublicKeyCredentialRequestOptions = {
         challenge: new Uint8Array(16), 
         allowCredentials: [], 
@@ -89,6 +101,13 @@ export function PinDialog({ onPinSuccess }: PinDialogProps) {
     if (e.key === 'Enter') {
       handleUnlock();
     }
+  };
+
+  const handleResetApp = () => {
+    localStorage.removeItem("rupee-route-pin");
+    localStorage.removeItem("rupee-route-user");
+    localStorage.removeItem("favoriteCategories"); // Clear any other stored data
+    window.location.reload(); // Reload the page to trigger the setup flow
   };
 
   return (
@@ -124,8 +143,25 @@ export function PinDialog({ onPinSuccess }: PinDialogProps) {
           </Button>
           {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
         </div>
-        <DialogFooter>
+        <DialogFooter className="flex-col-reverse items-center justify-center space-y-2 space-y-reverse">
           <Button onClick={handleUnlock} className="w-full">Unlock with PIN</Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="link" size="sm" className="p-0 h-auto">Forgot PIN?</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Reset App?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. All your data, including accounts and transactions, will be permanently deleted. You will have to set up the app again.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleResetApp}>Reset App</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </DialogFooter>
       </DialogContent>
     </Dialog>
