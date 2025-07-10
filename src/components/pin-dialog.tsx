@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,16 +15,22 @@ import { Button } from "@/components/ui/button";
 import { Fingerprint, IndianRupee } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const CORRECT_PIN = "1234";
-
 type PinDialogProps = {
   onPinSuccess: () => void;
 };
 
 export function PinDialog({ onPinSuccess }: PinDialogProps) {
   const [pin, setPin] = useState("");
+  const [correctPin, setCorrectPin] = useState("");
   const [error, setError] = useState("");
   const { toast } = useToast();
+
+  useEffect(() => {
+    const storedPin = localStorage.getItem("rupee-route-pin");
+    if (storedPin) {
+      setCorrectPin(storedPin);
+    }
+  }, []);
 
   const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -35,7 +41,7 @@ export function PinDialog({ onPinSuccess }: PinDialogProps) {
   };
 
   const handleUnlock = () => {
-    if (pin === CORRECT_PIN) {
+    if (pin === correctPin) {
       onPinSuccess();
     } else {
       setError("Incorrect PIN. Please try again.");
@@ -54,19 +60,15 @@ export function PinDialog({ onPinSuccess }: PinDialogProps) {
     }
     
     try {
-      // In a real-world app, you would fetch a challenge from your server here.
-      // For this prototype, we use a static, simplified challenge.
       const publicKeyCredentialRequestOptions: PublicKeyCredentialRequestOptions = {
-        challenge: new Uint8Array(16), // Dummy challenge
-        allowCredentials: [], // In a real app, you would provide credential IDs
+        challenge: new Uint8Array(16), 
+        allowCredentials: [], 
         timeout: 60000,
         userVerification: 'preferred',
       };
       
-      // This will trigger the browser's biometric prompt (e.g., fingerprint, face ID)
       await navigator.credentials.get({ publicKey: publicKeyCredentialRequestOptions });
 
-      // If the above line doesn't throw an error, the user has successfully authenticated.
       toast({
         title: "Biometric Scan Successful",
         description: "Unlocking app...",

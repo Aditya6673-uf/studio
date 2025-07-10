@@ -8,8 +8,9 @@ import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarProvider }
 import { Logo } from '@/components/logo';
 import { MainNav } from '@/components/main-nav';
 import { UserNav } from '@/components/user-nav';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PinDialog } from '@/components/pin-dialog';
+import { WelcomeDialog } from '@/components/welcome-dialog';
 
 export default function RootLayout({
   children,
@@ -17,9 +18,30 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userExists, setUserExists] = useState<boolean | null>(null);
 
-  const handlePinSuccess = () => {
+  useEffect(() => {
+    // This effect runs only on the client, after hydration
+    const pin = localStorage.getItem('rupee-route-pin');
+    setUserExists(!!pin);
+  }, []);
+
+  const handleAuthSuccess = () => {
     setIsAuthenticated(true);
+    setUserExists(true); // Ensure userExists is updated after signup/login
+  };
+  
+  const renderAuthScreen = () => {
+    if (userExists === null) {
+      // Still checking for user, render nothing or a loading spinner
+      return null; 
+    }
+    
+    if (userExists) {
+      return <PinDialog onPinSuccess={handleAuthSuccess} />;
+    } else {
+      return <WelcomeDialog onSetupSuccess={handleAuthSuccess} />;
+    }
   };
 
   return (
@@ -31,7 +53,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased" suppressHydrationWarning>
         {!isAuthenticated ? (
-          <PinDialog onPinSuccess={handlePinSuccess} />
+          renderAuthScreen()
         ) : (
           <SidebarProvider>
             <Sidebar>
