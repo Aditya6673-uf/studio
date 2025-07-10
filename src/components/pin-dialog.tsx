@@ -12,7 +12,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { IndianRupee } from "lucide-react";
+import { Fingerprint, IndianRupee } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const CORRECT_PIN = "1234";
 
@@ -23,6 +24,7 @@ type PinDialogProps = {
 export function PinDialog({ onPinSuccess }: PinDialogProps) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
+  const { toast } = useToast();
 
   const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -38,6 +40,33 @@ export function PinDialog({ onPinSuccess }: PinDialogProps) {
     } else {
       setError("Incorrect PIN. Please try again.");
       setPin("");
+    }
+  };
+
+  const handleBiometricUnlock = async () => {
+    if (typeof window.PublicKeyCredential === 'undefined') {
+       toast({
+        variant: "destructive",
+        title: "Biometrics Not Supported",
+        description: "Your browser does not support biometric authentication.",
+      });
+      return;
+    }
+    
+    try {
+      // In a real app, you would use navigator.credentials.get() to verify a credential
+      // For this prototype, we'll simulate a successful check
+      toast({
+        title: "Biometric Scan Simulated",
+        description: "Unlocking app...",
+      });
+      setTimeout(onPinSuccess, 1000);
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Biometric Failed",
+        description: "Could not verify your identity. Please use your PIN.",
+      });
     }
   };
 
@@ -63,7 +92,7 @@ export function PinDialog({ onPinSuccess }: PinDialogProps) {
             Unlock RupeeRoute to manage your finances.
           </DialogDescription>
         </DialogHeader>
-        <div className="py-4">
+        <div className="py-4 space-y-4">
           <Input
             type="password"
             value={pin}
@@ -74,10 +103,14 @@ export function PinDialog({ onPinSuccess }: PinDialogProps) {
             className="text-center text-2xl font-mono tracking-[0.5em] h-12"
             autoFocus
           />
+           <Button variant="outline" className="w-full" onClick={handleBiometricUnlock}>
+            <Fingerprint className="mr-2 h-4 w-4" />
+            Use Biometrics
+          </Button>
           {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
         </div>
         <DialogFooter>
-          <Button onClick={handleUnlock} className="w-full">Unlock</Button>
+          <Button onClick={handleUnlock} className="w-full">Unlock with PIN</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
