@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import React from "react"
+import React, { useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -55,7 +55,7 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      type: defaultType || "expense",
+      type: "expense",
       amount: undefined,
       date: new Date(),
       paymentMethod: "UPI",
@@ -69,7 +69,7 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
   const watchedType = form.watch("type");
   const watchedCategory = form.watch("category");
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       form.reset({
         type: defaultType || 'expense',
@@ -81,6 +81,13 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
       });
     }
   }, [isOpen, defaultType, form]);
+  
+  useEffect(() => {
+    if (defaultType) {
+      form.setValue('type', defaultType);
+    }
+  }, [defaultType, form]);
+
 
   React.useEffect(() => {
     form.resetField("category", { defaultValue: "" });
@@ -236,11 +243,11 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
                         mode="single"
                         selected={field.value}
                         onSelect={(date) => {
-                          field.onChange(date)
+                          if (date) field.onChange(date)
                           setIsCalendarOpen(false)
                         }}
                         onDayDoubleClick={(date) => {
-                          field.onChange(date)
+                          if (date) field.onChange(date)
                           setIsCalendarOpen(false)
                         }}
                         disabled={(date) =>
