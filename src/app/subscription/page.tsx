@@ -12,9 +12,7 @@ const plans = [
     price: "₹0",
     period: "",
     features: [
-      "Track income & expenses",
-      "Set savings goals",
-      "Basic reporting",
+      "Supported by ads",
     ],
     buttonText: "Current Plan",
     buttonVariant: "outline",
