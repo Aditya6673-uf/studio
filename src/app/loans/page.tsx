@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -6,15 +7,26 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { HandCoins, PlusCircle } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { AddLoanDialog } from "@/components/add-loan-dialog";
+import type { Loan } from "@/lib/types";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 
-export default function LoansPage() {
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-
-  // Placeholder data
-  const loans = [
+const initialLoans: Loan[] = [
     { id: '1', name: 'Car Loan', principal: 500000, paid: 120000, interestRate: 8.5 },
     { id: '2', name: 'Personal Loan', principal: 100000, paid: 100000, interestRate: 12.0 },
-  ];
+];
+
+export default function LoansPage() {
+  const [loans, setLoans] = useLocalStorage<Loan[]>('rupee-route-loans', initialLoans);
+  const [isAddLoanOpen, setIsAddLoanOpen] = useState(false);
+
+  const handleAddLoan = (loanData: Omit<Loan, 'id'>) => {
+    const newLoan: Loan = {
+      ...loanData,
+      id: new Date().getTime().toString(),
+    };
+    setLoans(prev => [...prev, newLoan]);
+  };
 
   return (
     <>
@@ -27,7 +39,7 @@ export default function LoansPage() {
                 <h1 className="font-headline text-3xl font-bold">Loans</h1>
             </div>
           </div>
-          <Button onClick={() => setIsSheetOpen(true)} disabled>
+          <Button onClick={() => setIsAddLoanOpen(true)}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Loan
           </Button>
@@ -53,8 +65,8 @@ export default function LoansPage() {
                   loans.map(loan => (
                     <TableRow key={loan.id}>
                       <TableCell className="font-medium">{loan.name}</TableCell>
-                      <TableCell>{loan.principal.toLocaleString('en-IN')}</TableCell>
-                      <TableCell>{loan.paid.toLocaleString('en-IN')}</TableCell>
+                      <TableCell>₹{loan.principal.toLocaleString('en-IN')}</TableCell>
+                      <TableCell>₹{loan.paid.toLocaleString('en-IN')}</TableCell>
                       <TableCell>{loan.interestRate.toFixed(2)}%</TableCell>
                     </TableRow>
                   ))
@@ -70,7 +82,11 @@ export default function LoansPage() {
           </CardContent>
         </Card>
       </main>
-      {/* A dialog/sheet for adding loans would be needed here */}
+      <AddLoanDialog
+        isOpen={isAddLoanOpen}
+        setIsOpen={setIsAddLoanOpen}
+        onAddLoan={handleAddLoan}
+      />
     </>
   );
 }
