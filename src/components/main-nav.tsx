@@ -19,7 +19,6 @@ const navItems = [
   { href: '/loans', label: 'Loans', icon: HandCoins },
   { href: '/auto-credit', label: 'Auto Credit', icon: PiggyBank },
   { href: '/subscription', label: 'Subscription', icon: Crown },
-  { href: '/profile', label: 'Profile', icon: User },
 ];
 
 export function MainNav() {
