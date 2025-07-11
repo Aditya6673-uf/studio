@@ -25,11 +25,7 @@ const plans = [
     price: "₹29",
     period: "/ month",
     features: [
-      "All Free features",
       "Ad-free experience",
-      "Advanced reporting & export",
-      "SMS transaction import",
-      "Loan & auto-credit tracking",
     ],
     buttonText: "Choose Plan",
     buttonVariant: "default",
