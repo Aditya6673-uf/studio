@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/dialog";
 import { useTransactions } from "@/context/transactions-context";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { AdBanner } from "@/components/ad-banner";
 
 const paymentMethodIcons = {
   UPI: <Landmark className="h-4 w-4 text-muted-foreground" />,
@@ -419,6 +420,9 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+      </div>
+      <div className="mt-6">
+        <AdBanner />
       </div>
       <AddTransactionSheet
         isOpen={isSheetOpen}
