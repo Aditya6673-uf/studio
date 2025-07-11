@@ -13,8 +13,8 @@ import { useLocalStorage } from "@/hooks/use-local-storage";
 import { format } from "date-fns";
 
 const initialLoans: Loan[] = [
-    { id: '1', name: 'Car Loan', principal: 500000, paid: 120000, interestRate: 8.5, startDate: new Date('2022-08-01'), term: 5 },
-    { id: '2', name: 'Personal Loan', principal: 100000, paid: 100000, interestRate: 12.0, startDate: new Date('2023-01-15'), term: 1 },
+    { id: '1', name: 'Car Loan', principal: 500000, paid: 120000, interestRate: 8.5, startDate: new Date('2022-08-01').toISOString(), term: 5 },
+    { id: '2', name: 'Personal Loan', principal: 100000, paid: 100000, interestRate: 12.0, startDate: new Date('2023-01-15').toISOString(), term: 1 },
 ];
 
 export default function LoansPage() {
@@ -25,6 +25,8 @@ export default function LoansPage() {
     const newLoan: Loan = {
       ...loanData,
       id: new Date().getTime().toString(),
+      // Ensure date is stored as a string for consistent serialization
+      startDate: loanData.startDate instanceof Date ? loanData.startDate.toISOString() : loanData.startDate,
     };
     setLoans(prev => [...prev, newLoan]);
   };
@@ -65,16 +67,22 @@ export default function LoansPage() {
               </TableHeader>
               <TableBody>
                 {loans.length > 0 ? (
-                  loans.map(loan => (
-                    <TableRow key={loan.id}>
-                      <TableCell className="font-medium">{loan.name}</TableCell>
-                      <TableCell>₹{loan.principal.toLocaleString('en-IN')}</TableCell>
-                      <TableCell>₹{loan.paid.toLocaleString('en-IN')}</TableCell>
-                      <TableCell>{loan.interestRate.toFixed(2)}%</TableCell>
-                       <TableCell>{format(new Date(loan.startDate), 'dd MMM, yyyy')}</TableCell>
-                      <TableCell>{loan.term} years</TableCell>
-                    </TableRow>
-                  ))
+                  loans.map(loan => {
+                    // Ensure startDate is a valid Date object before formatting
+                    const startDate = loan.startDate ? new Date(loan.startDate) : null;
+                    const isValidDate = startDate && !isNaN(startDate.getTime());
+
+                    return (
+                      <TableRow key={loan.id}>
+                        <TableCell className="font-medium">{loan.name}</TableCell>
+                        <TableCell>₹{loan.principal.toLocaleString('en-IN')}</TableCell>
+                        <TableCell>₹{loan.paid.toLocaleString('en-IN')}</TableCell>
+                        <TableCell>{loan.interestRate.toFixed(2)}%</TableCell>
+                        <TableCell>{isValidDate ? format(startDate, 'dd MMM, yyyy') : 'N/A'}</TableCell>
+                        <TableCell>{loan.term} years</TableCell>
+                      </TableRow>
+                    );
+                  })
                 ) : (
                   <TableRow>
                     <TableCell colSpan={6} className="h-24 text-center">
