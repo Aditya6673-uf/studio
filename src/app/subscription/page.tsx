@@ -36,10 +36,8 @@ const plans = [
     price: "₹149",
     period: "/ 6 months",
     features: [
-      "All Pro features",
       "Ad-free experience",
       "Save ~15% vs monthly",
-      "Priority support",
     ],
     buttonText: "Choose Plan",
     buttonVariant: "default",
