@@ -23,4 +23,6 @@ export type Loan = {
   principal: number;
   paid: number;
   interestRate: number;
+  startDate: Date | string;
+  term: number; // in years
 };

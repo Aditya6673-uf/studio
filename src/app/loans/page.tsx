@@ -10,10 +10,11 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { AddLoanDialog } from "@/components/add-loan-dialog";
 import type { Loan } from "@/lib/types";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { format } from "date-fns";
 
 const initialLoans: Loan[] = [
-    { id: '1', name: 'Car Loan', principal: 500000, paid: 120000, interestRate: 8.5 },
-    { id: '2', name: 'Personal Loan', principal: 100000, paid: 100000, interestRate: 12.0 },
+    { id: '1', name: 'Car Loan', principal: 500000, paid: 120000, interestRate: 8.5, startDate: new Date('2022-08-01'), term: 5 },
+    { id: '2', name: 'Personal Loan', principal: 100000, paid: 100000, interestRate: 12.0, startDate: new Date('2023-01-15'), term: 1 },
 ];
 
 export default function LoansPage() {
@@ -58,6 +59,8 @@ export default function LoansPage() {
                   <TableHead>Principal</TableHead>
                   <TableHead>Amount Paid</TableHead>
                   <TableHead>Interest Rate</TableHead>
+                  <TableHead>Start Date</TableHead>
+                  <TableHead>Term</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -68,11 +71,13 @@ export default function LoansPage() {
                       <TableCell>₹{loan.principal.toLocaleString('en-IN')}</TableCell>
                       <TableCell>₹{loan.paid.toLocaleString('en-IN')}</TableCell>
                       <TableCell>{loan.interestRate.toFixed(2)}%</TableCell>
+                       <TableCell>{format(new Date(loan.startDate), 'dd MMM, yyyy')}</TableCell>
+                      <TableCell>{loan.term} years</TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
+                    <TableCell colSpan={6} className="h-24 text-center">
                       No loans added yet.
                     </TableCell>
                   </TableRow>
