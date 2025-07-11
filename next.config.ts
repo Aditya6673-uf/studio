@@ -18,13 +18,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  experimental: {
-    // This is to allow the Next.js dev server to be accessed from the
-    // cloud workstation's proxy.
-    allowedDevOrigins: [
-      'https://*.cluster-ancjwrkgr5dvux4qug5rbzyc2y.cloudworkstations.dev',
-    ],
-  },
 };
 
 export default nextConfig;
