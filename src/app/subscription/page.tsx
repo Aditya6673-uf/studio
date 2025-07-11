@@ -26,6 +26,7 @@ const plans = [
     period: "/ month",
     features: [
       "All Free features",
+      "Ad-free experience",
       "Advanced reporting & export",
       "SMS transaction import",
       "Loan & auto-credit tracking",
@@ -40,6 +41,7 @@ const plans = [
     period: "/ 6 months",
     features: [
       "All Pro features",
+      "Ad-free experience",
       "Save ~15% vs monthly",
       "Priority support",
     ],
@@ -53,6 +55,7 @@ const plans = [
     period: "/ year",
     features: [
       "All Pro features",
+      "Ad-free experience",
       "Save ~20% vs monthly",
       "Priority support",
       "Early access to new features",
