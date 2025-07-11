@@ -26,3 +26,11 @@ export type Loan = {
   startDate: Date | string;
   term: number; // in years
 };
+
+export type AutoCredit = {
+  id: string;
+  name: string;
+  amount: number;
+  frequency: 'Monthly' | 'Quarterly' | 'Yearly' | 'One-Time';
+  nextDate: Date | string;
+};

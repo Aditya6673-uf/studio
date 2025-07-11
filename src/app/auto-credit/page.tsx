@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -6,15 +7,29 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PiggyBank, PlusCircle } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import type { AutoCredit } from "@/lib/types";
+import { useLocalStorage } from "@/hooks/use-local-storage";
+import { AddAutoCreditDialog } from "@/components/add-autocredit-dialog";
+import { format } from "date-fns";
+
+const initialAutoCredits: AutoCredit[] = [
+    { id: '1', name: 'Mutual Fund SIP', amount: 5000, frequency: 'Monthly', nextDate: new Date('2024-08-05').toISOString() },
+    { id: '2', name: 'Rent Payment', amount: 15000, frequency: 'Monthly', nextDate: new Date('2024-08-01').toISOString() },
+];
+
 
 export default function AutoCreditPage() {
+  const [autoCredits, setAutoCredits] = useLocalStorage<AutoCredit[]>('rupee-route-autocredits', initialAutoCredits);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  // Placeholder data
-  const autoCredits = [
-    { id: '1', name: 'Mutual Fund SIP', amount: 5000, frequency: 'Monthly', nextDate: '2024-08-05' },
-    { id: '2', name: 'Rent Payment', amount: 15000, frequency: 'Monthly', nextDate: '2024-08-01' },
-  ];
+  const handleAddAutoCredit = (data: Omit<AutoCredit, 'id'>) => {
+    const newAutoCredit: AutoCredit = {
+        ...data,
+        id: new Date().getTime().toString(),
+        nextDate: data.nextDate instanceof Date ? data.nextDate.toISOString() : data.nextDate,
+    };
+    setAutoCredits(prev => [...prev, newAutoCredit]);
+  };
 
   return (
     <>
@@ -27,7 +42,7 @@ export default function AutoCreditPage() {
                 <h1 className="font-headline text-3xl font-bold">Auto Credit</h1>
             </div>
           </div>
-           <Button onClick={() => setIsSheetOpen(true)} disabled>
+           <Button onClick={() => setIsSheetOpen(true)}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Auto Credit
           </Button>
@@ -50,14 +65,18 @@ export default function AutoCreditPage() {
               </TableHeader>
               <TableBody>
                 {autoCredits.length > 0 ? (
-                  autoCredits.map(item => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium">{item.name}</TableCell>
-                      <TableCell>{item.amount.toLocaleString('en-IN')}</TableCell>
-                      <TableCell>{item.frequency}</TableCell>
-                      <TableCell>{item.nextDate}</TableCell>
-                    </TableRow>
-                  ))
+                  autoCredits.map(item => {
+                    const nextDate = item.nextDate ? new Date(item.nextDate) : null;
+                    const isValidDate = nextDate && !isNaN(nextDate.getTime());
+                    return (
+                        <TableRow key={item.id}>
+                        <TableCell className="font-medium">{item.name}</TableCell>
+                        <TableCell>₹{item.amount.toLocaleString('en-IN')}</TableCell>
+                        <TableCell>{item.frequency}</TableCell>
+                        <TableCell>{isValidDate ? format(nextDate, 'dd MMM, yyyy') : 'N/A'}</TableCell>
+                        </TableRow>
+                    );
+                  })
                 ) : (
                   <TableRow>
                     <TableCell colSpan={4} className="h-24 text-center">
@@ -70,7 +89,11 @@ export default function AutoCreditPage() {
           </CardContent>
         </Card>
       </main>
-       {/* A dialog/sheet for adding auto-credits would be needed here */}
+      <AddAutoCreditDialog
+        isOpen={isSheetOpen}
+        setIsOpen={setIsSheetOpen}
+        onAddAutoCredit={handleAddAutoCredit}
+      />
     </>
   );
 }
