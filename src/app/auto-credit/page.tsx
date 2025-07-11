@@ -11,6 +11,7 @@ import type { AutoCredit } from "@/lib/types";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { AddAutoCreditDialog } from "@/components/add-autocredit-dialog";
 import { format } from "date-fns";
+import { AdBanner } from "@/components/ad-banner";
 
 const initialAutoCredits: AutoCredit[] = [
     { id: '1', name: 'Mutual Fund SIP', amount: 5000, frequency: 'Monthly', nextDate: new Date('2024-08-05').toISOString() },
@@ -88,6 +89,9 @@ export default function AutoCreditPage() {
             </Table>
           </CardContent>
         </Card>
+        <div className="mt-6">
+          <AdBanner />
+        </div>
       </main>
       <AddAutoCreditDialog
         isOpen={isSheetOpen}

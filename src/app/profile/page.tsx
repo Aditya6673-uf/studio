@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Camera, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { AdBanner } from '@/components/ad-banner';
 
 export default function ProfilePage() {
   const [avatarSrc, setAvatarSrc] = useState("");
@@ -48,8 +49,8 @@ export default function ProfilePage() {
         <SidebarTrigger className="md:hidden" />
         <h1 className="font-headline text-3xl font-bold">Profile</h1>
       </div>
-      <div className="flex justify-center">
-        <Card className="w-full max-w-lg">
+      <div className="grid gap-6">
+        <Card className="w-full max-w-lg mx-auto">
           <CardHeader className="items-center text-center">
             <div className="relative group mb-4">
               <Avatar className="h-24 w-24">
@@ -104,6 +105,9 @@ export default function ProfilePage() {
             <Button className="w-full" onClick={handleSaveChanges}>Save Changes</Button>
           </CardFooter>
         </Card>
+        <div className="mt-6">
+            <AdBanner/>
+        </div>
       </div>
     </main>
   );

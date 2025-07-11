@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { CheckCircle } from "lucide-react";
+import { AdBanner } from "@/components/ad-banner";
 
 const plans = [
   {
@@ -89,6 +90,9 @@ export default function SubscriptionPage() {
             </div>
           </Card>
         ))}
+      </div>
+      <div className="mt-8">
+        <AdBanner />
       </div>
     </main>
   );

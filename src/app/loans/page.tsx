@@ -11,6 +11,7 @@ import { AddLoanDialog } from "@/components/add-loan-dialog";
 import type { Loan } from "@/lib/types";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { format } from "date-fns";
+import { AdBanner } from "@/components/ad-banner";
 
 const initialLoans: Loan[] = [
     { id: '1', name: 'Car Loan', principal: 500000, paid: 120000, interestRate: 8.5, startDate: new Date('2022-08-01').toISOString(), term: 5 },
@@ -94,6 +95,9 @@ export default function LoansPage() {
             </Table>
           </CardContent>
         </Card>
+        <div className="mt-6">
+          <AdBanner />
+        </div>
       </main>
       <AddLoanDialog
         isOpen={isAddLoanOpen}
