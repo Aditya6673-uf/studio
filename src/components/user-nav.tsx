@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { Crown } from "lucide-react";
 
 export function UserNav({ onLogout }: { onLogout: () => void }) {
   return (
@@ -36,6 +37,12 @@ export function UserNav({ onLogout }: { onLogout: () => void }) {
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
             <Link href="/profile">Profile</Link>
+          </DropdownMenuItem>
+           <DropdownMenuItem asChild>
+            <Link href="/subscription">
+              <Crown className="mr-2 h-4 w-4" />
+              <span>Subscription</span>
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
