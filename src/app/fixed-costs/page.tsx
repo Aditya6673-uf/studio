@@ -58,7 +58,7 @@ export default function FixedCostsPage() {
   };
 
   const isAllSelected = selectedRowIds.length > 0 && selectedRowIds.length === fixedCostTransactions.length;
-  const isSomeSelected = selectedRowIds.length > 0 && selectedRowIds.length < fixedCostTransactions.length;
+  const isSomeSelected = selectedRowIds.length > 0 && fixedCostTransactions.length > 0 && !isAllSelected;
 
   return (
     <>
@@ -116,10 +116,9 @@ export default function FixedCostsPage() {
                 <TableRow>
                   <TableHead className="w-[50px]">
                     <Checkbox
-                      checked={isAllSelected}
-                      onCheckedChange={handleSelectAll}
+                      checked={isAllSelected || isSomeSelected}
+                      onCheckedChange={(checked) => handleSelectAll(!!checked)}
                       aria-label="Select all rows"
-                      indeterminate={isSomeSelected.toString()}
                     />
                   </TableHead>
                   <TableHead>Category</TableHead>
