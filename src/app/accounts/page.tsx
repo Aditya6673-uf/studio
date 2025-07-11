@@ -9,6 +9,7 @@ import type { Account } from "@/lib/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { AddAccountDialog } from "@/components/add-account-dialog";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { AdBanner } from "@/components/ad-banner";
 
 const accountIcons = {
   Bank: <Landmark className="h-8 w-8 text-primary" />,
@@ -80,6 +81,9 @@ export default function AccountsPage() {
               </CardContent>
             </Card>
           )}
+        </div>
+        <div className="mt-6">
+          <AdBanner />
         </div>
       </main>
       <AddAccountDialog
