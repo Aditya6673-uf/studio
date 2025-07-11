@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useTransactions } from "@/context/transactions-context";
 import { Separator } from "@/components/ui/separator";
+import { AdBanner } from "@/components/ad-banner";
 
 interface MonthlySummary {
   transactions: Transaction[];
@@ -185,6 +186,10 @@ export default function AllTransactionsPage() {
             )}
           </CardContent>
         </Card>
+
+        <div className="mt-6">
+          <AdBanner />
+        </div>
       </main>
       <AddTransactionSheet
         isOpen={isSheetOpen}
