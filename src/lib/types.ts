@@ -34,3 +34,16 @@ export type AutoCredit = {
   frequency: 'Monthly' | 'Quarterly' | 'Yearly' | 'One-Time';
   nextDate: Date | string;
 };
+
+export type MutualFund = {
+    id: string;
+    name: string;
+    category: 'Equity' | 'Debt' | 'Hybrid';
+    nav: number;
+    returns: {
+        oneYear: number;
+        threeYear: number;
+        fiveYear: number;
+    };
+    risk: 'Low' | 'Moderate' | 'High' | 'Very High';
+};
