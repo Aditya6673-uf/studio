@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Building2, PlusCircle, HandCoins } from "lucide-react";
+import { Building2, PlusCircle, HandCoins, Trash2 } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import type { RealEstate } from "@/lib/types";
 import { AddRealEstateDialog } from "@/components/add-real-estate-dialog";
@@ -15,6 +15,17 @@ import { format } from "date-fns";
 import { AdBanner } from "@/components/ad-banner";
 import { useSubscription } from "@/context/subscription-context";
 import { useTransactions } from "@/context/transactions-context";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const initialRealEstate: RealEstate[] = [
     { id: '1', name: '2BHK Apartment', type: 'Residential', location: 'Mumbai, MH', currentValue: 15000000, purchaseDate: new Date('2020-05-10').toISOString() },
@@ -56,6 +67,10 @@ export default function RealEstatePage() {
     });
     
     setPropertyToSell(null);
+  };
+
+  const handleDeleteProperty = (propertyId: string) => {
+    setProperties(prev => prev.filter(p => p.id !== propertyId));
   };
 
   const totalValue = properties.reduce((sum, prop) => sum + prop.currentValue, 0);
@@ -100,6 +115,7 @@ export default function RealEstatePage() {
                   <TableHead>Current Value</TableHead>
                   <TableHead>Purchase Date</TableHead>
                   <TableHead className="text-right">Sale Details / Action</TableHead>
+                  <TableHead className="w-[50px]"><span className="sr-only">Actions</span></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -131,12 +147,40 @@ export default function RealEstatePage() {
                             </Button>
                           )}
                         </TableCell>
+                         <TableCell>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Delete property</span>
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete this property record.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteProperty(property.id)}>
+                                  Continue
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </TableCell>
                       </TableRow>
                     );
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
+                    <TableCell colSpan={5} className="h-24 text-center">
                       No properties added yet.
                     </TableCell>
                   </TableRow>
