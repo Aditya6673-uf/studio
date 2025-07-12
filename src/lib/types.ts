@@ -64,3 +64,12 @@ export type Insurance = {
   coverage: number;
   nextDueDate: Date | string;
 };
+
+export type RealEstate = {
+  id: string;
+  name: string;
+  type: 'Residential' | 'Commercial' | 'Land';
+  location: string;
+  currentValue: number;
+  purchaseDate: Date | string;
+};
