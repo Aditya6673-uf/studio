@@ -112,7 +112,6 @@ export default function SubscriptionPage() {
                 <span className="block mt-1 text-muted-foreground">Expires on: {format(new Date(subscriptionInfo.endDate), 'dd MMM, yyyy')}</span>
               )}
             </p>
-            <Button onClick={handleCancelSubscription} variant="destructive" size="sm" className="mt-4">Cancel Subscription</Button>
           </CardContent>
         </Card>
       )}
