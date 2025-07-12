@@ -18,6 +18,7 @@ interface TransactionsContextType {
   addHolding: (amount: number, fund: MutualFund) => void;
   autoCredits: AutoCredit[];
   addAutoCredit: (autoCredit: AutoCreditInput) => void;
+  addScheduledTransaction: (payload: { transaction: TransactionInput, autoCredit: AutoCreditInput }) => void;
 }
 
 const TransactionsContext = createContext<TransactionsContextType | undefined>(undefined);
@@ -76,8 +77,13 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
     setAutoCredits(prev => [...prev, newAutoCredit]);
   };
 
+  const addScheduledTransaction = ({ transaction, autoCredit }: { transaction: TransactionInput, autoCredit: AutoCreditInput }) => {
+    addTransaction(transaction);
+    addAutoCredit(autoCredit);
+  };
+
   return (
-    <TransactionsContext.Provider value={{ transactions, addTransaction, deleteTransaction, holdings, addHolding, autoCredits, addAutoCredit }}>
+    <TransactionsContext.Provider value={{ transactions, addTransaction, deleteTransaction, holdings, addHolding, autoCredits, addAutoCredit, addScheduledTransaction }}>
       {children}
     </TransactionsContext.Provider>
   );

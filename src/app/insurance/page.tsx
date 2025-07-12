@@ -12,6 +12,7 @@ import type { Insurance } from "@/lib/types";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { format } from "date-fns";
 import { AdBanner } from "@/components/ad-banner";
+import { useTransactions } from "@/context/transactions-context";
 
 const initialInsurances: Insurance[] = [
     { id: '1', provider: 'HDFC Ergo', policyName: 'Optima Restore', type: 'Health', premium: 12000, coverage: 500000, nextDueDate: new Date('2025-08-15').toISOString() },
@@ -21,6 +22,7 @@ const initialInsurances: Insurance[] = [
 export default function InsurancePage() {
   const [insurances, setInsurances] = useLocalStorage<Insurance[]>('rupee-route-insurances', initialInsurances);
   const [isAddInsuranceOpen, setIsAddInsuranceOpen] = useState(false);
+  const { addScheduledTransaction } = useTransactions();
 
   const handleAddInsurance = (insuranceData: Omit<Insurance, 'id'>) => {
     const newInsurance: Insurance = {
@@ -29,6 +31,23 @@ export default function InsurancePage() {
       nextDueDate: insuranceData.nextDueDate instanceof Date ? insuranceData.nextDueDate.toISOString() : insuranceData.nextDueDate,
     };
     setInsurances(prev => [...prev, newInsurance]);
+
+    addScheduledTransaction({
+        transaction: {
+            type: 'expense',
+            amount: insuranceData.premium,
+            category: 'Insurance',
+            date: insuranceData.nextDueDate,
+            paymentMethod: 'Card', // Defaulting to Card, can be changed later
+            notes: `${insuranceData.policyName} Premium`
+        },
+        autoCredit: {
+            name: `${insuranceData.policyName} Premium`,
+            amount: insuranceData.premium,
+            frequency: 'Monthly',
+            nextDate: insuranceData.nextDueDate,
+        }
+    });
   };
 
   return (
