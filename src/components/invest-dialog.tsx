@@ -31,18 +31,20 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { Calendar } from "./ui/calendar"
+import { Switch } from "@/components/ui/switch"
 
 
 const formSchema = z.object({
   amount: z.coerce.number().positive({ message: "Investment amount must be positive." }).min(100, { message: "Minimum investment is ₹100." }),
   date: z.date({ required_error: "Please select a date." }),
+  isSip: z.boolean().default(false),
 })
 
 type InvestDialogProps = {
   isOpen: boolean
   setIsOpen: (isOpen: boolean) => void
   fund: MutualFund
-  onConfirmInvestment: (amount: number, date: Date, fund: MutualFund) => void
+  onConfirmInvestment: (amount: number, date: Date, fund: MutualFund, isSip: boolean) => void
 }
 
 export function InvestDialog({ isOpen, setIsOpen, fund, onConfirmInvestment }: InvestDialogProps) {
@@ -50,6 +52,7 @@ export function InvestDialog({ isOpen, setIsOpen, fund, onConfirmInvestment }: I
   const [step, setStep] = useState<'amount' | 'payment'>('amount');
   const [investmentAmount, setInvestmentAmount] = useState(0);
   const [investmentDate, setInvestmentDate] = useState<Date>(new Date());
+  const [isSip, setIsSip] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -57,6 +60,7 @@ export function InvestDialog({ isOpen, setIsOpen, fund, onConfirmInvestment }: I
     defaultValues: {
       amount: undefined,
       date: new Date(),
+      isSip: false,
     },
   });
 
@@ -66,7 +70,7 @@ export function InvestDialog({ isOpen, setIsOpen, fund, onConfirmInvestment }: I
   React.useEffect(() => {
     if (isOpen) {
       // Reset state when dialog opens
-      form.reset({ amount: undefined, date: new Date() });
+      form.reset({ amount: undefined, date: new Date(), isSip: false });
       setStep('amount');
       setInvestmentAmount(0);
     }
@@ -75,11 +79,12 @@ export function InvestDialog({ isOpen, setIsOpen, fund, onConfirmInvestment }: I
   function handleAmountSubmit(values: z.infer<typeof formSchema>) {
     setInvestmentAmount(values.amount);
     setInvestmentDate(values.date);
+    setIsSip(values.isSip);
     setStep('payment');
   }
 
   function handleConfirmPayment() {
-    onConfirmInvestment(investmentAmount, investmentDate, fund);
+    onConfirmInvestment(investmentAmount, investmentDate, fund, isSip);
     toast({
         title: "Investment Successful!",
         description: `You have invested ₹${investmentAmount.toLocaleString('en-IN')} in ${fund.name}.`,
@@ -180,6 +185,27 @@ export function InvestDialog({ isOpen, setIsOpen, fund, onConfirmInvestment }: I
                             </PopoverContent>
                           </Popover>
                           <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="isSip"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <div className="space-y-0.5">
+                            <FormLabel>Set up monthly SIP</FormLabel>
+                            <DialogDescription className="text-xs">
+                              Automatically schedule this investment for every month.
+                            </DialogDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
                         </FormItem>
                       )}
                     />

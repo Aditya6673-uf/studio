@@ -8,29 +8,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { PiggyBank, PlusCircle } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import type { AutoCredit } from "@/lib/types";
-import { useLocalStorage } from "@/hooks/use-local-storage";
 import { AddAutoCreditDialog } from "@/components/add-autocredit-dialog";
 import { format } from "date-fns";
 import { AdBanner } from "@/components/ad-banner";
-
-const initialAutoCredits: AutoCredit[] = [
-    { id: '1', name: 'Mutual Fund SIP', amount: 5000, frequency: 'Monthly', nextDate: new Date('2024-08-05').toISOString() },
-    { id: '2', name: 'Rent Payment', amount: 15000, frequency: 'Monthly', nextDate: new Date('2024-08-01').toISOString() },
-];
-
+import { useTransactions } from "@/context/transactions-context";
 
 export default function AutoCreditPage() {
-  const [autoCredits, setAutoCredits] = useLocalStorage<AutoCredit[]>('rupee-route-autocredits', initialAutoCredits);
+  const { autoCredits, addAutoCredit } = useTransactions();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-
-  const handleAddAutoCredit = (data: Omit<AutoCredit, 'id'>) => {
-    const newAutoCredit: AutoCredit = {
-        ...data,
-        id: new Date().getTime().toString(),
-        nextDate: data.nextDate instanceof Date ? data.nextDate.toISOString() : data.nextDate,
-    };
-    setAutoCredits(prev => [...prev, newAutoCredit]);
-  };
 
   return (
     <>
@@ -96,7 +81,7 @@ export default function AutoCreditPage() {
       <AddAutoCreditDialog
         isOpen={isSheetOpen}
         setIsOpen={setIsSheetOpen}
-        onAddAutoCredit={handleAddAutoCredit}
+        onAddAutoCredit={addAutoCredit}
       />
     </>
   );

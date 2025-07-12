@@ -33,11 +33,6 @@ const riskColorMap = {
     'Very High': 'bg-red-100 text-red-800',
 };
 
-const initialAutoCredits: AutoCredit[] = [
-    { id: '1', name: 'Mutual Fund SIP', amount: 5000, frequency: 'Monthly', nextDate: new Date('2024-08-05').toISOString() },
-    { id: '2', name: 'Rent Payment', amount: 15000, frequency: 'Monthly', nextDate: new Date('2024-08-01').toISOString() },
-];
-
 type ReturnPeriod = 'oneYear' | 'threeYear' | 'fiveYear';
 
 const returnPeriodLabels: Record<ReturnPeriod, string> = {
@@ -48,14 +43,13 @@ const returnPeriodLabels: Record<ReturnPeriod, string> = {
 
 export default function MutualFundsPage() {
   const [funds, setFunds] = useLocalStorage<MutualFund[]>('rupee-route-mutual-funds', initialMutualFunds);
-  const [autoCredits] = useLocalStorage<AutoCredit[]>('rupee-route-autocredits', initialAutoCredits);
   const [selectedFund, setSelectedFund] = useState<MutualFund | null>(null);
   const [selectedHolding, setSelectedHolding] = useState<HoldingDetails | null>(null);
   const [isInvestDialogOpen, setIsInvestDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [returnPeriod, setReturnPeriod] = useState<ReturnPeriod>('oneYear');
-  const { transactions, addTransaction, holdings, addHolding } = useTransactions();
+  const { transactions, addTransaction, holdings, addHolding, autoCredits, addAutoCredit } = useTransactions();
 
   const filteredFunds = useMemo(() => {
     if (!searchQuery) {
@@ -79,16 +73,25 @@ export default function MutualFundsPage() {
     setIsInvestDialogOpen(true);
   };
   
-  const handleConfirmInvestment = (amount: number, date: Date, fund: MutualFund) => {
+  const handleConfirmInvestment = (amount: number, date: Date, fund: MutualFund, isSip: boolean) => {
     addTransaction({
         type: 'expense',
         amount,
-        category: 'SIP', // or 'Investment'
+        category: isSip ? 'SIP' : 'Investment',
         date: date,
-        paymentMethod: 'UPI', // default, can be changed
+        paymentMethod: 'UPI', 
         notes: `Investment in ${fund.name}`
     });
     addHolding(amount, fund);
+
+    if (isSip) {
+        addAutoCredit({
+            name: `${fund.name} SIP`,
+            amount,
+            frequency: 'Monthly',
+            nextDate: date,
+        });
+    }
   };
   
   const holdingsWithDetails: HoldingDetails[] = useMemo(() => {
