@@ -31,7 +31,7 @@ export default function FixedCostsPage() {
   const [selectedRowIds, setSelectedRowIds] = useState<string[]>([]);
 
   const fixedCostTransactions = useMemo(() => {
-    const fixedCategories = ['Rent', 'EMI', 'SIP'];
+    const fixedCategories = ['Rent', 'EMI', 'SIP', 'Investment', 'Insurance'];
     return [...transactions]
       .filter(t => t.type === 'expense' && fixedCategories.includes(t.category))
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
