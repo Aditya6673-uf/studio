@@ -94,17 +94,17 @@ export default function SubscriptionPage() {
             <CardDescription>You are currently on the <strong>{subscriptionInfo.planName}</strong> plan.</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm">
+            <p className="text-sm text-muted-foreground">
               Your subscription is active. You can manage your subscription here.
               {subscriptionInfo.endDate && (
-                <span className="block mt-1 text-muted-foreground">Expires on: {format(new Date(subscriptionInfo.endDate), 'dd MMM, yyyy')}</span>
+                <span className="block mt-2 font-semibold text-foreground">Expires on: {format(new Date(subscriptionInfo.endDate), 'dd MMM, yyyy')}</span>
               )}
             </p>
           </CardContent>
         </Card>
       )}
 
-      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {plans.map((plan) => {
             const isCurrentPlan = subscriptionInfo?.planName === plan.name;
             return (
@@ -132,7 +132,7 @@ export default function SubscriptionPage() {
                     variant={isCurrentPlan ? "outline" : "default"}
                     onClick={() => handleChoosePlan(plan)}
                 >
-                    {isCurrentPlan ? "Current Plan" : isSubscribed ? "Switch Plan" : plan.buttonText}
+                    {isCurrentPlan ? "Current Plan" : "Switch Plan"}
                 </Button>
                 </div>
             </Card>
