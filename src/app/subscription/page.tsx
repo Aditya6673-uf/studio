@@ -61,7 +61,7 @@ export default function SubscriptionPage() {
     if (plan.durationInMonths === null) return;
     subscribe({ planName: plan.name, durationInMonths: plan.durationInMonths });
     toast({
-        title: "Subscription Activated!",
+        title: "Subscription Updated!",
         description: `You've successfully subscribed to the ${plan.name} plan.`,
     });
   };
@@ -74,7 +74,7 @@ export default function SubscriptionPage() {
     });
   };
   
-  const currentPlan = isSubscribed && subscriptionInfo ? plans.find(p => p.name === subscriptionInfo.planName) : plans[0];
+  const currentPlan = isSubscribed && subscriptionInfo ? plans.find(p => p.name === subscriptionInfo.planName) : null;
 
 
   return (
@@ -131,9 +131,8 @@ export default function SubscriptionPage() {
                     className="w-full"
                     variant={isCurrentPlan ? "outline" : "default"}
                     onClick={() => handleChoosePlan(plan)}
-                    disabled={isCurrentPlan}
                 >
-                    {isCurrentPlan ? "Current Plan" : plan.buttonText}
+                    {isCurrentPlan ? "Current Plan" : isSubscribed ? "Switch Plan" : plan.buttonText}
                 </Button>
                 </div>
             </Card>
