@@ -46,6 +46,7 @@ export type MutualFund = {
         fiveYear: number;
     };
     risk: 'Low' | 'Moderate' | 'High' | 'Very High';
+    upiId?: string;
 };
 
 export type Holding = {

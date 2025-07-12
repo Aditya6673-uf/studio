@@ -19,11 +19,11 @@ import { HoldingDetailsDialog, type HoldingDetails } from "@/components/holding-
 import { format } from "date-fns";
 
 const initialMutualFunds: MutualFund[] = [
-    { id: '1', name: 'Parag Parikh Flexi Cap Fund', category: 'Equity', nav: 75.25, returns: { oneYear: 35.2, threeYear: 22.1, fiveYear: 24.5 }, risk: 'Very High' },
-    { id: '2', name: 'Quant Small Cap Fund', category: 'Equity', nav: 280.5, returns: { oneYear: 65.8, threeYear: 38.2, fiveYear: 44.1 }, risk: 'Very High' },
-    { id: '3', name: 'Axis Bluechip Fund', category: 'Equity', nav: 58.1, returns: { oneYear: 25.5, threeYear: 15.3, fiveYear: 18.9 }, risk: 'High' },
-    { id: '4', name: 'ICICI Prudential Balanced Advantage Fund', category: 'Hybrid', nav: 65.7, returns: { oneYear: 20.1, threeYear: 14.8, fiveYear: 16.2 }, risk: 'Moderate' },
-    { id: '5', name: 'HDFC Short Term Debt Fund', category: 'Debt', nav: 28.9, returns: { oneYear: 7.2, threeYear: 5.8, fiveYear: 6.5 }, risk: 'Low' },
+    { id: '1', name: 'Parag Parikh Flexi Cap Fund', category: 'Equity', nav: 75.25, returns: { oneYear: 35.2, threeYear: 22.1, fiveYear: 24.5 }, risk: 'Very High', upiId: 'paragparikh@icici' },
+    { id: '2', name: 'Quant Small Cap Fund', category: 'Equity', nav: 280.5, returns: { oneYear: 65.8, threeYear: 38.2, fiveYear: 44.1 }, risk: 'Very High', upiId: 'quant@kotak' },
+    { id: '3', name: 'Axis Bluechip Fund', category: 'Equity', nav: 58.1, returns: { oneYear: 25.5, threeYear: 15.3, fiveYear: 18.9 }, risk: 'High', upiId: 'axisbluechip@axis' },
+    { id: '4', name: 'ICICI Prudential Balanced Advantage Fund', category: 'Hybrid', nav: 65.7, returns: { oneYear: 20.1, threeYear: 14.8, fiveYear: 16.2 }, risk: 'Moderate', upiId: 'icicipru@icici' },
+    { id: '5', name: 'HDFC Short Term Debt Fund', category: 'Debt', nav: 28.9, returns: { oneYear: 7.2, threeYear: 5.8, fiveYear: 6.5 }, risk: 'Low', upiId: 'hdfcdebt@hdfc' },
 ];
 
 const riskColorMap = {
@@ -69,7 +69,7 @@ export default function MutualFundsPage() {
         amount,
         category: 'SIP', // or 'Investment'
         date: new Date(),
-        paymentMethod: 'Card', // default, can be changed
+        paymentMethod: 'UPI', // default, can be changed
         notes: `Investment in ${fund.name}`
     });
     addHolding(amount, fund);
