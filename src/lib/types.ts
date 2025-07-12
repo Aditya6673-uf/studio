@@ -73,3 +73,19 @@ export type RealEstate = {
   currentValue: number;
   purchaseDate: Date | string;
 };
+
+export type SubscriptionInfo = {
+  planName: string;
+  startDate: string; // ISO string
+};
+
+export type Plan = {
+  name: string;
+  price: string;
+  period: string;
+  durationInMonths: number | null;
+  features: string[];
+  buttonText: string;
+  buttonVariant: "default" | "outline";
+  isPopular: boolean;
+};

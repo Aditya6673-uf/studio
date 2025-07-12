@@ -11,9 +11,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { Crown } from "lucide-react";
+import { Crown, Settings } from "lucide-react";
+import { useSubscription } from "@/context/subscription-context";
 
 export function UserNav({ onLogout }: { onLogout: () => void }) {
+  const { isSubscribed } = useSubscription();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
