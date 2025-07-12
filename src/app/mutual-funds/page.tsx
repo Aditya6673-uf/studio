@@ -1,11 +1,11 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { TrendingUp, PlusCircle, Shield, BarChart, Zap } from "lucide-react";
+import { TrendingUp, Zap, Search } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import type { MutualFund } from "@/lib/types";
@@ -13,6 +13,7 @@ import { useLocalStorage } from "@/hooks/use-local-storage";
 import { AdBanner } from "@/components/ad-banner";
 import { InvestDialog } from "@/components/invest-dialog";
 import { useTransactions } from "@/context/transactions-context";
+import { Input } from "@/components/ui/input";
 
 const initialMutualFunds: MutualFund[] = [
     { id: '1', name: 'Parag Parikh Flexi Cap Fund', category: 'Equity', nav: 75.25, returns: { oneYear: 35.2, threeYear: 22.1, fiveYear: 24.5 }, risk: 'Very High' },
@@ -30,10 +31,20 @@ const riskColorMap = {
 };
 
 export default function MutualFundsPage() {
-  const [funds, setFunds] = useLocalStorage<MutualFund[]>('rupee-route-mutual-funds', initialMutualFunds);
+  const [funds] = useLocalStorage<MutualFund[]>('rupee-route-mutual-funds', initialMutualFunds);
   const [selectedFund, setSelectedFund] = useState<MutualFund | null>(null);
   const [isInvestDialogOpen, setIsInvestDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { addTransaction } = useTransactions();
+
+  const filteredFunds = useMemo(() => {
+    if (!searchQuery) {
+      return funds;
+    }
+    return funds.filter(fund =>
+      fund.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [funds, searchQuery]);
 
   const handleInvestClick = (fund: MutualFund) => {
     setSelectedFund(fund);
@@ -68,6 +79,16 @@ export default function MutualFundsPage() {
           <CardHeader>
             <CardTitle>Explore Mutual Funds</CardTitle>
             <CardDescription>Browse and invest in a curated list of mutual funds.</CardDescription>
+            <div className="relative mt-4">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search for a fund..."
+                className="w-full rounded-lg bg-background pl-8"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
           </CardHeader>
           <CardContent>
              <Table>
@@ -81,8 +102,8 @@ export default function MutualFundsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {funds.length > 0 ? (
-                  funds.map(fund => (
+                {filteredFunds.length > 0 ? (
+                  filteredFunds.map(fund => (
                     <TableRow key={fund.id}>
                         <TableCell className="font-medium">{fund.name}</TableCell>
                         <TableCell>{fund.category}</TableCell>
@@ -101,7 +122,7 @@ export default function MutualFundsPage() {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={5} className="h-24 text-center">
-                      No mutual funds available at the moment.
+                      No mutual funds found.
                     </TableCell>
                   </TableRow>
                 )}
