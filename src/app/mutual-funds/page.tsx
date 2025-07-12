@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { TrendingUp, Zap, Search, IndianRupee, ArrowUp, ArrowDown } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
-import type { MutualFund, Holding, Transaction } from "@/lib/types";
+import type { MutualFund, Holding, Transaction, AutoCredit } from "@/lib/types";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { AdBanner } from "@/components/ad-banner";
 import { InvestDialog } from "@/components/invest-dialog";
@@ -16,6 +16,7 @@ import { useTransactions } from "@/context/transactions-context";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { HoldingDetailsDialog, type HoldingDetails } from "@/components/holding-details-dialog";
+import { format } from "date-fns";
 
 const initialMutualFunds: MutualFund[] = [
     { id: '1', name: 'Parag Parikh Flexi Cap Fund', category: 'Equity', nav: 75.25, returns: { oneYear: 35.2, threeYear: 22.1, fiveYear: 24.5 }, risk: 'Very High' },
@@ -32,8 +33,15 @@ const riskColorMap = {
     'Very High': 'bg-red-100 text-red-800',
 };
 
+const initialAutoCredits: AutoCredit[] = [
+    { id: '1', name: 'Mutual Fund SIP', amount: 5000, frequency: 'Monthly', nextDate: new Date('2024-08-05').toISOString() },
+    { id: '2', name: 'Rent Payment', amount: 15000, frequency: 'Monthly', nextDate: new Date('2024-08-01').toISOString() },
+];
+
+
 export default function MutualFundsPage() {
   const [funds, setFunds] = useLocalStorage<MutualFund[]>('rupee-route-mutual-funds', initialMutualFunds);
+  const [autoCredits] = useLocalStorage<AutoCredit[]>('rupee-route-autocredits', initialAutoCredits);
   const [selectedFund, setSelectedFund] = useState<MutualFund | null>(null);
   const [selectedHolding, setSelectedHolding] = useState<HoldingDetails | null>(null);
   const [isInvestDialogOpen, setIsInvestDialogOpen] = useState(false);
@@ -82,6 +90,8 @@ export default function MutualFundsPage() {
       const investmentHistory = transactions.filter(t => 
           t.notes === `Investment in ${fundDetails.name}`
       );
+      
+      const relatedAutoCredit = autoCredits.find(ac => fundDetails.name.includes(ac.name) || ac.name.includes(fundDetails.name));
 
       return {
         ...holding,
@@ -92,9 +102,10 @@ export default function MutualFundsPage() {
         oneDayReturn,
         xirr,
         investmentHistory,
+        nextSipDate: relatedAutoCredit?.nextDate,
       };
     }).filter((h): h is HoldingDetails => h !== null);
-  }, [holdings, funds, transactions]);
+  }, [holdings, funds, transactions, autoCredits]);
 
   const handleHoldingClick = (holding: HoldingDetails) => {
     setSelectedHolding(holding);
@@ -126,6 +137,7 @@ export default function MutualFundsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Fund Name</TableHead>
+                    <TableHead>Next SIP Date</TableHead>
                     <TableHead className="text-right">Invested</TableHead>
                     <TableHead className="text-right">Current Value</TableHead>
                     <TableHead className="text-right">Total Return</TableHead>
@@ -135,6 +147,9 @@ export default function MutualFundsPage() {
                   {holdingsWithDetails.map(holding => (
                     <TableRow key={holding.fundId} className="cursor-pointer hover:bg-muted/50" onClick={() => handleHoldingClick(holding)}>
                       <TableCell className="font-medium">{holding.name}</TableCell>
+                       <TableCell>
+                        {holding.nextSipDate ? format(new Date(holding.nextSipDate), 'dd MMM, yyyy') : '-'}
+                       </TableCell>
                       <TableCell className="text-right font-mono"><IndianRupee className="inline h-3.5 w-3.5" />{holding.totalInvested.toLocaleString('en-IN')}</TableCell>
                       <TableCell className="text-right font-mono"><IndianRupee className="inline h-3.5 w-3.5" />{holding.currentValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                        <TableCell className="text-right font-mono">

@@ -23,6 +23,7 @@ export interface HoldingDetails extends Holding {
   oneDayReturn: number;
   xirr: number;
   investmentHistory: Transaction[];
+  nextSipDate?: string | Date;
 }
 
 type HoldingDetailsDialogProps = {
@@ -62,6 +63,12 @@ export function HoldingDetailsDialog({ isOpen, setIsOpen, holding }: HoldingDeta
             <div className="flex flex-col">
                 <span className="text-muted-foreground">XIRR (Est.)</span>
                 <span className="font-bold text-lg">{holding.xirr.toFixed(2)}%</span>
+            </div>
+             <div className="flex flex-col">
+                <span className="text-muted-foreground">Next SIP Date</span>
+                <span className="font-bold text-lg">
+                    {holding.nextSipDate ? format(new Date(holding.nextSipDate), 'dd MMM, yyyy') : 'Not Set'}
+                </span>
             </div>
         </div>
 
