@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useMemo } from "react";
@@ -26,6 +27,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { useTransactions } from "@/context/transactions-context";
 import { Separator } from "@/components/ui/separator";
 import { AdBanner } from "@/components/ad-banner";
+import { useSubscription } from "@/context/subscription-context";
 
 interface MonthlySummary {
   transactions: Transaction[];
@@ -41,6 +43,7 @@ interface GroupedTransactions {
 export default function AllTransactionsPage() {
   const { transactions, addTransaction, deleteTransaction } = useTransactions();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const { isSubscribed } = useSubscription();
 
   const groupedTransactions = useMemo(() => {
     const sorted = [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -187,9 +190,11 @@ export default function AllTransactionsPage() {
           </CardContent>
         </Card>
 
-        <div className="mt-6">
-          <AdBanner />
-        </div>
+        {!isSubscribed && (
+          <div className="mt-6">
+            <AdBanner />
+          </div>
+        )}
       </main>
       <AddTransactionSheet
         isOpen={isSheetOpen}

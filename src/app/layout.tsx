@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import type { Metadata } from 'next';
@@ -12,6 +13,7 @@ import { useState, useEffect } from 'react';
 import { PinDialog } from '@/components/pin-dialog';
 import { WelcomeDialog } from '@/components/welcome-dialog';
 import { TransactionsProvider } from '@/context/transactions-context';
+import { SubscriptionProvider } from '@/context/subscription-context';
 
 export default function RootLayout({
   children,
@@ -37,6 +39,7 @@ export default function RootLayout({
     localStorage.removeItem("rupee-route-user");
     localStorage.removeItem("rupee-route-transactions");
     localStorage.removeItem("favoriteCategories");
+    localStorage.removeItem("rupee-route-subscribed");
     window.location.reload();
   };
 
@@ -65,24 +68,26 @@ export default function RootLayout({
           renderAuthScreen()
         ) : (
           <TransactionsProvider>
-            <SidebarProvider>
-              <Sidebar>
-                <SidebarHeader>
-                  <Logo />
-                </SidebarHeader>
-                <SidebarContent>
-                  <MainNav />
-                </SidebarContent>
-              </Sidebar>
-              <SidebarInset>
-                <div className="flex h-full flex-col">
-                  <header className="sticky top-0 z-10 flex h-16 items-center justify-end gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
-                    <UserNav onLogout={handleLogout} />
-                  </header>
-                  {children}
-                </div>
-              </SidebarInset>
-            </SidebarProvider>
+            <SubscriptionProvider>
+              <SidebarProvider>
+                <Sidebar>
+                  <SidebarHeader>
+                    <Logo />
+                  </SidebarHeader>
+                  <SidebarContent>
+                    <MainNav />
+                  </SidebarContent>
+                </Sidebar>
+                <SidebarInset>
+                  <div className="flex h-full flex-col">
+                    <header className="sticky top-0 z-10 flex h-16 items-center justify-end gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
+                      <UserNav onLogout={handleLogout} />
+                    </header>
+                    {children}
+                  </div>
+                </SidebarInset>
+              </SidebarProvider>
+            </SubscriptionProvider>
           </TransactionsProvider>
         )}
         <Toaster />

@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useMemo } from "react";
@@ -24,11 +25,13 @@ import {
 import { useTransactions } from "@/context/transactions-context";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AdBanner } from "@/components/ad-banner";
+import { useSubscription } from "@/context/subscription-context";
 
 export default function FixedCostsPage() {
   const { transactions, addTransaction, deleteTransaction } = useTransactions();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [selectedRowIds, setSelectedRowIds] = useState<string[]>([]);
+  const { isSubscribed } = useSubscription();
 
   const fixedCostTransactions = useMemo(() => {
     const fixedCategories = ['Rent', 'EMI', 'SIP', 'Investment', 'Insurance'];
@@ -188,9 +191,11 @@ export default function FixedCostsPage() {
             </Table>
           </CardContent>
         </Card>
-        <div className="mt-6">
-          <AdBanner />
-        </div>
+        {!isSubscribed && (
+          <div className="mt-6">
+            <AdBanner />
+          </div>
+        )}
       </main>
       <AddTransactionSheet
         isOpen={isSheetOpen}

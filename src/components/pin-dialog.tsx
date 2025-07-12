@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -116,6 +117,7 @@ export function PinDialog({ onPinSuccess }: PinDialogProps) {
     localStorage.removeItem("rupee-route-pin");
     localStorage.removeItem("rupee-route-user");
     localStorage.removeItem("favoriteCategories"); // Clear any other stored data
+    localStorage.removeItem("rupee-route-subscribed");
     window.location.reload(); // Reload the page to trigger the setup flow
   };
 

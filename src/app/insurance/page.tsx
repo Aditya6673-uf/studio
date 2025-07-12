@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState } from "react";
@@ -13,6 +14,7 @@ import { useLocalStorage } from "@/hooks/use-local-storage";
 import { format } from "date-fns";
 import { AdBanner } from "@/components/ad-banner";
 import { useTransactions } from "@/context/transactions-context";
+import { useSubscription } from "@/context/subscription-context";
 
 const initialInsurances: Insurance[] = [
     { id: '1', provider: 'HDFC Ergo', policyName: 'Optima Restore', type: 'Health', premium: 12000, coverage: 500000, nextDueDate: new Date('2025-08-15').toISOString() },
@@ -23,6 +25,7 @@ export default function InsurancePage() {
   const [insurances, setInsurances] = useLocalStorage<Insurance[]>('rupee-route-insurances', initialInsurances);
   const [isAddInsuranceOpen, setIsAddInsuranceOpen] = useState(false);
   const { addScheduledTransaction } = useTransactions();
+  const { isSubscribed } = useSubscription();
 
   const handleAddInsurance = (insuranceData: Omit<Insurance, 'id'>) => {
     const newInsurance: Insurance = {
@@ -112,9 +115,11 @@ export default function InsurancePage() {
             </Table>
           </CardContent>
         </Card>
-        <div className="mt-6">
-          <AdBanner />
-        </div>
+        {!isSubscribed && (
+          <div className="mt-6">
+            <AdBanner />
+          </div>
+        )}
       </main>
       <AddInsuranceDialog
         isOpen={isAddInsuranceOpen}

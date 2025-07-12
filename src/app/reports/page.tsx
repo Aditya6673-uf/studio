@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useMemo, useState } from "react";
@@ -35,6 +36,7 @@ import type { Transaction } from "@/lib/types";
 import { useTransactions } from "@/context/transactions-context";
 import { ExportDataDialog } from "@/components/export-data-dialog";
 import { AdBanner } from "@/components/ad-banner";
+import { useSubscription } from "@/context/subscription-context";
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -87,6 +89,7 @@ export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState("monthly");
   const [offset, setOffset] = useState(0);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const { isSubscribed } = useSubscription();
 
   const { dailyData, weeklyData, monthlyData, yearlyData, rangeDescription } = useMemo(() => {
     const processTransactionsForPeriod = (transactionsToProcess: Transaction[], startDate: Date, endDate: Date) => {
@@ -252,9 +255,11 @@ export default function ReportsPage() {
         </CardContent>
       </Card>
 
-      <div className="mt-6">
-        <AdBanner />
-      </div>
+      {!isSubscribed && (
+        <div className="mt-6">
+          <AdBanner />
+        </div>
+      )}
     </main>
 
     <Dialog open={selectedTransactions !== null} onOpenChange={(isOpen) => !isOpen && setSelectedTransactions(null)}>

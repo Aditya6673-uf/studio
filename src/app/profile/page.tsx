@@ -10,12 +10,14 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Camera, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AdBanner } from '@/components/ad-banner';
+import { useSubscription } from '@/context/subscription-context';
 
 export default function ProfilePage() {
   const [avatarSrc, setAvatarSrc] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [isEmailVisible, setIsEmailVisible] = useState(true);
+  const { isSubscribed } = useSubscription();
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -105,9 +107,11 @@ export default function ProfilePage() {
             <Button className="w-full" onClick={handleSaveChanges}>Save Changes</Button>
           </CardFooter>
         </Card>
-        <div className="mt-6">
-            <AdBanner/>
-        </div>
+        {!isSubscribed && (
+          <div className="mt-6">
+              <AdBanner/>
+          </div>
+        )}
       </div>
     </main>
   );

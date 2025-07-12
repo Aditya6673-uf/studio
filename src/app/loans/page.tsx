@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState } from "react";
@@ -12,6 +13,7 @@ import type { Loan } from "@/lib/types";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { format } from "date-fns";
 import { AdBanner } from "@/components/ad-banner";
+import { useSubscription } from "@/context/subscription-context";
 
 const initialLoans: Loan[] = [
     { id: '1', name: 'Car Loan', principal: 500000, paid: 120000, interestRate: 8.5, startDate: new Date('2022-08-01').toISOString(), term: 5 },
@@ -21,6 +23,7 @@ const initialLoans: Loan[] = [
 export default function LoansPage() {
   const [loans, setLoans] = useLocalStorage<Loan[]>('rupee-route-loans', initialLoans);
   const [isAddLoanOpen, setIsAddLoanOpen] = useState(false);
+  const { isSubscribed } = useSubscription();
 
   const handleAddLoan = (loanData: Omit<Loan, 'id'>) => {
     const newLoan: Loan = {
@@ -95,9 +98,11 @@ export default function LoansPage() {
             </Table>
           </CardContent>
         </Card>
-        <div className="mt-6">
-          <AdBanner />
-        </div>
+        {!isSubscribed && (
+          <div className="mt-6">
+            <AdBanner />
+          </div>
+        )}
       </main>
       <AddLoanDialog
         isOpen={isAddLoanOpen}

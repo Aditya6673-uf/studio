@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -10,6 +11,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { AddAccountDialog } from "@/components/add-account-dialog";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { AdBanner } from "@/components/ad-banner";
+import { useSubscription } from "@/context/subscription-context";
 
 const accountIcons = {
   Bank: <Landmark className="h-8 w-8 text-primary" />,
@@ -19,6 +21,7 @@ const accountIcons = {
 export default function AccountsPage() {
   const [accounts, setAccounts] = useLocalStorage<Account[]>('rupee-route-accounts', initialAccounts);
   const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
+  const { isSubscribed } = useSubscription();
   const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
 
   const handleAddAccount = (accountData: Omit<Account, 'id'>) => {
@@ -82,9 +85,11 @@ export default function AccountsPage() {
             </Card>
           )}
         </div>
-        <div className="mt-6">
-          <AdBanner />
-        </div>
+        {!isSubscribed && (
+          <div className="mt-6">
+            <AdBanner />
+          </div>
+        )}
       </main>
       <AddAccountDialog
         isOpen={isAddAccountOpen}

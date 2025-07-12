@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useMemo } from "react";
@@ -37,6 +38,7 @@ import {
 import { useTransactions } from "@/context/transactions-context";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { AdBanner } from "@/components/ad-banner";
+import { useSubscription } from "@/context/subscription-context";
 
 const paymentMethodIcons = {
   UPI: <Landmark className="h-4 w-4 text-muted-foreground" />,
@@ -55,6 +57,7 @@ export default function Dashboard() {
 
   const [isIncomeDialogOpen, setIsIncomeDialogOpen] = useState(false);
   const [incomeInput, setIncomeInput] = useState("");
+  const { isSubscribed } = useSubscription();
 
   const { monthlyIncome, monthlyExpenses, netBalance, incomeChange, expenseChange } = useMemo(() => {
     const now = new Date();
@@ -421,9 +424,11 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
-      <div className="mt-6">
-        <AdBanner />
-      </div>
+      {!isSubscribed && (
+        <div className="mt-6">
+          <AdBanner />
+        </div>
+      )}
       <AddTransactionSheet
         isOpen={isSheetOpen}
         setIsOpen={setIsSheetOpen}

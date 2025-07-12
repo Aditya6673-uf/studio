@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { CheckCircle } from "lucide-react";
 import { AdBanner } from "@/components/ad-banner";
+import { useSubscription } from "@/context/subscription-context";
+import { useToast } from "@/hooks/use-toast";
 
 const plans = [
   {
@@ -18,6 +21,7 @@ const plans = [
     buttonText: "Current Plan",
     buttonVariant: "outline",
     isPopular: false,
+    isCurrent: true,
   },
   {
     name: "Pro Monthly",
@@ -29,6 +33,7 @@ const plans = [
     buttonText: "Choose Plan",
     buttonVariant: "default",
     isPopular: true,
+    isCurrent: false,
   },
   {
     name: "Pro Semi-Annual",
@@ -41,6 +46,7 @@ const plans = [
     buttonText: "Choose Plan",
     buttonVariant: "default",
     isPopular: false,
+    isCurrent: false,
   },
   {
     name: "Pro Annual",
@@ -53,10 +59,22 @@ const plans = [
     buttonText: "Choose Plan",
     buttonVariant: "default",
     isPopular: false,
+    isCurrent: false,
   },
 ];
 
 export default function SubscriptionPage() {
+  const { isSubscribed, subscribe } = useSubscription();
+  const { toast } = useToast();
+
+  const handleChoosePlan = (planName: string) => {
+    subscribe();
+    toast({
+        title: "Subscription Activated!",
+        description: `You've successfully subscribed to the ${planName} plan. Enjoy your ad-free experience.`,
+    });
+  };
+
   return (
     <main className="flex-1 overflow-y-auto p-4 md:p-8">
       <div className="mb-8 flex items-center gap-4">
@@ -84,16 +102,23 @@ export default function SubscriptionPage() {
               </ul>
             </CardContent>
             <div className="p-6 pt-0">
-               <Button className="w-full" variant={plan.buttonVariant as any} disabled={plan.buttonVariant === 'outline'}>
-                {plan.buttonText}
+               <Button 
+                className="w-full"
+                variant={(plan.isCurrent && !isSubscribed) || (isSubscribed && !plan.isCurrent) ? "default" : "outline"}
+                disabled={(plan.isCurrent && !isSubscribed) || isSubscribed}
+                onClick={() => handleChoosePlan(plan.name)}
+               >
+                 {isSubscribed ? "Subscribed" : plan.buttonText}
                </Button>
             </div>
           </Card>
         ))}
       </div>
-      <div className="mt-8">
-        <AdBanner />
-      </div>
+      {!isSubscribed && (
+        <div className="mt-8">
+          <AdBanner />
+        </div>
+      )}
     </main>
   );
 }

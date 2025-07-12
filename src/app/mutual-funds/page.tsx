@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useMemo } from "react";
@@ -17,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { HoldingDetailsDialog, type HoldingDetails } from "@/components/holding-details-dialog";
 import { format } from "date-fns";
+import { useSubscription } from "@/context/subscription-context";
 
 const initialMutualFunds: MutualFund[] = [
     { id: '1', name: 'Parag Parikh Flexi Cap Fund', category: 'Equity', nav: 75.25, returns: { oneYear: 35.2, threeYear: 22.1, fiveYear: 24.5 }, risk: 'Very High', upiId: 'paragparikh@icici' },
@@ -50,6 +52,7 @@ export default function MutualFundsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [returnPeriod, setReturnPeriod] = useState<ReturnPeriod>('oneYear');
   const { transactions, addTransaction, holdings, addHolding, autoCredits, addAutoCredit } = useTransactions();
+  const { isSubscribed } = useSubscription();
 
   const filteredFunds = useMemo(() => {
     if (!searchQuery) {
@@ -246,9 +249,11 @@ export default function MutualFundsPage() {
             </Table>
           </CardContent>
         </Card>
-        <div className="mt-6">
-          <AdBanner />
-        </div>
+        {!isSubscribed && (
+          <div className="mt-6">
+            <AdBanner />
+          </div>
+        )}
       </main>
       
       {selectedFund && (

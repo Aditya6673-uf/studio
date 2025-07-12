@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState } from "react";
@@ -12,6 +13,7 @@ import { AddRealEstateDialog } from "@/components/add-real-estate-dialog";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { format } from "date-fns";
 import { AdBanner } from "@/components/ad-banner";
+import { useSubscription } from "@/context/subscription-context";
 
 const initialRealEstate: RealEstate[] = [
     { id: '1', name: '2BHK Apartment', type: 'Residential', location: 'Mumbai, MH', currentValue: 15000000, purchaseDate: new Date('2020-05-10').toISOString() },
@@ -21,6 +23,7 @@ const initialRealEstate: RealEstate[] = [
 export default function RealEstatePage() {
   const [properties, setProperties] = useLocalStorage<RealEstate[]>('rupee-route-real-estate', initialRealEstate);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const { isSubscribed } = useSubscription();
 
   const handleAddProperty = (propertyData: Omit<RealEstate, 'id'>) => {
     const newProperty: RealEstate = {
@@ -103,9 +106,11 @@ export default function RealEstatePage() {
             </Table>
           </CardContent>
         </Card>
-        <div className="mt-6">
-          <AdBanner />
-        </div>
+        {!isSubscribed && (
+          <div className="mt-6">
+            <AdBanner />
+          </div>
+        )}
       </main>
       <AddRealEstateDialog
         isOpen={isAddDialogOpen}
