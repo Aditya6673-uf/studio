@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { Plan } from "@/lib/types";
 import { format } from "date-fns";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 const plans: Plan[] = [
   {
@@ -108,7 +109,7 @@ export default function SubscriptionPage() {
         {plans.map((plan) => {
             const isCurrentPlan = subscriptionInfo?.planName === plan.name;
             return (
-            <Card key={plan.name} className={`flex flex-col ${plan.isPopular && !isCurrentPlan ? 'border-primary border-2' : ''}`}>
+            <Card key={plan.name} className={cn("flex flex-col", plan.isPopular && !isCurrentPlan ? 'border-primary border-2' : '', isCurrentPlan ? 'bg-primary/5' : '')}>
                 <CardHeader className="items-center">
                 {plan.isPopular && !isCurrentPlan && <div className="text-xs font-bold uppercase text-primary -mt-2 mb-2">Most Popular</div>}
                 <CardTitle className="text-2xl">{plan.name}</CardTitle>
