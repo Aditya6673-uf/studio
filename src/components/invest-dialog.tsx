@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input"
 import type { MutualFund } from "@/lib/types"
 import { useToast } from "@/hooks/use-toast"
 import { ArrowLeft, IndianRupee, Copy } from "lucide-react"
+import { Label } from "@/components/ui/label"
 
 const formSchema = z.object({
   amount: z.coerce.number().positive({ message: "Investment amount must be positive." }).min(100, { message: "Minimum investment is ₹100." }),
