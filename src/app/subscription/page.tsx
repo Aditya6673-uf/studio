@@ -14,18 +14,6 @@ import Link from "next/link";
 
 const plans: Plan[] = [
   {
-    name: "Free",
-    price: "₹0",
-    period: "",
-    durationInMonths: null,
-    features: [
-      "Supported by ads",
-    ],
-    buttonText: "Current Plan",
-    buttonVariant: "outline",
-    isPopular: false,
-  },
-  {
     name: "Pro Monthly",
     price: "₹29",
     period: "/ month",
