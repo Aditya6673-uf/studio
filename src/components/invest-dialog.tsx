@@ -205,9 +205,11 @@ export function InvestDialog({ isOpen, setIsOpen, fund, onConfirmInvestment }: I
                     </p>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="upi-id">Pay to this UPI ID</Label>
+                    <Label>Pay to this UPI ID</Label>
                     <div className="flex items-center gap-2">
-                        <Input id="upi-id" value={fund.upiId || 'N/A'} readOnly className="font-mono" />
+                        <div className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm font-mono">
+                           {fund.upiId || 'N/A'}
+                        </div>
                         <Button variant="outline" size="icon" onClick={handleCopyUpiId} disabled={!fund.upiId}>
                             <Copy className="h-4 w-4" />
                             <span className="sr-only">Copy UPI ID</span>
