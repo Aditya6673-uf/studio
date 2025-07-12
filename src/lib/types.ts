@@ -6,7 +6,7 @@ export type Transaction = {
   amount: number;
   category: string;
   date: Date | string; // Allow string for serialization in local storage
-  paymentMethod: 'UPI' | 'Cash' | 'Card';
+  paymentMethod: 'UPI' | 'Cash' | 'Card' | 'Bank';
   notes?: string;
 };
 
@@ -72,6 +72,8 @@ export type RealEstate = {
   location: string;
   currentValue: number;
   purchaseDate: Date | string;
+  sellPrice?: number;
+  sellDate?: Date | string;
 };
 
 export type SubscriptionInfo = {

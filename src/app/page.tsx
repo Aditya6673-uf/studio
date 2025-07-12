@@ -44,6 +44,7 @@ const paymentMethodIcons = {
   UPI: <Landmark className="h-4 w-4 text-muted-foreground" />,
   Cash: <Wallet className="h-4 w-4 text-muted-foreground" />,
   Card: <CreditCard className="h-4 w-4 text-muted-foreground" />,
+  Bank: <Landmark className="h-4 w-4 text-muted-foreground" />,
 };
 
 export default function Dashboard() {

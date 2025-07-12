@@ -37,7 +37,7 @@ const formSchema = z.object({
   amount: z.coerce.number().positive({ message: "Amount must be positive." }),
   category: z.string().min(1, { message: "Please enter a category." }),
   date: z.date({ required_error: "Please select a date." }),
-  paymentMethod: z.enum(["UPI", "Cash", "Card"]),
+  paymentMethod: z.enum(["UPI", "Cash", "Card", "Bank"]),
   notes: z.string().optional(),
 });
 
@@ -281,6 +281,7 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
                       <SelectItem value="UPI">UPI</SelectItem>
                       <SelectItem value="Cash">Cash</SelectItem>
                       <SelectItem value="Card">Card</SelectItem>
+                      <SelectItem value="Bank">Bank</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
