@@ -107,11 +107,12 @@ export default function SubscriptionPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm">
-              Your subscription is active and will automatically renew. You can manage your subscription here.
+              Your subscription is active. You can manage your subscription here.
               {subscriptionInfo.endDate && (
                 <span className="block mt-1 text-muted-foreground">Expires on: {format(new Date(subscriptionInfo.endDate), 'dd MMM, yyyy')}</span>
               )}
             </p>
+            <Button onClick={handleCancelSubscription} variant="destructive" size="sm" className="mt-4">Cancel Subscription</Button>
           </CardContent>
         </Card>
       )}
@@ -142,15 +143,10 @@ export default function SubscriptionPage() {
                 <Button 
                     className="w-full"
                     variant={isCurrentPlan ? "outline" : "default"}
-                    onClick={() => {
-                        if (isCurrentPlan) {
-                            handleCancelSubscription();
-                        } else {
-                            handleChoosePlan(plan)
-                        }
-                    }}
+                    onClick={() => handleChoosePlan(plan)}
+                    disabled={isCurrentPlan}
                 >
-                    {isCurrentPlan ? (plan.name === "Free" ? "Current Plan" : "Cancel Subscription") : plan.buttonText}
+                    {isCurrentPlan ? "Current Plan" : plan.buttonText}
                 </Button>
                 </div>
             </Card>
