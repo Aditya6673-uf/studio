@@ -25,29 +25,38 @@ import {
 import { Input } from "@/components/ui/input"
 import type { MutualFund } from "@/lib/types"
 import { useToast } from "@/hooks/use-toast"
-import { ArrowLeft, IndianRupee, Copy } from "lucide-react"
+import { ArrowLeft, IndianRupee, Copy, CalendarIcon } from "lucide-react"
 import { Label } from "@/components/ui/label"
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
+import { cn } from "@/lib/utils"
+import { format } from "date-fns"
+import { Calendar } from "./ui/calendar"
+
 
 const formSchema = z.object({
   amount: z.coerce.number().positive({ message: "Investment amount must be positive." }).min(100, { message: "Minimum investment is ₹100." }),
+  date: z.date({ required_error: "Please select a date." }),
 })
 
 type InvestDialogProps = {
   isOpen: boolean
   setIsOpen: (isOpen: boolean) => void
   fund: MutualFund
-  onConfirmInvestment: (amount: number, fund: MutualFund) => void
+  onConfirmInvestment: (amount: number, date: Date, fund: MutualFund) => void
 }
 
 export function InvestDialog({ isOpen, setIsOpen, fund, onConfirmInvestment }: InvestDialogProps) {
   const { toast } = useToast();
   const [step, setStep] = useState<'amount' | 'payment'>('amount');
   const [investmentAmount, setInvestmentAmount] = useState(0);
+  const [investmentDate, setInvestmentDate] = useState<Date>(new Date());
+  const [isCalendarOpen, setIsCalendarOpen] = React.useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       amount: undefined,
+      date: new Date(),
     },
   });
 
@@ -57,7 +66,7 @@ export function InvestDialog({ isOpen, setIsOpen, fund, onConfirmInvestment }: I
   React.useEffect(() => {
     if (isOpen) {
       // Reset state when dialog opens
-      form.reset();
+      form.reset({ amount: undefined, date: new Date() });
       setStep('amount');
       setInvestmentAmount(0);
     }
@@ -65,11 +74,12 @@ export function InvestDialog({ isOpen, setIsOpen, fund, onConfirmInvestment }: I
 
   function handleAmountSubmit(values: z.infer<typeof formSchema>) {
     setInvestmentAmount(values.amount);
+    setInvestmentDate(values.date);
     setStep('payment');
   }
 
   function handleConfirmPayment() {
-    onConfirmInvestment(investmentAmount, fund);
+    onConfirmInvestment(investmentAmount, investmentDate, fund);
     toast({
         title: "Investment Successful!",
         description: `You have invested ₹${investmentAmount.toLocaleString('en-IN')} in ${fund.name}.`,
@@ -128,6 +138,52 @@ export function InvestDialog({ isOpen, setIsOpen, fund, onConfirmInvestment }: I
                         </FormItem>
                     )}
                     />
+
+                    <FormField
+                      control={form.control}
+                      name="date"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Investment Date</FormLabel>
+                          <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={"outline"}
+                                  className={cn(
+                                    "w-full pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value ? (
+                                    format(field.value, "PPP")
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={(date) => {
+                                  if (date) field.onChange(date)
+                                  setIsCalendarOpen(false)
+                                }}
+                                disabled={(date) =>
+                                  date > new Date() || date < new Date("1900-01-01")
+                                }
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
                     <div className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-md">
                         You will get approximately <span className="font-bold text-primary">{calculatedUnits} units</span> for this investment.
                     </div>

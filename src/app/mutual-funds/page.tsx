@@ -63,12 +63,12 @@ export default function MutualFundsPage() {
     setIsInvestDialogOpen(true);
   };
   
-  const handleConfirmInvestment = (amount: number, fund: MutualFund) => {
+  const handleConfirmInvestment = (amount: number, date: Date, fund: MutualFund) => {
     addTransaction({
         type: 'expense',
         amount,
         category: 'SIP', // or 'Investment'
-        date: new Date(),
+        date: date,
         paymentMethod: 'UPI', // default, can be changed
         notes: `Investment in ${fund.name}`
     });
