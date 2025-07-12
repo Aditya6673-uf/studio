@@ -5,7 +5,7 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { TrendingUp, Zap, Search, IndianRupee, ArrowUp, ArrowDown } from "lucide-react";
+import { TrendingUp, Zap, Search, IndianRupee, ArrowUp, ArrowDown, ChevronsUpDown } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import type { MutualFund, Holding, Transaction, AutoCredit } from "@/lib/types";
@@ -38,6 +38,13 @@ const initialAutoCredits: AutoCredit[] = [
     { id: '2', name: 'Rent Payment', amount: 15000, frequency: 'Monthly', nextDate: new Date('2024-08-01').toISOString() },
 ];
 
+type ReturnPeriod = 'oneYear' | 'threeYear' | 'fiveYear';
+
+const returnPeriodLabels: Record<ReturnPeriod, string> = {
+  oneYear: '1Y Returns',
+  threeYear: '3Y Returns',
+  fiveYear: '5Y Returns',
+};
 
 export default function MutualFundsPage() {
   const [funds, setFunds] = useLocalStorage<MutualFund[]>('rupee-route-mutual-funds', initialMutualFunds);
@@ -47,6 +54,7 @@ export default function MutualFundsPage() {
   const [isInvestDialogOpen, setIsInvestDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [returnPeriod, setReturnPeriod] = useState<ReturnPeriod>('oneYear');
   const { transactions, addTransaction, holdings, addHolding } = useTransactions();
 
   const filteredFunds = useMemo(() => {
@@ -57,6 +65,14 @@ export default function MutualFundsPage() {
       fund.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [funds, searchQuery]);
+
+  const handleReturnPeriodChange = () => {
+    setReturnPeriod(prev => {
+        if (prev === 'oneYear') return 'threeYear';
+        if (prev === 'threeYear') return 'fiveYear';
+        return 'oneYear';
+    });
+  };
 
   const handleInvestClick = (fund: MutualFund) => {
     setSelectedFund(fund);
@@ -188,7 +204,12 @@ export default function MutualFundsPage() {
                 <TableRow>
                   <TableHead>Fund Name</TableHead>
                   <TableHead>Category</TableHead>
-                  <TableHead>1Y Returns</TableHead>
+                  <TableHead>
+                    <Button variant="ghost" onClick={handleReturnPeriodChange} className="p-0 hover:bg-transparent">
+                      {returnPeriodLabels[returnPeriod]}
+                      <ChevronsUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </TableHead>
                   <TableHead>Risk</TableHead>
                   <TableHead className="text-right">Action</TableHead>
                 </TableRow>
@@ -199,7 +220,7 @@ export default function MutualFundsPage() {
                     <TableRow key={fund.id}>
                         <TableCell className="font-medium">{fund.name}</TableCell>
                         <TableCell>{fund.category}</TableCell>
-                        <TableCell className="text-green-600 font-medium">{fund.returns.oneYear}%</TableCell>
+                        <TableCell className="text-green-600 font-medium">{fund.returns[returnPeriod]}%</TableCell>
                         <TableCell>
                             <Badge variant="outline" className={riskColorMap[fund.risk]}>{fund.risk}</Badge>
                         </TableCell>
