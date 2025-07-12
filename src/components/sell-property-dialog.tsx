@@ -44,6 +44,8 @@ type SellPropertyDialogProps = {
 
 export function SellPropertyDialog({ isOpen, setIsOpen, property, onConfirmSale }: SellPropertyDialogProps) {
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
+  
+  const fromYear = property.purchaseDate ? new Date(property.purchaseDate).getFullYear() : new Date().getFullYear() - 50;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -112,7 +114,7 @@ export function SellPropertyDialog({ isOpen, setIsOpen, property, onConfirmSale 
                       <Calendar
                         mode="single"
                         captionLayout="dropdown-buttons"
-                        fromYear={new Date(property.purchaseDate).getFullYear()}
+                        fromYear={fromYear}
                         toYear={new Date().getFullYear()}
                         selected={field.value}
                         onSelect={(date) => {
