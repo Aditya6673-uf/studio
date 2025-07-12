@@ -174,6 +174,9 @@ export function AddLoanDialog({ isOpen, setIsOpen, onAddLoan }: AddLoanDialogPro
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
+                        captionLayout="dropdown-buttons"
+                        fromYear={new Date().getFullYear() - 20}
+                        toYear={new Date().getFullYear()}
                         selected={field.value}
                         onSelect={(date) => {
                           if (date) field.onChange(date)

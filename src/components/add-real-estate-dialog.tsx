@@ -165,6 +165,9 @@ export function AddRealEstateDialog({ isOpen, setIsOpen, onAddProperty }: AddRea
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
+                        captionLayout="dropdown-buttons"
+                        fromYear={new Date().getFullYear() - 50}
+                        toYear={new Date().getFullYear()}
                         selected={field.value}
                         onSelect={(date) => {
                           if (date) field.onChange(date)

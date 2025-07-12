@@ -80,6 +80,9 @@ export function ExportDataDialog({
                 <Calendar
                   initialFocus
                   mode="range"
+                  captionLayout="dropdown-buttons"
+                  fromYear={new Date().getFullYear() - 10}
+                  toYear={new Date().getFullYear()}
                   defaultMonth={date?.from}
                   selected={date}
                   onSelect={setDate}
