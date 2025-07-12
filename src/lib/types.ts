@@ -47,3 +47,9 @@ export type MutualFund = {
     };
     risk: 'Low' | 'Moderate' | 'High' | 'Very High';
 };
+
+export type Holding = {
+    fundId: string;
+    units: number;
+    totalInvested: number;
+};

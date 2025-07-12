@@ -5,15 +5,16 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { TrendingUp, Zap, Search } from "lucide-react";
+import { TrendingUp, Zap, Search, IndianRupee, ArrowUp, ArrowDown } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
-import type { MutualFund } from "@/lib/types";
+import type { MutualFund, Holding } from "@/lib/types";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { AdBanner } from "@/components/ad-banner";
 import { InvestDialog } from "@/components/invest-dialog";
 import { useTransactions } from "@/context/transactions-context";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 const initialMutualFunds: MutualFund[] = [
     { id: '1', name: 'Parag Parikh Flexi Cap Fund', category: 'Equity', nav: 75.25, returns: { oneYear: 35.2, threeYear: 22.1, fiveYear: 24.5 }, risk: 'Very High' },
@@ -31,11 +32,11 @@ const riskColorMap = {
 };
 
 export default function MutualFundsPage() {
-  const [funds] = useLocalStorage<MutualFund[]>('rupee-route-mutual-funds', initialMutualFunds);
+  const [funds, setFunds] = useLocalStorage<MutualFund[]>('rupee-route-mutual-funds', initialMutualFunds);
   const [selectedFund, setSelectedFund] = useState<MutualFund | null>(null);
   const [isInvestDialogOpen, setIsInvestDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const { addTransaction } = useTransactions();
+  const { addTransaction, holdings, addHolding } = useTransactions();
 
   const filteredFunds = useMemo(() => {
     if (!searchQuery) {
@@ -51,16 +52,43 @@ export default function MutualFundsPage() {
     setIsInvestDialogOpen(true);
   };
   
-  const handleConfirmInvestment = (amount: number, fundName: string) => {
+  const handleConfirmInvestment = (amount: number, fund: MutualFund) => {
     addTransaction({
         type: 'expense',
         amount,
         category: 'SIP', // or 'Investment'
         date: new Date(),
         paymentMethod: 'Card', // default, can be changed
-        notes: `Investment in ${fundName}`
+        notes: `Investment in ${fund.name}`
     });
+    addHolding(amount, fund);
   };
+  
+  const holdingsWithDetails = useMemo(() => {
+    return holdings.map(holding => {
+      const fundDetails = funds.find(f => f.id === holding.fundId);
+      if (!fundDetails) return null;
+
+      const currentValue = holding.units * fundDetails.nav;
+      const totalReturn = currentValue - holding.totalInvested;
+      const totalReturnPercent = (totalReturn / holding.totalInvested) * 100;
+      
+      // Placeholder for 1D return and XIRR
+      const oneDayReturn = (Math.random() - 0.4) * 2; 
+      const xirr = (Math.random() * 15) + 5; 
+
+      return {
+        ...holding,
+        name: fundDetails.name,
+        currentValue,
+        totalReturn,
+        totalReturnPercent,
+        oneDayReturn,
+        xirr,
+      };
+    }).filter(Boolean);
+  }, [holdings, funds]);
+
 
   return (
     <>
@@ -74,6 +102,43 @@ export default function MutualFundsPage() {
             </div>
           </div>
         </div>
+        
+        {holdingsWithDetails.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Your Holdings</CardTitle>
+              <CardDescription>A summary of your current mutual fund investments.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Fund Name</TableHead>
+                    <TableHead className="text-right">Invested</TableHead>
+                    <TableHead className="text-right">Current Value</TableHead>
+                    <TableHead className="text-right">Total Return</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {holdingsWithDetails.map(holding => (
+                    <TableRow key={holding.fundId}>
+                      <TableCell className="font-medium">{holding.name}</TableCell>
+                      <TableCell className="text-right font-mono"><IndianRupee className="inline h-3.5 w-3.5" />{holding.totalInvested.toLocaleString('en-IN')}</TableCell>
+                      <TableCell className="text-right font-mono"><IndianRupee className="inline h-3.5 w-3.5" />{holding.currentValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                       <TableCell className="text-right font-mono">
+                         <div className={cn("flex items-center justify-end", holding.totalReturn >= 0 ? 'text-green-600' : 'text-red-600')}>
+                            {holding.totalReturn >= 0 ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+                            <IndianRupee className="h-3.5 w-3.5" />{Math.abs(holding.totalReturn).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                         </div>
+                         <span className="text-xs text-muted-foreground">({holding.totalReturnPercent.toFixed(2)}%)</span>
+                       </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>

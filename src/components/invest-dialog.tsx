@@ -33,7 +33,7 @@ type InvestDialogProps = {
   isOpen: boolean
   setIsOpen: (isOpen: boolean) => void
   fund: MutualFund
-  onConfirmInvestment: (amount: number, fundName: string) => void
+  onConfirmInvestment: (amount: number, fund: MutualFund) => void
 }
 
 export function InvestDialog({ isOpen, setIsOpen, fund, onConfirmInvestment }: InvestDialogProps) {
@@ -46,7 +46,7 @@ export function InvestDialog({ isOpen, setIsOpen, fund, onConfirmInvestment }: I
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onConfirmInvestment(values.amount, fund.name);
+    onConfirmInvestment(values.amount, fund);
     toast({
         title: "Investment Successful!",
         description: `You have invested ₹${values.amount.toLocaleString('en-IN')} in ${fund.name}.`,
