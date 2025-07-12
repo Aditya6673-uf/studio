@@ -54,3 +54,13 @@ export type Holding = {
     units: number;
     totalInvested: number;
 };
+
+export type Insurance = {
+  id: string;
+  provider: string;
+  policyName: string;
+  type: 'Health' | 'Life' | 'Vehicle' | 'Other';
+  premium: number;
+  coverage: number;
+  nextDueDate: Date | string;
+};
