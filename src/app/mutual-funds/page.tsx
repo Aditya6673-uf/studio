@@ -8,13 +8,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { TrendingUp, Zap, Search, IndianRupee, ArrowUp, ArrowDown } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
-import type { MutualFund, Holding } from "@/lib/types";
+import type { MutualFund, Holding, Transaction } from "@/lib/types";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { AdBanner } from "@/components/ad-banner";
 import { InvestDialog } from "@/components/invest-dialog";
 import { useTransactions } from "@/context/transactions-context";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { HoldingDetailsDialog, type HoldingDetails } from "@/components/holding-details-dialog";
 
 const initialMutualFunds: MutualFund[] = [
     { id: '1', name: 'Parag Parikh Flexi Cap Fund', category: 'Equity', nav: 75.25, returns: { oneYear: 35.2, threeYear: 22.1, fiveYear: 24.5 }, risk: 'Very High' },
@@ -34,9 +35,11 @@ const riskColorMap = {
 export default function MutualFundsPage() {
   const [funds, setFunds] = useLocalStorage<MutualFund[]>('rupee-route-mutual-funds', initialMutualFunds);
   const [selectedFund, setSelectedFund] = useState<MutualFund | null>(null);
+  const [selectedHolding, setSelectedHolding] = useState<HoldingDetails | null>(null);
   const [isInvestDialogOpen, setIsInvestDialogOpen] = useState(false);
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const { addTransaction, holdings, addHolding } = useTransactions();
+  const { transactions, addTransaction, holdings, addHolding } = useTransactions();
 
   const filteredFunds = useMemo(() => {
     if (!searchQuery) {
@@ -64,18 +67,21 @@ export default function MutualFundsPage() {
     addHolding(amount, fund);
   };
   
-  const holdingsWithDetails = useMemo(() => {
-    return holdings.map(holding => {
+  const holdingsWithDetails: HoldingDetails[] = useMemo(() => {
+     return holdings.map(holding => {
       const fundDetails = funds.find(f => f.id === holding.fundId);
       if (!fundDetails) return null;
 
       const currentValue = holding.units * fundDetails.nav;
       const totalReturn = currentValue - holding.totalInvested;
-      const totalReturnPercent = (totalReturn / holding.totalInvested) * 100;
+      const totalReturnPercent = holding.totalInvested > 0 ? (totalReturn / holding.totalInvested) * 100 : 0;
       
-      // Placeholder for 1D return and XIRR
       const oneDayReturn = (Math.random() - 0.4) * 2; 
       const xirr = (Math.random() * 15) + 5; 
+
+      const investmentHistory = transactions.filter(t => 
+          t.notes === `Investment in ${fundDetails.name}`
+      );
 
       return {
         ...holding,
@@ -85,9 +91,15 @@ export default function MutualFundsPage() {
         totalReturnPercent,
         oneDayReturn,
         xirr,
+        investmentHistory,
       };
-    }).filter(Boolean);
-  }, [holdings, funds]);
+    }).filter((h): h is HoldingDetails => h !== null);
+  }, [holdings, funds, transactions]);
+
+  const handleHoldingClick = (holding: HoldingDetails) => {
+    setSelectedHolding(holding);
+    setIsDetailsDialogOpen(true);
+  };
 
 
   return (
@@ -107,7 +119,7 @@ export default function MutualFundsPage() {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>Your Holdings</CardTitle>
-              <CardDescription>A summary of your current mutual fund investments.</CardDescription>
+              <CardDescription>A summary of your current mutual fund investments. Click on a fund for more details.</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -121,7 +133,7 @@ export default function MutualFundsPage() {
                 </TableHeader>
                 <TableBody>
                   {holdingsWithDetails.map(holding => (
-                    <TableRow key={holding.fundId}>
+                    <TableRow key={holding.fundId} className="cursor-pointer hover:bg-muted/50" onClick={() => handleHoldingClick(holding)}>
                       <TableCell className="font-medium">{holding.name}</TableCell>
                       <TableCell className="text-right font-mono"><IndianRupee className="inline h-3.5 w-3.5" />{holding.totalInvested.toLocaleString('en-IN')}</TableCell>
                       <TableCell className="text-right font-mono"><IndianRupee className="inline h-3.5 w-3.5" />{holding.currentValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
@@ -206,6 +218,14 @@ export default function MutualFundsPage() {
             setIsOpen={setIsInvestDialogOpen}
             fund={selectedFund}
             onConfirmInvestment={handleConfirmInvestment}
+        />
+      )}
+      
+      {selectedHolding && (
+        <HoldingDetailsDialog
+            isOpen={isDetailsDialogOpen}
+            setIsOpen={setIsDetailsDialogOpen}
+            holding={selectedHolding}
         />
       )}
     </>
