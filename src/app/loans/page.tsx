@@ -1,12 +1,11 @@
 
-
 "use client";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { HandCoins, PlusCircle } from "lucide-react";
+import { HandCoins, PlusCircle, IndianRupee } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { AddLoanDialog } from "@/components/add-loan-dialog";
 import type { Loan } from "@/lib/types";
@@ -79,8 +78,8 @@ export default function LoansPage() {
                     return (
                       <TableRow key={loan.id}>
                         <TableCell className="font-medium">{loan.name}</TableCell>
-                        <TableCell>₹{loan.principal.toLocaleString('en-IN')}</TableCell>
-                        <TableCell>₹{loan.paid.toLocaleString('en-IN')}</TableCell>
+                        <TableCell className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{loan.principal.toLocaleString('en-IN')}</TableCell>
+                        <TableCell className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{loan.paid.toLocaleString('en-IN')}</TableCell>
                         <TableCell>{loan.interestRate.toFixed(2)}%</TableCell>
                         <TableCell>{isValidDate ? format(startDate, 'dd MMM, yyyy') : 'N/A'}</TableCell>
                         <TableCell>{loan.term} years</TableCell>
