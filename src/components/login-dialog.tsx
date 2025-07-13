@@ -27,6 +27,11 @@ import { Label } from "./ui/label";
 import { browserSupportsWebAuthn, startAuthentication } from '@simplewebauthn/browser';
 import { useToast } from "@/hooks/use-toast";
 import { Logo } from "./logo";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 
 type LoginDialogProps = {
   onLoginSuccess: () => void;
@@ -42,9 +47,12 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
   const [hasBiometrics, setHasBiometrics] = useState(false);
   
   const [isResetPhoneDialogOpen, setIsResetPhoneDialogOpen] = useState(false);
+  const [isOtpDialogOpen, setIsOtpDialogOpen] = useState(false);
   const [isResetConfirmDialogOpen, setIsResetConfirmDialogOpen] = useState(false);
   const [phoneInput, setPhoneInput] = useState("");
   const [phoneError, setPhoneError] = useState("");
+  const [otpInput, setOtpInput] = useState("");
+  const [otpError, setOtpError] = useState("");
 
   useEffect(() => {
     const storedName = localStorage.getItem("rupee-route-user");
@@ -109,9 +117,20 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
     if (phoneInput === correctUser.phone) {
       setPhoneError("");
       setIsResetPhoneDialogOpen(false);
-      setIsResetConfirmDialogOpen(true);
+      setIsOtpDialogOpen(true); // Open OTP dialog next
     } else {
       setPhoneError("Phone number does not match.");
+    }
+  };
+
+  const handleOtpVerification = () => {
+    // We can't send a real OTP, so we'll use a hardcoded value for demonstration.
+    if (otpInput === "123456") {
+      setOtpError("");
+      setIsOtpDialogOpen(false);
+      setIsResetConfirmDialogOpen(true);
+    } else {
+      setOtpError("Incorrect OTP. Please try again.");
     }
   };
 
@@ -136,7 +155,7 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
 
   return (
     <>
-      <Dialog open={!isResetPhoneDialogOpen && !isResetConfirmDialogOpen}>
+      <Dialog open={!isResetPhoneDialogOpen && !isResetConfirmDialogOpen && !isOtpDialogOpen}>
         <DialogContent
           className="max-w-sm"
           onInteractOutside={(e) => e.preventDefault()}
@@ -225,6 +244,34 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
         </DialogContent>
       </Dialog>
       
+      <Dialog open={isOtpDialogOpen} onOpenChange={setIsOtpDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enter OTP</DialogTitle>
+            <DialogDescription>
+              An OTP has been sent to your number. Please enter it below. (Hint: use 123456)
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4 py-4">
+            <InputOTP maxLength={6} value={otpInput} onChange={setOtpInput}>
+              <InputOTPGroup>
+                <InputOTPSlot index={0} />
+                <InputOTPSlot index={1} />
+                <InputOTPSlot index={2} />
+                <InputOTPSlot index={3} />
+                <InputOTPSlot index={4} />
+                <InputOTPSlot index={5} />
+              </InputOTPGroup>
+            </InputOTP>
+            {otpError && <p className="text-red-500 text-sm">{otpError}</p>}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsOtpDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleOtpVerification}>Verify OTP</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <AlertDialog open={isResetConfirmDialogOpen} onOpenChange={setIsResetConfirmDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
