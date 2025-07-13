@@ -180,7 +180,6 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter your name"
-                autoFocus
               />
             </div>
             <div className="space-y-2">
@@ -195,6 +194,7 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
                     placeholder="Enter your 4-digit PIN"
                     maxLength={4}
                     className="flex-1"
+                    autoFocus
                   />
                   {hasBiometrics && (
                       <Button variant="outline" size="icon" onClick={handleBiometricLogin} aria-label="Login with biometrics">
