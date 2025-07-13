@@ -67,15 +67,16 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
     const storedBiometricCredential = localStorage.getItem('rupee-route-webauthn-credential');
     setHasBiometrics(!!storedBiometricCredential);
   }, []);
-  
-  const handleUnlock = () => {
-    if (name === correctUser.name && pin === correctUser.credential) {
+
+  const handleUnlock = (currentPin: string) => {
+    if (name === correctUser.name && currentPin === correctUser.credential) {
       onLoginSuccess();
     } else {
       setError("Incorrect name or PIN.");
       setTimeout(() => {
         setPin("");
-      }, 500);
+        setError("");
+      }, 1000);
     }
   };
   
@@ -109,7 +110,7 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter') {
-      handleUnlock();
+      handleUnlock(pin);
     }
   };
   
@@ -146,10 +147,12 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
     }
   };
 
-  const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+  const handlePinChange = (value: string) => {
     if (/^\d*$/.test(value)) {
         setPin(value);
+        if (value.length === 4) {
+            handleUnlock(value);
+        }
     }
   };
 
@@ -184,14 +187,14 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
               <Label htmlFor="login-credential">PIN</Label>
               <div className="flex items-center gap-2">
                   <Input
-                  id="login-credential"
-                  type="password"
-                  inputMode="numeric"
-                  value={pin}
-                  onChange={handlePinChange}
-                  placeholder="Enter your 4-digit PIN"
-                  maxLength={4}
-                  className="flex-1"
+                    id="login-credential"
+                    type="password"
+                    inputMode="numeric"
+                    value={pin}
+                    onChange={(e) => handlePinChange(e.target.value)}
+                    placeholder="Enter your 4-digit PIN"
+                    maxLength={4}
+                    className="flex-1"
                   />
                   {hasBiometrics && (
                       <Button variant="outline" size="icon" onClick={handleBiometricLogin} aria-label="Login with biometrics">
@@ -203,7 +206,7 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
             {error && <p className="text-red-500 text-sm text-center">{error}</p>}
           </div>
           <DialogFooter className="flex-col items-center justify-center space-y-2">
-            <Button onClick={handleUnlock} className="w-full">Sign In</Button>
+            <Button onClick={() => handleUnlock(pin)} className="w-full">Sign In</Button>
             <div className="text-center text-sm">
               Don't have an account?{" "}
               <Button variant="link" size="sm" className="p-0 h-auto" onClick={onSwitchToSignUp}>
