@@ -35,26 +35,6 @@ export type AutoCredit = {
   nextDate: Date | string;
 };
 
-export type MutualFund = {
-    id: string;
-    name: string;
-    category: 'Equity' | 'Debt' | 'Hybrid';
-    nav: number;
-    returns: {
-        oneYear: number;
-        threeYear: number;
-        fiveYear: number;
-    };
-    risk: 'Low' | 'Moderate' | 'High' | 'Very High';
-    upiId?: string;
-};
-
-export type Holding = {
-    fundId: string;
-    units: number;
-    totalInvested: number;
-};
-
 export type Insurance = {
   id: string;
   provider: string;

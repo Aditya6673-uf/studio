@@ -3,7 +3,7 @@
 "use client";
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import type { Transaction, Holding, MutualFund, AutoCredit, Lending } from '@/lib/types';
+import type { Transaction, AutoCredit, Lending } from '@/lib/types';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { initialTransactions } from '@/lib/data';
 
@@ -16,8 +16,6 @@ interface TransactionsContextType {
   transactions: Transaction[];
   addTransaction: (transaction: TransactionInput) => void;
   deleteTransaction: (id: string) => void;
-  holdings: Holding[];
-  addHolding: (amount: number, fund: MutualFund) => void;
   autoCredits: AutoCredit[];
   addAutoCredit: (autoCredit: AutoCreditInput) => void;
   addScheduledTransaction: (payload: { transaction: TransactionInput, autoCredit: AutoCreditInput }) => void;
@@ -35,7 +33,6 @@ const initialAutoCredits: AutoCredit[] = [
 
 export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
   const [transactions, setTransactions] = useLocalStorage<Transaction[]>('rupee-route-transactions', []);
-  const [holdings, setHoldings] = useLocalStorage<Holding[]>('rupee-route-holdings', []);
   const [autoCredits, setAutoCredits] = useLocalStorage<AutoCredit[]>('rupee-route-autocredits', initialAutoCredits);
   const [lendings, setLendings] = useLocalStorage<Lending[]>('rupee-route-lendings', []);
 
@@ -51,29 +48,6 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
     setTransactions(prev => prev.filter(t => t.id !== id));
   };
   
-  const addHolding = (amount: number, fund: MutualFund) => {
-    const units = amount / fund.nav;
-    setHoldings(prev => {
-        const existingHoldingIndex = prev.findIndex(h => h.fundId === fund.id);
-        if (existingHoldingIndex > -1) {
-            const updatedHoldings = [...prev];
-            updatedHoldings[existingHoldingIndex] = {
-                ...updatedHoldings[existingHoldingIndex],
-                units: updatedHoldings[existingHoldingIndex].units + units,
-                totalInvested: updatedHoldings[existingHoldingIndex].totalInvested + amount,
-            };
-            return updatedHoldings;
-        } else {
-            const newHolding: Holding = {
-                fundId: fund.id,
-                units: units,
-                totalInvested: amount,
-            };
-            return [...prev, newHolding];
-        }
-    });
-  };
-
   const addAutoCredit = (autoCreditData: AutoCreditInput) => {
     const newAutoCredit: AutoCredit = {
         ...autoCreditData,
@@ -132,7 +106,7 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <TransactionsContext.Provider value={{ transactions, addTransaction, deleteTransaction, holdings, addHolding, autoCredits, addAutoCredit, addScheduledTransaction, lendings, addLending, updateLendingStatus }}>
+    <TransactionsContext.Provider value={{ transactions, addTransaction, deleteTransaction, autoCredits, addAutoCredit, addScheduledTransaction, lendings, addLending, updateLendingStatus }}>
       {children}
     </TransactionsContext.Provider>
   );
