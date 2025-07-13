@@ -21,17 +21,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userExists, setUserExists] = useState<boolean | null>(null);
+  const [authView, setAuthView] = useState<'login' | 'signup' | 'loading'>('loading');
 
   useEffect(() => {
     // This effect runs only on the client, after hydration
     const user = localStorage.getItem('rupee-route-user');
-    setUserExists(!!user);
+    setAuthView(user ? 'login' : 'signup');
   }, []);
 
   const handleAuthSuccess = () => {
     setIsAuthenticated(true);
-    setUserExists(true); // Ensure userExists is updated after signup/login
+    setAuthView('loading'); 
   };
   
   const handleLogout = () => {
@@ -45,15 +45,14 @@ export default function RootLayout({
   };
 
   const renderAuthScreen = () => {
-    if (userExists === null) {
-      // Still checking for user, render nothing or a loading spinner
+    if (authView === 'loading') {
       return null; 
     }
     
-    if (userExists) {
-      return <LoginDialog onLoginSuccess={handleAuthSuccess} />;
+    if (authView === 'login') {
+      return <LoginDialog onLoginSuccess={handleAuthSuccess} onSwitchToSignUp={() => setAuthView('signup')} />;
     } else {
-      return <WelcomeDialog onSetupSuccess={handleAuthSuccess} />;
+      return <WelcomeDialog onSetupSuccess={handleAuthSuccess} onSwitchToLogin={() => setAuthView('login')} />;
     }
   };
 

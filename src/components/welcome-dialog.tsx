@@ -18,9 +18,10 @@ import { Label } from "./ui/label";
 
 type WelcomeDialogProps = {
   onSetupSuccess: () => void;
+  onSwitchToLogin: () => void;
 };
 
-export function WelcomeDialog({ onSetupSuccess }: WelcomeDialogProps) {
+export function WelcomeDialog({ onSetupSuccess, onSwitchToLogin }: WelcomeDialogProps) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -137,8 +138,14 @@ export function WelcomeDialog({ onSetupSuccess }: WelcomeDialogProps) {
           </div>
           {error && <p className="text-red-500 text-sm text-center pt-2">{error}</p>}
         </div>
-        <DialogFooter>
-          <Button onClick={handleCompleteSetup} className="w-full">Complete Setup</Button>
+        <DialogFooter className="flex-col items-center justify-center space-y-2">
+          <Button onClick={handleCompleteSetup} className="w-full">Sign Up</Button>
+           <div className="text-center text-sm">
+            Already have an account?{" "}
+            <Button variant="link" size="sm" className="p-0 h-auto" onClick={onSwitchToLogin}>
+              Sign In
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -28,9 +28,10 @@ import { Label } from "./ui/label";
 
 type LoginDialogProps = {
   onLoginSuccess: () => void;
+  onSwitchToSignUp: () => void;
 };
 
-export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
+export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogProps) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [correctUser, setCorrectUser] = useState<Record<string, string>>({});
@@ -108,7 +109,13 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
         </div>
         <DialogFooter className="flex-col items-center justify-center space-y-2">
-          <Button onClick={handleUnlock} className="w-full">Unlock</Button>
+          <Button onClick={handleUnlock} className="w-full">Sign In</Button>
+          <div className="text-center text-sm">
+            Don't have an account?{" "}
+            <Button variant="link" size="sm" className="p-0 h-auto" onClick={onSwitchToSignUp}>
+                Sign Up
+            </Button>
+          </div>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="link" size="sm" className="p-0 h-auto">Forgot password or want to reset?</Button>
