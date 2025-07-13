@@ -26,7 +26,6 @@ import { Fingerprint } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "./ui/label";
 import { browserSupportsWebAuthn, startRegistration } from '@simplewebauthn/browser';
-import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Logo } from "./logo";
 
 
@@ -38,10 +37,7 @@ type WelcomeDialogProps = {
 export function WelcomeDialog({ onSetupSuccess, onSwitchToLogin }: WelcomeDialogProps) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [pin, setPin] = useState("");
-  const [authMethod, setAuthMethod] = useState<'password' | 'pin'>('password');
   const [error, setError] = useState("");
   const { toast } = useToast();
   const [isBiometricSetupOpen, setIsBiometricSetupOpen] = useState(false);
@@ -56,20 +52,9 @@ export function WelcomeDialog({ onSetupSuccess, onSwitchToLogin }: WelcomeDialog
         setError("Please enter a valid 10-digit phone number.");
         return;
     }
-    if (authMethod === 'password') {
-        if (password.length < 6) {
-            setError("Password must be at least 6 characters.");
-            return;
-        }
-        if (password !== confirmPassword) {
-            setError("Passwords do not match.");
-            return;
-        }
-    } else { // PIN validation
-        if (!/^\d{4}$/.test(pin)) {
-            setError("PIN must be exactly 4 digits.");
-            return;
-        }
+    if (!/^\d{4}$/.test(pin)) {
+        setError("PIN must be exactly 4 digits.");
+        return;
     }
     
     // Clear previous user data
@@ -79,12 +64,8 @@ export function WelcomeDialog({ onSetupSuccess, onSwitchToLogin }: WelcomeDialog
     // Save new user data
     localStorage.setItem("rupee-route-user", name.trim());
     localStorage.setItem("rupee-route-phone", phone);
-    localStorage.setItem("rupee-route-auth-method", authMethod);
-    localStorage.setItem("rupee-route-credential", authMethod === 'password' ? password : pin);
-
-    // Clean up old keys if they exist
-    localStorage.removeItem("rupee-route-password");
-    localStorage.removeItem("rupee-route-pin");
+    localStorage.setItem("rupee-route-auth-method", "pin");
+    localStorage.setItem("rupee-route-credential", pin);
     
     toast({
       title: "Setup Complete!",
@@ -188,61 +169,18 @@ export function WelcomeDialog({ onSetupSuccess, onSwitchToLogin }: WelcomeDialog
               />
             </div>
 
-            <div className="space-y-3">
-                <Label>Authentication Method</Label>
-                <RadioGroup
-                    value={authMethod}
-                    onValueChange={(value: 'password' | 'pin') => setAuthMethod(value)}
-                    className="flex space-x-4"
-                >
-                    <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="password" id="r1" />
-                        <Label htmlFor="r1">Password</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="pin" id="r2" />
-                        <Label htmlFor="r2">4-Digit PIN</Label>
-                    </div>
-                </RadioGroup>
+            <div className="space-y-2">
+                <Label htmlFor="pin">Set a 4-Digit PIN</Label>
+                <Input
+                    id="pin"
+                    type="password"
+                    inputMode="numeric"
+                    value={pin}
+                    onChange={handlePinChange}
+                    placeholder="Enter 4 digits"
+                    maxLength={4}
+                />
             </div>
-
-            {authMethod === 'password' ? (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Set a Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="At least 6 characters"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
-                  <Input
-                    id="confirm-password"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Re-enter your password"
-                  />
-                </div>
-              </>
-            ) : (
-                <div className="space-y-2">
-                    <Label htmlFor="pin">Set a 4-Digit PIN</Label>
-                    <Input
-                        id="pin"
-                        type="password"
-                        inputMode="numeric"
-                        value={pin}
-                        onChange={handlePinChange}
-                        placeholder="Enter 4 digits"
-                        maxLength={4}
-                    />
-                </div>
-            )}
             
             {error && <p className="text-red-500 text-sm text-center pt-2">{error}</p>}
           </div>

@@ -22,7 +22,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Label } from "./ui/label";
 import { browserSupportsWebAuthn, startAuthentication } from '@simplewebauthn/browser';
@@ -36,9 +35,8 @@ type LoginDialogProps = {
 
 export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogProps) {
   const [name, setName] = useState("");
-  const [credential, setCredential] = useState("");
+  const [pin, setPin] = useState("");
   const [correctUser, setCorrectUser] = useState<Record<string, string>>({});
-  const [authMethod, setAuthMethod] = useState<'password' | 'pin' | null>(null);
   const [error, setError] = useState("");
   const { toast } = useToast();
   const [hasBiometrics, setHasBiometrics] = useState(false);
@@ -51,12 +49,10 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
   useEffect(() => {
     const storedName = localStorage.getItem("rupee-route-user");
     const storedCredential = localStorage.getItem("rupee-route-credential");
-    const storedAuthMethod = localStorage.getItem("rupee-route-auth-method") as 'password' | 'pin' | null;
     
-    if (storedName && storedCredential && storedAuthMethod) {
+    if (storedName && storedCredential) {
       const storedPhone = localStorage.getItem("rupee-route-phone") || "";
       setCorrectUser({ name: storedName, credential: storedCredential, phone: storedPhone });
-      setAuthMethod(storedAuthMethod);
       setName(storedName);
     }
     
@@ -65,13 +61,12 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
   }, []);
   
   const handleUnlock = () => {
-    if (name === correctUser.name && credential === correctUser.credential) {
+    if (name === correctUser.name && pin === correctUser.credential) {
       onLoginSuccess();
     } else {
-      const errorMsg = authMethod === 'pin' ? "Incorrect PIN." : "Incorrect username or password.";
-      setError(errorMsg);
+      setError("Incorrect name or PIN.");
       setTimeout(() => {
-        setCredential("");
+        setPin("");
       }, 500);
     }
   };
@@ -84,7 +79,7 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
     try {
       const storedCredential = localStorage.getItem('rupee-route-webauthn-credential');
        if (!storedCredential) {
-         toast({ variant: 'destructive', title: 'Biometrics Not Set Up', description: 'Please log in with your password/PIN and set up biometrics first.' });
+         toast({ variant: 'destructive', title: 'Biometrics Not Set Up', description: 'Please log in with your PIN and set up biometrics first.' });
          return;
        }
       
@@ -132,6 +127,13 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
     }
   };
 
+  const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) {
+        setPin(value);
+    }
+  };
+
   return (
     <>
       <Dialog open={!isResetPhoneDialogOpen && !isResetConfirmDialogOpen}>
@@ -144,7 +146,7 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
               <Logo className="mb-4" />
             <DialogTitle className="text-2xl">Welcome Back!</DialogTitle>
             <DialogDescription>
-              Enter your credentials to unlock RupeeRoute.
+              Enter your PIN to unlock RupeeRoute.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4" onKeyPress={handleKeyPress}>
@@ -160,15 +162,16 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="login-credential">{authMethod === 'pin' ? 'PIN' : 'Password'}</Label>
+              <Label htmlFor="login-credential">PIN</Label>
               <div className="flex items-center gap-2">
                   <Input
                   id="login-credential"
-                  type={authMethod === 'pin' ? 'number' : 'password'}
-                  value={credential}
-                  onChange={(e) => setCredential(e.target.value)}
-                  placeholder={authMethod === 'pin' ? 'Enter your 4-digit PIN' : 'Enter your password'}
-                  maxLength={authMethod === 'pin' ? 4 : undefined}
+                  type="password"
+                  inputMode="numeric"
+                  value={pin}
+                  onChange={handlePinChange}
+                  placeholder="Enter your 4-digit PIN"
+                  maxLength={4}
                   className="flex-1"
                   />
                   {hasBiometrics && (
@@ -189,7 +192,7 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
               </Button>
             </div>
             <Button variant="link" size="sm" className="p-0 h-auto" onClick={() => setIsResetPhoneDialogOpen(true)}>
-              Forgot password or want to reset?
+              Forgot PIN or want to reset?
             </Button>
           </DialogFooter>
         </DialogContent>

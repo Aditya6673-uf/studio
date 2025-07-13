@@ -36,10 +36,8 @@ export default function RootLayout({
   
   const handleLogout = () => {
     localStorage.removeItem("rupee-route-user");
-    localStorage.removeItem("rupee-route-password"); // Also remove old key if present
-    localStorage.removeItem("rupee-route-pin"); // Also remove old key if present
-    localStorage.removeItem("rupee-route-auth-method");
     localStorage.removeItem("rupee-route-credential");
+    localStorage.removeItem("rupee-route-auth-method");
     localStorage.removeItem("rupee-route-phone");
     localStorage.removeItem("rupee-route-transactions");
     localStorage.removeItem("favoriteCategories");
