@@ -91,3 +91,12 @@ export type Plan = {
   buttonVariant: "default" | "outline";
   isPopular: boolean;
 };
+
+export type Lending = {
+  id: string;
+  personName: string;
+  amount: number;
+  dateLent: Date | string;
+  status: 'Pending' | 'Paid';
+  notes?: string;
+};
