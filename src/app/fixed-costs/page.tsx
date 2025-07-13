@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useTransactions } from "@/context/transactions-context";
 import { Checkbox } from "@/components/ui/checkbox";
-import { AdBanner } from "@/components/ad-banner";
 import { useSubscription } from "@/context/subscription-context";
 
 export default function FixedCostsPage() {
@@ -191,11 +190,6 @@ export default function FixedCostsPage() {
             </Table>
           </CardContent>
         </Card>
-        {!isSubscribed && (
-          <div className="mt-6">
-            <AdBanner />
-          </div>
-        )}
       </main>
       <AddTransactionSheet
         isOpen={isSheetOpen}

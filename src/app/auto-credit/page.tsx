@@ -11,7 +11,6 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import type { AutoCredit } from "@/lib/types";
 import { AddAutoCreditDialog } from "@/components/add-autocredit-dialog";
 import { format } from "date-fns";
-import { AdBanner } from "@/components/ad-banner";
 import { useTransactions } from "@/context/transactions-context";
 import { useSubscription } from "@/context/subscription-context";
 
@@ -77,11 +76,6 @@ export default function AutoCreditPage() {
             </Table>
           </CardContent>
         </Card>
-        {!isSubscribed && (
-          <div className="mt-6">
-            <AdBanner />
-          </div>
-        )}
       </main>
       <AddAutoCreditDialog
         isOpen={isSheetOpen}

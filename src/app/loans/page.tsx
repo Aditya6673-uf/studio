@@ -11,7 +11,6 @@ import { AddLoanDialog } from "@/components/add-loan-dialog";
 import type { Loan } from "@/lib/types";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { format } from "date-fns";
-import { AdBanner } from "@/components/ad-banner";
 import { useSubscription } from "@/context/subscription-context";
 
 const initialLoans: Loan[] = [
@@ -78,8 +77,8 @@ export default function LoansPage() {
                     return (
                       <TableRow key={loan.id}>
                         <TableCell className="font-medium">{loan.name}</TableCell>
-                        <TableCell className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{loan.principal.toLocaleString('en-IN')}</TableCell>
-                        <TableCell className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{loan.paid.toLocaleString('en-IN')}</TableCell>
+                        <TableCell><div className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{loan.principal.toLocaleString('en-IN')}</div></TableCell>
+                        <TableCell><div className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{loan.paid.toLocaleString('en-IN')}</div></TableCell>
                         <TableCell>{loan.interestRate.toFixed(2)}%</TableCell>
                         <TableCell>{isValidDate ? format(startDate, 'dd MMM, yyyy') : 'N/A'}</TableCell>
                         <TableCell>{loan.term} years</TableCell>
@@ -97,11 +96,6 @@ export default function LoansPage() {
             </Table>
           </CardContent>
         </Card>
-        {!isSubscribed && (
-          <div className="mt-6">
-            <AdBanner />
-          </div>
-        )}
       </main>
       <AddLoanDialog
         isOpen={isAddLoanOpen}

@@ -12,7 +12,6 @@ import { AddRealEstateDialog } from "@/components/add-real-estate-dialog";
 import { SellPropertyDialog } from "@/components/sell-property-dialog";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { format } from "date-fns";
-import { AdBanner } from "@/components/ad-banner";
 import { useSubscription } from "@/context/subscription-context";
 import { useTransactions } from "@/context/transactions-context";
 import {
@@ -189,11 +188,6 @@ export default function RealEstatePage() {
             </Table>
           </CardContent>
         </Card>
-        {!isSubscribed && (
-          <div className="mt-6">
-            <AdBanner />
-          </div>
-        )}
       </main>
       <AddRealEstateDialog
         isOpen={isAddDialogOpen}

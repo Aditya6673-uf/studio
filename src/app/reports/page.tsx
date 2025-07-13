@@ -35,7 +35,6 @@ import {
 import type { Transaction } from "@/lib/types";
 import { useTransactions } from "@/context/transactions-context";
 import { ExportDataDialog } from "@/components/export-data-dialog";
-import { AdBanner } from "@/components/ad-banner";
 import { useSubscription } from "@/context/subscription-context";
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -254,12 +253,6 @@ export default function ReportsPage() {
           </Tabs>
         </CardContent>
       </Card>
-
-      {!isSubscribed && (
-        <div className="mt-6">
-          <AdBanner />
-        </div>
-      )}
     </main>
 
     <Dialog open={selectedTransactions !== null} onOpenChange={(isOpen) => !isOpen && setSelectedTransactions(null)}>

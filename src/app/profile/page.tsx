@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useRef, useState, type ChangeEvent } from 'react';
@@ -9,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Camera, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { AdBanner } from '@/components/ad-banner';
 import { useSubscription } from '@/context/subscription-context';
 
 export default function ProfilePage() {
@@ -107,11 +107,6 @@ export default function ProfilePage() {
             <Button className="w-full" onClick={handleSaveChanges}>Save Changes</Button>
           </CardFooter>
         </Card>
-        {!isSubscribed && (
-          <div className="mt-6">
-              <AdBanner/>
-          </div>
-        )}
       </div>
     </main>
   );

@@ -37,7 +37,6 @@ import {
 } from "@/components/ui/dialog";
 import { useTransactions } from "@/context/transactions-context";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { AdBanner } from "@/components/ad-banner";
 import { useSubscription } from "@/context/subscription-context";
 import { AddLendingDialog } from "@/components/add-lending-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -503,12 +502,6 @@ export default function Dashboard() {
               </CardContent>
             </Card>
         </div>
-
-        {!isSubscribed && (
-          <div className="mt-6">
-            <AdBanner />
-          </div>
-        )}
       </main>
       <AddTransactionSheet
         isOpen={isSheetOpen}

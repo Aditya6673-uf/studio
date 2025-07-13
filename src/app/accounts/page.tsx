@@ -10,7 +10,6 @@ import type { Account } from "@/lib/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { AddAccountDialog } from "@/components/add-account-dialog";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { AdBanner } from "@/components/ad-banner";
 import { useSubscription } from "@/context/subscription-context";
 import {
   AlertDialog,
@@ -124,11 +123,6 @@ export default function AccountsPage() {
             </Card>
           )}
         </div>
-        {!isSubscribed && (
-          <div className="mt-6">
-            <AdBanner />
-          </div>
-        )}
       </main>
       <AddAccountDialog
         isOpen={isAddAccountOpen}

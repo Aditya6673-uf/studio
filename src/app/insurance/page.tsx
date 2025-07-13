@@ -11,7 +11,6 @@ import { AddInsuranceDialog } from "@/components/add-insurance-dialog";
 import type { Insurance } from "@/lib/types";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { format } from "date-fns";
-import { AdBanner } from "@/components/ad-banner";
 import { useTransactions } from "@/context/transactions-context";
 import { useSubscription } from "@/context/subscription-context";
 
@@ -98,7 +97,7 @@ export default function InsurancePage() {
                         <TableCell>{policy.provider}</TableCell>
                         <TableCell>{policy.type}</TableCell>
                         <TableCell className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{policy.premium.toLocaleString('en-IN')}</TableCell>
-                        <TableCell className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{policy.coverage.toLocaleString('en-IN')}</TableCell>
+                        <TableCell><div className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{policy.coverage.toLocaleString('en-IN')}</div></TableCell>
                         <TableCell>{isValidDate ? format(nextDueDate, 'dd MMM, yyyy') : 'N/A'}</TableCell>
                       </TableRow>
                     );
@@ -114,11 +113,6 @@ export default function InsurancePage() {
             </Table>
           </CardContent>
         </Card>
-        {!isSubscribed && (
-          <div className="mt-6">
-            <AdBanner />
-          </div>
-        )}
       </main>
       <AddInsuranceDialog
         isOpen={isAddInsuranceOpen}

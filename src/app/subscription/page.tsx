@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { CheckCircle, Crown } from "lucide-react";
-import { AdBanner } from "@/components/ad-banner";
 import { useSubscription } from "@/context/subscription-context";
 import { useToast } from "@/hooks/use-toast";
 import type { Plan } from "@/lib/types";
@@ -140,11 +139,6 @@ export default function SubscriptionPage() {
             )
         })}
       </div>
-      {!isSubscribed && (
-        <div className="mt-8">
-          <AdBanner />
-        </div>
-      )}
     </main>
   );
 }
