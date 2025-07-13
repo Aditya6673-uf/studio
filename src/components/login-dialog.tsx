@@ -42,6 +42,11 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
   const [error, setError] = useState("");
   const { toast } = useToast();
   const [hasBiometrics, setHasBiometrics] = useState(false);
+  
+  const [isResetPhoneDialogOpen, setIsResetPhoneDialogOpen] = useState(false);
+  const [isResetConfirmDialogOpen, setIsResetConfirmDialogOpen] = useState(false);
+  const [phoneInput, setPhoneInput] = useState("");
+  const [phoneError, setPhoneError] = useState("");
 
   useEffect(() => {
     const storedName = localStorage.getItem("rupee-route-user");
@@ -49,7 +54,8 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
     const storedAuthMethod = localStorage.getItem("rupee-route-auth-method") as 'password' | 'pin' | null;
     
     if (storedName && storedCredential && storedAuthMethod) {
-      setCorrectUser({ name: storedName, credential: storedCredential });
+      const storedPhone = localStorage.getItem("rupee-route-phone") || "";
+      setCorrectUser({ name: storedName, credential: storedCredential, phone: storedPhone });
       setAuthMethod(storedAuthMethod);
       setName(storedName);
     }
@@ -103,86 +109,133 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
       handleUnlock();
     }
   };
+  
+  const handlePhoneVerification = () => {
+    if (phoneInput === correctUser.phone) {
+      setPhoneError("");
+      setIsResetPhoneDialogOpen(false);
+      setIsResetConfirmDialogOpen(true);
+    } else {
+      setPhoneError("Phone number does not match.");
+    }
+  };
 
   const handleResetApp = () => {
     localStorage.clear();
     window.location.reload(); // Reload the page to trigger the setup flow
   };
 
+  const handlePhoneInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) {
+      setPhoneInput(value);
+    }
+  };
+
   return (
-    <Dialog open={true}>
-      <DialogContent
-        className="max-w-sm"
-        onInteractOutside={(e) => e.preventDefault()}
-        hideCloseButton={true}
-      >
-        <DialogHeader className="items-center text-center">
-            <Logo className="mb-4" />
-          <DialogTitle className="text-2xl">Welcome Back!</DialogTitle>
-          <DialogDescription>
-            Enter your credentials to unlock RupeeRoute.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="py-4 space-y-4" onKeyPress={handleKeyPress}>
-          <div className="space-y-2">
-            <Label htmlFor="login-name">Name</Label>
-            <Input
-              id="login-name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter your name"
-              autoFocus
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="login-credential">{authMethod === 'pin' ? 'PIN' : 'Password'}</Label>
-            <div className="flex items-center gap-2">
-                <Input
-                id="login-credential"
-                type={authMethod === 'pin' ? 'number' : 'password'}
-                value={credential}
-                onChange={(e) => setCredential(e.target.value)}
-                placeholder={authMethod === 'pin' ? 'Enter your 4-digit PIN' : 'Enter your password'}
-                maxLength={authMethod === 'pin' ? 4 : undefined}
-                className="flex-1"
-                />
-                {hasBiometrics && (
-                    <Button variant="outline" size="icon" onClick={handleBiometricLogin} aria-label="Login with biometrics">
-                        <Fingerprint className="h-5 w-5"/>
-                    </Button>
-                )}
+    <>
+      <Dialog open={!isResetPhoneDialogOpen && !isResetConfirmDialogOpen}>
+        <DialogContent
+          className="max-w-sm"
+          onInteractOutside={(e) => e.preventDefault()}
+          hideCloseButton={true}
+        >
+          <DialogHeader className="items-center text-center">
+              <Logo className="mb-4" />
+            <DialogTitle className="text-2xl">Welcome Back!</DialogTitle>
+            <DialogDescription>
+              Enter your credentials to unlock RupeeRoute.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4" onKeyPress={handleKeyPress}>
+            <div className="space-y-2">
+              <Label htmlFor="login-name">Name</Label>
+              <Input
+                id="login-name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter your name"
+                autoFocus
+              />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="login-credential">{authMethod === 'pin' ? 'PIN' : 'Password'}</Label>
+              <div className="flex items-center gap-2">
+                  <Input
+                  id="login-credential"
+                  type={authMethod === 'pin' ? 'number' : 'password'}
+                  value={credential}
+                  onChange={(e) => setCredential(e.target.value)}
+                  placeholder={authMethod === 'pin' ? 'Enter your 4-digit PIN' : 'Enter your password'}
+                  maxLength={authMethod === 'pin' ? 4 : undefined}
+                  className="flex-1"
+                  />
+                  {hasBiometrics && (
+                      <Button variant="outline" size="icon" onClick={handleBiometricLogin} aria-label="Login with biometrics">
+                          <Fingerprint className="h-5 w-5"/>
+                      </Button>
+                  )}
+              </div>
+            </div>
+            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
           </div>
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-        </div>
-        <DialogFooter className="flex-col items-center justify-center space-y-2">
-          <Button onClick={handleUnlock} className="w-full">Sign In</Button>
-          <div className="text-center text-sm">
-            Don't have an account?{" "}
-            <Button variant="link" size="sm" className="p-0 h-auto" onClick={onSwitchToSignUp}>
-                Sign Up
+          <DialogFooter className="flex-col items-center justify-center space-y-2">
+            <Button onClick={handleUnlock} className="w-full">Sign In</Button>
+            <div className="text-center text-sm">
+              Don't have an account?{" "}
+              <Button variant="link" size="sm" className="p-0 h-auto" onClick={onSwitchToSignUp}>
+                  Sign Up
+              </Button>
+            </div>
+            <Button variant="link" size="sm" className="p-0 h-auto" onClick={() => setIsResetPhoneDialogOpen(true)}>
+              Forgot password or want to reset?
             </Button>
-          </div>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="link" size="sm" className="p-0 h-auto">Forgot password or want to reset?</Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Reset App?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. All your data, including your account and transactions, will be permanently deleted. You will have to set up the app again.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleResetApp}>Reset App</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      <Dialog open={isResetPhoneDialogOpen} onOpenChange={setIsResetPhoneDialogOpen}>
+        <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Verify Your Identity</DialogTitle>
+              <DialogDescription>
+                To reset the app, please enter the phone number you used during signup.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-2">
+              <Label htmlFor="phone-verify">Phone Number</Label>
+              <Input
+                id="phone-verify"
+                type="tel"
+                value={phoneInput}
+                onChange={handlePhoneInputChange}
+                placeholder="Enter 10-digit number"
+                maxLength={10}
+              />
+              {phoneError && <p className="text-red-500 text-sm pt-2">{phoneError}</p>}
+            </div>
+            <DialogFooter>
+                <Button variant="outline" onClick={() => setIsResetPhoneDialogOpen(false)}>Cancel</Button>
+                <Button onClick={handlePhoneVerification}>Continue</Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      <AlertDialog open={isResetConfirmDialogOpen} onOpenChange={setIsResetConfirmDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset App?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. All your data, including your account and transactions, will be permanently deleted. You will have to set up the app again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleResetApp}>Reset App</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
