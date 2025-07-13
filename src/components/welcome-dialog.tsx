@@ -22,25 +22,28 @@ type WelcomeDialogProps = {
 
 export function WelcomeDialog({ onSetupSuccess }: WelcomeDialogProps) {
   const [name, setName] = useState("");
-  const [pin, setPin] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const { toast } = useToast();
 
-  const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (/^\d*$/.test(value) && value.length <= 4) {
-      setPin(value);
-      setError("");
-    }
-  };
-
   const handleCompleteSetup = () => {
+    setError(""); // Reset error on each attempt
     if (name.trim().length < 2) {
       setError("Please enter a valid name.");
       return;
     }
-    if (pin.length !== 4) {
-      setError("PIN must be exactly 4 digits.");
+    if (!/^\d{10}$/.test(phone)) {
+        setError("Please enter a valid 10-digit phone number.");
+        return;
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
       return;
     }
     
@@ -49,7 +52,8 @@ export function WelcomeDialog({ onSetupSuccess }: WelcomeDialogProps) {
     localStorage.removeItem("rupee-route-accounts");
     
     localStorage.setItem("rupee-route-user", name.trim());
-    localStorage.setItem("rupee-route-pin", pin);
+    localStorage.setItem("rupee-route-phone", phone);
+    localStorage.setItem("rupee-route-password", password);
     
     toast({
       title: "Setup Complete!",
@@ -59,7 +63,7 @@ export function WelcomeDialog({ onSetupSuccess }: WelcomeDialogProps) {
     onSetupSuccess();
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter') {
       handleCompleteSetup();
     }
@@ -81,7 +85,7 @@ export function WelcomeDialog({ onSetupSuccess }: WelcomeDialogProps) {
             Let's get your account set up.
           </DialogDescription>
         </DialogHeader>
-        <div className="py-4 space-y-6">
+        <div className="py-4 space-y-4" onKeyPress={handleKeyPress}>
            <div className="space-y-2">
             <Label htmlFor="name">What should we call you?</Label>
             <Input
@@ -94,20 +98,37 @@ export function WelcomeDialog({ onSetupSuccess }: WelcomeDialogProps) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="pin">Set a 4-digit PIN</Label>
+            <Label htmlFor="phone">Phone Number</Label>
             <Input
-              id="pin"
-              type="password"
-              inputMode="numeric"
-              value={pin}
-              onChange={handlePinChange}
-              onKeyPress={handleKeyPress}
-              maxLength={4}
-              placeholder="****"
-              className="text-center text-2xl font-mono tracking-[0.5em] h-12"
+              id="phone"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Enter your 10-digit phone number"
+              maxLength={10}
             />
           </div>
-          {error && <p className="text-red-500 text-sm text-center -mt-2">{error}</p>}
+          <div className="space-y-2">
+            <Label htmlFor="password">Set a Password</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="At least 6 characters"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirm-password">Confirm Password</Label>
+            <Input
+              id="confirm-password"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Re-enter your password"
+            />
+          </div>
+          {error && <p className="text-red-500 text-sm text-center pt-2">{error}</p>}
         </div>
         <DialogFooter>
           <Button onClick={handleCompleteSetup} className="w-full">Complete Setup</Button>

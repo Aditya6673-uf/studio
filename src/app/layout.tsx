@@ -10,7 +10,7 @@ import { Logo } from '@/components/logo';
 import { MainNav } from '@/components/main-nav';
 import { UserNav } from '@/components/user-nav';
 import { useState, useEffect } from 'react';
-import { PinDialog } from '@/components/pin-dialog';
+import { LoginDialog } from '@/components/login-dialog';
 import { WelcomeDialog } from '@/components/welcome-dialog';
 import { TransactionsProvider } from '@/context/transactions-context';
 import { SubscriptionProvider } from '@/context/subscription-context';
@@ -25,8 +25,8 @@ export default function RootLayout({
 
   useEffect(() => {
     // This effect runs only on the client, after hydration
-    const pin = localStorage.getItem('rupee-route-pin');
-    setUserExists(!!pin);
+    const user = localStorage.getItem('rupee-route-user');
+    setUserExists(!!user);
   }, []);
 
   const handleAuthSuccess = () => {
@@ -35,8 +35,9 @@ export default function RootLayout({
   };
   
   const handleLogout = () => {
-    localStorage.removeItem("rupee-route-pin");
     localStorage.removeItem("rupee-route-user");
+    localStorage.removeItem("rupee-route-password");
+    localStorage.removeItem("rupee-route-phone");
     localStorage.removeItem("rupee-route-transactions");
     localStorage.removeItem("favoriteCategories");
     localStorage.removeItem("rupee-route-subscribed");
@@ -50,7 +51,7 @@ export default function RootLayout({
     }
     
     if (userExists) {
-      return <PinDialog onPinSuccess={handleAuthSuccess} />;
+      return <LoginDialog onLoginSuccess={handleAuthSuccess} />;
     } else {
       return <WelcomeDialog onSetupSuccess={handleAuthSuccess} />;
     }
