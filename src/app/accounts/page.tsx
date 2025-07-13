@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { IndianRupee, Landmark, PlusCircle, Wallet } from "lucide-react";
+import { IndianRupee, Landmark, PlusCircle, Wallet, Trash2 } from "lucide-react";
 import { initialAccounts } from "@/lib/data";
 import type { Account } from "@/lib/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -12,6 +12,17 @@ import { AddAccountDialog } from "@/components/add-account-dialog";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { AdBanner } from "@/components/ad-banner";
 import { useSubscription } from "@/context/subscription-context";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const accountIcons = {
   Bank: <Landmark className="h-8 w-8 text-primary" />,
@@ -30,6 +41,10 @@ export default function AccountsPage() {
       id: new Date().getTime().toString(),
     };
     setAccounts(prev => [...prev, newAccount]);
+  };
+
+  const handleDeleteAccount = (id: string) => {
+    setAccounts(prev => prev.filter(acc => acc.id !== id));
   };
 
   return (
@@ -65,7 +80,31 @@ export default function AccountsPage() {
                 <Card key={account.id} className="flex flex-col">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-lg font-medium">{account.name}</CardTitle>
-                    {accountIcons[account.type]}
+                    <div className="flex items-center gap-2">
+                        {accountIcons[account.type]}
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive/70 hover:text-destructive hover:bg-destructive/10">
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Delete Account</span>
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the "{account.name}" account.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeleteAccount(account.id)}>
+                                Continue
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
                   </CardHeader>
                   <CardContent className="flex-grow flex flex-col justify-end">
                     <div className="text-sm text-muted-foreground">{account.type} Account</div>
