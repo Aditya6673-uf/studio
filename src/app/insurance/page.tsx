@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ShieldCheck, PlusCircle } from "lucide-react";
+import { ShieldCheck, PlusCircle, IndianRupee } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { AddInsuranceDialog } from "@/components/add-insurance-dialog";
 import type { Insurance } from "@/lib/types";
@@ -98,8 +98,8 @@ export default function InsurancePage() {
                         <TableCell className="font-medium">{policy.policyName}</TableCell>
                         <TableCell>{policy.provider}</TableCell>
                         <TableCell>{policy.type}</TableCell>
-                        <TableCell>₹{policy.premium.toLocaleString('en-IN')}</TableCell>
-                        <TableCell>₹{policy.coverage.toLocaleString('en-IN')}</TableCell>
+                        <TableCell className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{policy.premium.toLocaleString('en-IN')}</TableCell>
+                        <TableCell className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{policy.coverage.toLocaleString('en-IN')}</TableCell>
                         <TableCell>{isValidDate ? format(nextDueDate, 'dd MMM, yyyy') : 'N/A'}</TableCell>
                       </TableRow>
                     );
