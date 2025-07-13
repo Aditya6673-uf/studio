@@ -69,6 +69,13 @@ export function WelcomeDialog({ onSetupSuccess }: WelcomeDialogProps) {
     }
   };
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) {
+      setPhone(value);
+    }
+  };
+
   return (
     <Dialog open={true}>
       <DialogContent
@@ -103,7 +110,7 @@ export function WelcomeDialog({ onSetupSuccess }: WelcomeDialogProps) {
               id="phone"
               type="tel"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={handlePhoneChange}
               placeholder="Enter your 10-digit phone number"
               maxLength={10}
             />
