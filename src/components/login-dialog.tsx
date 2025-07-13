@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { IndianRupee, Fingerprint } from "lucide-react";
+import { Fingerprint } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +27,7 @@ import {
 import { Label } from "./ui/label";
 import { browserSupportsWebAuthn, startAuthentication } from '@simplewebauthn/browser';
 import { useToast } from "@/hooks/use-toast";
+import { Logo } from "./logo";
 
 type LoginDialogProps = {
   onLoginSuccess: () => void;
@@ -116,9 +117,7 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
         hideCloseButton={true}
       >
         <DialogHeader className="items-center text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary mb-4">
-                <IndianRupee className="h-6 w-6 text-primary-foreground" />
-            </div>
+            <Logo className="mb-4" />
           <DialogTitle className="text-2xl">Welcome Back!</DialogTitle>
           <DialogDescription>
             Enter your credentials to unlock RupeeRoute.
