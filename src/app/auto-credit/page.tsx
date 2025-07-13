@@ -1,12 +1,11 @@
 
-
 "use client";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PiggyBank, PlusCircle } from "lucide-react";
+import { PiggyBank, PlusCircle, IndianRupee } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import type { AutoCredit } from "@/lib/types";
 import { AddAutoCreditDialog } from "@/components/add-autocredit-dialog";
@@ -59,7 +58,7 @@ export default function AutoCreditPage() {
                     return (
                         <TableRow key={item.id}>
                         <TableCell className="font-medium">{item.name}</TableCell>
-                        <TableCell>₹{item.amount.toLocaleString('en-IN')}</TableCell>
+                        <TableCell className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{item.amount.toLocaleString('en-IN')}</TableCell>
                         <TableCell>{item.frequency}</TableCell>
                         <TableCell>{isValidDate ? format(nextDate, 'dd MMM, yyyy') : 'N/A'}</TableCell>
                         </TableRow>
