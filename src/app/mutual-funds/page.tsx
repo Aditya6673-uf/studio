@@ -148,7 +148,7 @@ export default function MutualFundsPage() {
           </div>
         </div>
         
-        {holdingsWithDetails.length > 0 && (
+        {holdingsWithDetails.length > 0 ? (
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>Your Holdings</CardTitle>
@@ -187,68 +187,15 @@ export default function MutualFundsPage() {
               </Table>
             </CardContent>
           </Card>
+        ) : (
+             <Card>
+                <CardContent className="h-48 flex flex-col items-center justify-center text-center text-muted-foreground">
+                    <p>You have no mutual fund holdings.</p>
+                    <p className="text-sm">You can add investments manually as an expense with the 'Investment' or 'SIP' category.</p>
+                </CardContent>
+            </Card>
         )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Explore Mutual Funds</CardTitle>
-            <CardDescription>Browse and invest in a curated list of mutual funds.</CardDescription>
-            <div className="relative mt-4">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search for a fund..."
-                className="w-full rounded-lg bg-background pl-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </CardHeader>
-          <CardContent>
-             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Fund Name</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>
-                    <Button variant="ghost" onClick={handleReturnPeriodChange} className="p-0 hover:bg-transparent">
-                      {returnPeriodLabels[returnPeriod]}
-                      <ChevronsUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                  </TableHead>
-                  <TableHead>Risk</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredFunds.length > 0 ? (
-                  filteredFunds.map(fund => (
-                    <TableRow key={fund.id}>
-                        <TableCell className="font-medium">{fund.name}</TableCell>
-                        <TableCell>{fund.category}</TableCell>
-                        <TableCell className="text-green-600 font-medium">{fund.returns[returnPeriod]}%</TableCell>
-                        <TableCell>
-                            <Badge variant="outline" className={riskColorMap[fund.risk]}>{fund.risk}</Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                           <Button size="sm" onClick={() => handleInvestClick(fund)}>
-                                <Zap className="mr-2 h-4 w-4" />
-                                Invest
-                            </Button>
-                        </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
-                      No mutual funds found.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
         {!isSubscribed && (
           <div className="mt-6">
             <AdBanner />
