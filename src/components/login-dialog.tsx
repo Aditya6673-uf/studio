@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { IndianRupee, User, Fingerprint } from "lucide-react";
+import { IndianRupee, Fingerprint } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,30 +35,36 @@ type LoginDialogProps = {
 
 export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogProps) {
   const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
+  const [credential, setCredential] = useState("");
   const [correctUser, setCorrectUser] = useState<Record<string, string>>({});
+  const [authMethod, setAuthMethod] = useState<'password' | 'pin' | null>(null);
   const [error, setError] = useState("");
   const { toast } = useToast();
   const [hasBiometrics, setHasBiometrics] = useState(false);
 
   useEffect(() => {
     const storedName = localStorage.getItem("rupee-route-user");
-    const storedPassword = localStorage.getItem("rupee-route-password");
-    if (storedName && storedPassword) {
-      setCorrectUser({ name: storedName, password: storedPassword });
+    const storedCredential = localStorage.getItem("rupee-route-credential");
+    const storedAuthMethod = localStorage.getItem("rupee-route-auth-method") as 'password' | 'pin' | null;
+    
+    if (storedName && storedCredential && storedAuthMethod) {
+      setCorrectUser({ name: storedName, credential: storedCredential });
+      setAuthMethod(storedAuthMethod);
       setName(storedName);
     }
-    const credential = localStorage.getItem('rupee-route-webauthn-credential');
-    setHasBiometrics(!!credential);
+    
+    const storedBiometricCredential = localStorage.getItem('rupee-route-webauthn-credential');
+    setHasBiometrics(!!storedBiometricCredential);
   }, []);
   
   const handleUnlock = () => {
-    if (name === correctUser.name && password === correctUser.password) {
+    if (name === correctUser.name && credential === correctUser.credential) {
       onLoginSuccess();
     } else {
-      setError("Incorrect username or password.");
+      const errorMsg = authMethod === 'pin' ? "Incorrect PIN." : "Incorrect username or password.";
+      setError(errorMsg);
       setTimeout(() => {
-        setPassword("");
+        setCredential("");
       }, 500);
     }
   };
@@ -71,7 +77,7 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
     try {
       const storedCredential = localStorage.getItem('rupee-route-webauthn-credential');
        if (!storedCredential) {
-         toast({ variant: 'destructive', title: 'Biometrics Not Set Up', description: 'Please log in with your password and set up biometrics first.' });
+         toast({ variant: 'destructive', title: 'Biometrics Not Set Up', description: 'Please log in with your password/PIN and set up biometrics first.' });
          return;
        }
       
@@ -90,7 +96,6 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
         toast({ variant: 'destructive', title: 'Biometric Login Failed', description: err.message || 'Please try again.' });
     }
   }
-
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter') {
@@ -132,14 +137,15 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="login-password">Password</Label>
+            <Label htmlFor="login-credential">{authMethod === 'pin' ? 'PIN' : 'Password'}</Label>
             <div className="flex items-center gap-2">
                 <Input
-                id="login-password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                id="login-credential"
+                type={authMethod === 'pin' ? 'number' : 'password'}
+                value={credential}
+                onChange={(e) => setCredential(e.target.value)}
+                placeholder={authMethod === 'pin' ? 'Enter your 4-digit PIN' : 'Enter your password'}
+                maxLength={authMethod === 'pin' ? 4 : undefined}
                 className="flex-1"
                 />
                 {hasBiometrics && (
