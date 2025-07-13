@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState, useMemo } from "react";
@@ -148,7 +147,7 @@ export default function MutualFundsPage() {
           </div>
         </div>
         
-        {holdingsWithDetails.length > 0 ? (
+        {holdingsWithDetails.length > 0 && (
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>Your Holdings</CardTitle>
@@ -187,14 +186,62 @@ export default function MutualFundsPage() {
               </Table>
             </CardContent>
           </Card>
-        ) : (
-             <Card>
-                <CardContent className="h-48 flex flex-col items-center justify-center text-center text-muted-foreground">
-                    <p>You have no mutual fund holdings.</p>
-                    <p className="text-sm">You can add investments manually as an expense with the 'Investment' or 'SIP' category.</p>
-                </CardContent>
-            </Card>
         )}
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Explore Mutual Funds</CardTitle>
+                <CardDescription>Browse and invest in a curated list of mutual funds.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                 <div className="relative mb-4">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input
+                        placeholder="Search for a fund..."
+                        className="pl-10"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                        <TableHead>Fund Name</TableHead>
+                        <TableHead>Risk</TableHead>
+                        <TableHead className="text-right cursor-pointer" onClick={handleReturnPeriodChange}>
+                           <div className="flex items-center justify-end gap-1">
+                             {returnPeriodLabels[returnPeriod]}
+                             <ChevronsUpDown className="h-3 w-3" />
+                           </div>
+                        </TableHead>
+                        <TableHead className="text-right">Action</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {filteredFunds.map(fund => (
+                            <TableRow key={fund.id}>
+                                <TableCell>
+                                    <div className="font-medium">{fund.name}</div>
+                                    <div className="text-xs text-muted-foreground">{fund.category}</div>
+                                </TableCell>
+                                <TableCell>
+                                    <Badge variant="outline" className={cn(riskColorMap[fund.risk])}>{fund.risk}</Badge>
+                                </TableCell>
+                                <TableCell className="text-right font-mono">
+                                    {fund.returns[returnPeriod].toFixed(2)}%
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    <Button size="sm" onClick={() => handleInvestClick(fund)}>
+                                        <Zap className="mr-2 h-4 w-4" />
+                                        Invest
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
 
         {!isSubscribed && (
           <div className="mt-6">
