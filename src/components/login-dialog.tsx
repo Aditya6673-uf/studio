@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { IndianRupee, User } from "lucide-react";
+import { IndianRupee, User, Fingerprint } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +25,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Label } from "./ui/label";
+import { browserSupportsWebAuthn, startAuthentication } from '@simplewebauthn/browser';
+import { useToast } from "@/hooks/use-toast";
 
 type LoginDialogProps = {
   onLoginSuccess: () => void;
@@ -36,14 +38,18 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
   const [password, setPassword] = useState("");
   const [correctUser, setCorrectUser] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
+  const { toast } = useToast();
+  const [hasBiometrics, setHasBiometrics] = useState(false);
 
   useEffect(() => {
     const storedName = localStorage.getItem("rupee-route-user");
     const storedPassword = localStorage.getItem("rupee-route-password");
     if (storedName && storedPassword) {
       setCorrectUser({ name: storedName, password: storedPassword });
-      setName(storedName); // Pre-fill username
+      setName(storedName);
     }
+    const credential = localStorage.getItem('rupee-route-webauthn-credential');
+    setHasBiometrics(!!credential);
   }, []);
   
   const handleUnlock = () => {
@@ -56,6 +62,35 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
       }, 500);
     }
   };
+  
+  const handleBiometricLogin = async () => {
+    if (!browserSupportsWebAuthn()) {
+      toast({ variant: 'destructive', title: 'Unsupported Browser', description: 'Your browser does not support biometric login.' });
+      return;
+    }
+    try {
+      const storedCredential = localStorage.getItem('rupee-route-webauthn-credential');
+       if (!storedCredential) {
+         toast({ variant: 'destructive', title: 'Biometrics Not Set Up', description: 'Please log in with your password and set up biometrics first.' });
+         return;
+       }
+      
+      const credential = JSON.parse(storedCredential);
+      
+      const auth = await startAuthentication({
+          challenge: 'login-challenge',
+          rpId: window.location.hostname,
+          allowCredentials: [{
+            id: Uint8Array.from(credential.rawId, c => c),
+            type: 'public-key'
+          }],
+      });
+      onLoginSuccess();
+    } catch (err: any) {
+        toast({ variant: 'destructive', title: 'Biometric Login Failed', description: err.message || 'Please try again.' });
+    }
+  }
+
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter') {
@@ -98,13 +133,21 @@ export function LoginDialog({ onLoginSuccess, onSwitchToSignUp }: LoginDialogPro
           </div>
           <div className="space-y-2">
             <Label htmlFor="login-password">Password</Label>
-            <Input
-              id="login-password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-            />
+            <div className="flex items-center gap-2">
+                <Input
+                id="login-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                className="flex-1"
+                />
+                {hasBiometrics && (
+                    <Button variant="outline" size="icon" onClick={handleBiometricLogin} aria-label="Login with biometrics">
+                        <Fingerprint className="h-5 w-5"/>
+                    </Button>
+                )}
+            </div>
           </div>
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
         </div>
