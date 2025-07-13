@@ -35,7 +35,6 @@ import {
 import type { Transaction } from "@/lib/types";
 import { useTransactions } from "@/context/transactions-context";
 import { ExportDataDialog } from "@/components/export-data-dialog";
-import { useSubscription } from "@/context/subscription-context";
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -88,7 +87,6 @@ export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState("monthly");
   const [offset, setOffset] = useState(0);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
-  const { isSubscribed } = useSubscription();
 
   const { dailyData, weeklyData, monthlyData, yearlyData, rangeDescription } = useMemo(() => {
     const processTransactionsForPeriod = (transactionsToProcess: Transaction[], startDate: Date, endDate: Date) => {

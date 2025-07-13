@@ -11,12 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { Crown, Settings } from "lucide-react";
-import { useSubscription } from "@/context/subscription-context";
 
 export function UserNav({ onLogout }: { onLogout: () => void }) {
-  const { isSubscribed } = useSubscription();
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -40,12 +36,6 @@ export function UserNav({ onLogout }: { onLogout: () => void }) {
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
             <Link href="/profile">Profile</Link>
-          </DropdownMenuItem>
-           <DropdownMenuItem asChild>
-            <Link href="/subscription">
-              <Crown className="mr-2 h-4 w-4" />
-              <span>Subscription</span>
-            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

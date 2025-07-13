@@ -12,7 +12,6 @@ import { AddRealEstateDialog } from "@/components/add-real-estate-dialog";
 import { SellPropertyDialog } from "@/components/sell-property-dialog";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { format } from "date-fns";
-import { useSubscription } from "@/context/subscription-context";
 import { useTransactions } from "@/context/transactions-context";
 import {
   AlertDialog,
@@ -35,7 +34,6 @@ export default function RealEstatePage() {
   const [properties, setProperties] = useLocalStorage<RealEstate[]>('rupee-route-real-estate', initialRealEstate);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [propertyToSell, setPropertyToSell] = useState<RealEstate | null>(null);
-  const { isSubscribed } = useSubscription();
   const { addTransaction } = useTransactions();
 
   const handleAddProperty = (propertyData: Omit<RealEstate, 'id' | 'sellPrice' | 'sellDate'>) => {

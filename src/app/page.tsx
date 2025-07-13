@@ -37,7 +37,6 @@ import {
 } from "@/components/ui/dialog";
 import { useTransactions } from "@/context/transactions-context";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { useSubscription } from "@/context/subscription-context";
 import { AddLendingDialog } from "@/components/add-lending-dialog";
 import { Badge } from "@/components/ui/badge";
 
@@ -60,7 +59,6 @@ export default function Dashboard() {
 
   const [isIncomeDialogOpen, setIsIncomeDialogOpen] = useState(false);
   const [incomeInput, setIncomeInput] = useState("");
-  const { isSubscribed } = useSubscription();
 
   const { monthlyIncome, monthlyExpenses, netBalance, incomeChange, expenseChange } = useMemo(() => {
     const now = new Date();

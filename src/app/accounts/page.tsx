@@ -10,7 +10,6 @@ import type { Account } from "@/lib/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { AddAccountDialog } from "@/components/add-account-dialog";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { useSubscription } from "@/context/subscription-context";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +30,6 @@ const accountIcons = {
 export default function AccountsPage() {
   const [accounts, setAccounts] = useLocalStorage<Account[]>('rupee-route-accounts', initialAccounts);
   const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
-  const { isSubscribed } = useSubscription();
   const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
 
   const handleAddAccount = (accountData: Omit<Account, 'id'>) => {

@@ -13,7 +13,6 @@ import { useState, useEffect } from 'react';
 import { LoginDialog } from '@/components/login-dialog';
 import { WelcomeDialog } from '@/components/welcome-dialog';
 import { TransactionsProvider } from '@/context/transactions-context';
-import { SubscriptionProvider } from '@/context/subscription-context';
 
 export default function RootLayout({
   children,
@@ -37,11 +36,9 @@ export default function RootLayout({
   const handleLogout = () => {
     localStorage.removeItem("rupee-route-user");
     localStorage.removeItem("rupee-route-credential");
-    localStorage.removeItem("rupee-route-auth-method");
     localStorage.removeItem("rupee-route-phone");
     localStorage.removeItem("rupee-route-transactions");
     localStorage.removeItem("favoriteCategories");
-    localStorage.removeItem("rupee-route-subscribed");
     localStorage.removeItem("rupee-route-webauthn-credential");
     window.location.reload();
   };
@@ -70,7 +67,6 @@ export default function RootLayout({
           renderAuthScreen()
         ) : (
           <TransactionsProvider>
-            <SubscriptionProvider>
               <SidebarProvider>
                 <Sidebar>
                   <SidebarHeader>
@@ -89,7 +85,6 @@ export default function RootLayout({
                   </div>
                 </SidebarInset>
               </SidebarProvider>
-            </SubscriptionProvider>
           </TransactionsProvider>
         )}
         <Toaster />

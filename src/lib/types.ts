@@ -56,22 +56,6 @@ export type RealEstate = {
   sellDate?: Date | string;
 };
 
-export type SubscriptionInfo = {
-  planName: string;
-  startDate: string; // ISO string
-};
-
-export type Plan = {
-  name: string;
-  price: string;
-  period: string;
-  durationInMonths: number | null;
-  features: string[];
-  buttonText: string;
-  buttonVariant: "default" | "outline";
-  isPopular: boolean;
-};
-
 export type Lending = {
   id: string;
   personName: string;

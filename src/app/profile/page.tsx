@@ -10,14 +10,12 @@ import { Label } from "@/components/ui/label";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Camera, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useSubscription } from '@/context/subscription-context';
 
 export default function ProfilePage() {
   const [avatarSrc, setAvatarSrc] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [isEmailVisible, setIsEmailVisible] = useState(true);
-  const { isSubscribed } = useSubscription();
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

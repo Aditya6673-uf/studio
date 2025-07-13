@@ -26,7 +26,6 @@ import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useTransactions } from "@/context/transactions-context";
 import { Separator } from "@/components/ui/separator";
-import { useSubscription } from "@/context/subscription-context";
 
 interface MonthlySummary {
   transactions: Transaction[];
@@ -42,7 +41,6 @@ interface GroupedTransactions {
 export default function AllTransactionsPage() {
   const { transactions, addTransaction, deleteTransaction } = useTransactions();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const { isSubscribed } = useSubscription();
 
   const groupedTransactions = useMemo(() => {
     const sorted = [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
