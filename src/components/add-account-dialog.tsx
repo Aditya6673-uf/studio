@@ -28,7 +28,17 @@ const formSchema = z.object({
   name: z.string().min(1, { message: "Please enter an account name." }),
   type: z.enum(["Bank", "Wallet"], { required_error: "Please select an account type." }),
   balance: z.coerce.number().min(0, { message: "Balance cannot be negative." }),
-})
+  bankName: z.string().optional(),
+}).refine(data => {
+    if (data.type === 'Bank' && !data.bankName) {
+        return false;
+    }
+    return true;
+}, {
+    message: "Bank name is required for bank accounts.",
+    path: ["bankName"],
+});
+
 
 type AddAccountDialogProps = {
   isOpen: boolean
@@ -43,11 +53,18 @@ export function AddAccountDialog({ isOpen, setIsOpen, onAddAccount }: AddAccount
       name: "",
       type: "Bank",
       balance: undefined,
+      bankName: "",
     },
   })
 
+  const accountType = form.watch("type");
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onAddAccount(values);
+    const accountData: Omit<Account, 'id'> = { ...values };
+    if (values.type !== 'Bank') {
+        delete accountData.bankName;
+    }
+    onAddAccount(accountData);
     form.reset();
     setIsOpen(false);
   }
@@ -68,9 +85,9 @@ export function AddAccountDialog({ isOpen, setIsOpen, onAddAccount }: AddAccount
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Account/Wallet Name</FormLabel>
+                  <FormLabel>Account Nickname</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., HDFC Bank, PayTM Wallet" {...field} />
+                    <Input placeholder="e.g., My Salary Account, PayTM" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -97,6 +114,21 @@ export function AddAccountDialog({ isOpen, setIsOpen, onAddAccount }: AddAccount
                 </FormItem>
               )}
             />
+            {accountType === 'Bank' && (
+               <FormField
+                control={form.control}
+                name="bankName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bank Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., HDFC Bank" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
              <FormField
               control={form.control}
               name="balance"

@@ -1,5 +1,4 @@
 
-
 export type Transaction = {
   id: string;
   type: 'income' | 'expense';
@@ -15,6 +14,7 @@ export type Account = {
   name: string;
   type: 'Bank' | 'Wallet';
   balance: number;
+  bankName?: string;
 };
 
 export type Loan = {

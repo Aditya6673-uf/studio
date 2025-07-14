@@ -104,7 +104,10 @@ export default function AccountsPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="flex-grow flex flex-col justify-end">
-                    <div className="text-sm text-muted-foreground">{account.type} Account</div>
+                    <div className="text-sm text-muted-foreground">
+                        {account.type} Account
+                        {account.type === 'Bank' && account.bankName && <span className="block">{account.bankName}</span>}
+                    </div>
                     <div className="font-headline text-2xl font-bold flex items-center">
                       <IndianRupee className="h-6 w-6" />{account.balance.toLocaleString('en-IN')}
                     </div>
