@@ -1,3 +1,4 @@
+
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -85,9 +86,9 @@ export function AddAccountDialog({ isOpen, setIsOpen, onAddAccount }: AddAccount
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Account Nickname</FormLabel>
+                  <FormLabel>Account Owner Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., My Salary Account, PayTM" {...field} />
+                    <Input placeholder="e.g., Aditya" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
