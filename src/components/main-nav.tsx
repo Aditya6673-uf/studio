@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart, Home, Landmark, Repeat, List, HandCoins, PiggyBank, User, ShieldCheck, Building2, Gem } from 'lucide-react';
+import { BarChart, Home, Landmark, Repeat, List, HandCoins, PiggyBank, User, ShieldCheck, Building2, Gem, AreaChart } from 'lucide-react';
 import {
   SidebarMenu,
   SidebarMenuItem,
@@ -22,6 +22,7 @@ const navItems = [
   { href: '/insurance', label: 'Insurance', icon: ShieldCheck },
   { href: '/real-estate', label: 'Real Estate', icon: Building2 },
   { href: '/bullion', label: 'Bullion', icon: Gem },
+  { href: '/net-worth', label: 'Net Worth', icon: AreaChart },
 ];
 
 export function MainNav() {
