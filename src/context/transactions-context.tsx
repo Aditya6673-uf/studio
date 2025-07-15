@@ -3,12 +3,13 @@
 "use client";
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import type { Transaction, AutoCredit, Lending, Account } from '@/lib/types';
+import type { Transaction, AutoCredit, Lending, Account, Gold } from '@/lib/types';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 
 type TransactionInput = Omit<Transaction, 'id'>;
 type AutoCreditInput = Omit<AutoCredit, 'id'>;
 type LendingInput = Omit<Lending, 'id' | 'status'>;
+type GoldInput = Omit<Gold, 'id'>;
 
 
 interface TransactionsContextType {
@@ -24,6 +25,9 @@ interface TransactionsContextType {
   addLending: (lending: LendingInput) => void;
   updateLendingStatus: (id: string, status: 'Paid') => void;
   deleteLending: (id: string) => void;
+  gold: Gold[];
+  addGold: (gold: GoldInput) => void;
+  deleteGold: (id: string) => void;
 }
 
 const TransactionsContext = createContext<TransactionsContextType | undefined>(undefined);
@@ -44,6 +48,7 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
   const [accounts, setAccounts] = useLocalStorage<Account[]>('rupee-route-accounts', initialAccounts);
   const [autoCredits, setAutoCredits] = useLocalStorage<AutoCredit[]>('rupee-route-autocredits', initialAutoCredits);
   const [lendings, setLendings] = useLocalStorage<Lending[]>('rupee-route-lendings', []);
+  const [gold, setGold] = useLocalStorage<Gold[]>('rupee-route-gold', []);
 
   const addTransaction = (transaction: TransactionInput) => {
     const newTransaction: Transaction = {
@@ -150,9 +155,30 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
       });
     }
   };
+  
+  const addGold = (goldData: GoldInput) => {
+    const newGold: Gold = {
+      ...goldData,
+      id: new Date().getTime().toString(),
+    };
+    setGold(prev => [...prev, newGold]);
+
+    addTransaction({
+      type: 'expense',
+      amount: goldData.purchasePrice,
+      category: 'Investment',
+      date: goldData.purchaseDate,
+      paymentMethod: 'Bank',
+      notes: `Gold Purchase: ${goldData.weightInGrams}g ${goldData.type}`,
+    });
+  };
+
+  const deleteGold = (id: string) => {
+    setGold(prev => prev.filter(g => g.id !== id));
+  };
 
   return (
-    <TransactionsContext.Provider value={{ transactions, addTransaction, deleteTransaction, accounts, setAccounts, autoCredits, addAutoCredit, addScheduledTransaction, lendings, addLending, updateLendingStatus, deleteLending }}>
+    <TransactionsContext.Provider value={{ transactions, addTransaction, deleteTransaction, accounts, setAccounts, autoCredits, addAutoCredit, addScheduledTransaction, lendings, addLending, updateLendingStatus, deleteLending, gold, addGold, deleteGold }}>
       {children}
     </TransactionsContext.Provider>
   );

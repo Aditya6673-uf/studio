@@ -65,3 +65,12 @@ export type Lending = {
   status: 'Pending' | 'Paid';
   notes?: string;
 };
+
+export type Gold = {
+  id: string;
+  type: 'Jewelry' | 'Coin' | 'Bar' | 'Digital';
+  weightInGrams: number;
+  purity: number; // Karats
+  purchaseDate: Date | string;
+  purchasePrice: number;
+};
