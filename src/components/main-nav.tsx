@@ -21,7 +21,7 @@ const navItems = [
   { href: '/auto-credit', label: 'Auto Credit', icon: PiggyBank },
   { href: '/insurance', label: 'Insurance', icon: ShieldCheck },
   { href: '/real-estate', label: 'Real Estate', icon: Building2 },
-  { href: '/gold', label: 'Gold', icon: Gem },
+  { href: '/bullion', label: 'Bullion', icon: Gem },
 ];
 
 export function MainNav() {

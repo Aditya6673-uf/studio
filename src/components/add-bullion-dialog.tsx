@@ -29,38 +29,42 @@ import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 import { Calendar } from "./ui/calendar"
-import type { Gold } from "@/lib/types"
+import type { PreciousMetal } from "@/lib/types"
 
 const formSchema = z.object({
-  type: z.enum(["Jewelry", "Coin", "Bar", "Digital"], { required_error: "Please select a type." }),
+  metal: z.enum(["Gold", "Silver"], { required_error: "Please select a metal." }),
+  form: z.enum(["Jewelry", "Coin", "Bar", "Digital"], { required_error: "Please select a form." }),
   weightInGrams: z.coerce.number().positive({ message: "Weight must be positive." }),
-  purity: z.coerce.number().min(1, "Purity must be at least 1").max(24, "Purity cannot exceed 24"),
+  purity: z.string().min(1, { message: "Purity is required." }),
   purchaseDate: z.date({ required_error: "Please select the purchase date." }),
   purchasePrice: z.coerce.number().positive({ message: "Purchase price must be positive." }),
 });
 
-type AddGoldDialogProps = {
+type AddBullionDialogProps = {
   isOpen: boolean
   setIsOpen: (isOpen: boolean) => void
-  onAddGold: (data: Omit<Gold, 'id'>) => void
+  onAddBullion: (data: Omit<PreciousMetal, 'id'>) => void
 }
 
-export function AddGoldDialog({ isOpen, setIsOpen, onAddGold }: AddGoldDialogProps) {
+export function AddBullionDialog({ isOpen, setIsOpen, onAddBullion }: AddBullionDialogProps) {
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      type: "Jewelry",
+      metal: "Gold",
+      form: "Jewelry",
       weightInGrams: undefined,
-      purity: 22,
+      purity: "",
       purchaseDate: new Date(),
       purchasePrice: undefined,
     },
   });
 
+  const selectedMetal = form.watch("metal");
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onAddGold(values);
+    onAddBullion(values);
     form.reset();
     setIsOpen(false);
   }
@@ -69,36 +73,59 @@ export function AddGoldDialog({ isOpen, setIsOpen, onAddGold }: AddGoldDialogPro
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Gold Investment</DialogTitle>
+          <DialogTitle>Add Bullion Investment</DialogTitle>
           <DialogDescription>
-            Enter the details for your new gold investment. An expense transaction will be created.
+            Enter the details for your new gold or silver investment. An expense transaction will be created.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Jewelry">Jewelry</SelectItem>
-                      <SelectItem value="Coin">Coin</SelectItem>
-                      <SelectItem value="Bar">Bar</SelectItem>
-                      <SelectItem value="Digital">Digital</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="metal"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Metal</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a metal" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Gold">Gold</SelectItem>
+                          <SelectItem value="Silver">Silver</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="form"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Form</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a form" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Jewelry">Jewelry</SelectItem>
+                          <SelectItem value="Coin">Coin</SelectItem>
+                          <SelectItem value="Bar">Bar</SelectItem>
+                          <SelectItem value="Digital">Digital</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -118,9 +145,9 @@ export function AddGoldDialog({ isOpen, setIsOpen, onAddGold }: AddGoldDialogPro
                 name="purity"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Purity (karat)</FormLabel>
+                    <FormLabel>{selectedMetal === 'Gold' ? 'Purity (Karat)' : 'Purity (%)'}</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="e.g., 22" {...field} value={field.value ?? ''} />
+                      <Input placeholder={selectedMetal === 'Gold' ? 'e.g., 22' : 'e.g., 99.9'} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

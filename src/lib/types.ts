@@ -66,11 +66,12 @@ export type Lending = {
   notes?: string;
 };
 
-export type Gold = {
+export type PreciousMetal = {
   id: string;
-  type: 'Jewelry' | 'Coin' | 'Bar' | 'Digital';
+  metal: 'Gold' | 'Silver';
+  form: 'Jewelry' | 'Coin' | 'Bar' | 'Digital';
   weightInGrams: number;
-  purity: number; // Karats
+  purity: string; // Karats for Gold (e.g., "22K"), Percentage for Silver (e.g., "99.9%")
   purchaseDate: Date | string;
   purchasePrice: number;
 };

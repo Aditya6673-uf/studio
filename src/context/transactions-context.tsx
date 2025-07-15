@@ -3,13 +3,13 @@
 "use client";
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import type { Transaction, AutoCredit, Lending, Account, Gold } from '@/lib/types';
+import type { Transaction, AutoCredit, Lending, Account, PreciousMetal } from '@/lib/types';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 
 type TransactionInput = Omit<Transaction, 'id'>;
 type AutoCreditInput = Omit<AutoCredit, 'id'>;
 type LendingInput = Omit<Lending, 'id' | 'status'>;
-type GoldInput = Omit<Gold, 'id'>;
+type PreciousMetalInput = Omit<PreciousMetal, 'id'>;
 
 
 interface TransactionsContextType {
@@ -25,9 +25,9 @@ interface TransactionsContextType {
   addLending: (lending: LendingInput) => void;
   updateLendingStatus: (id: string, status: 'Paid') => void;
   deleteLending: (id: string) => void;
-  gold: Gold[];
-  addGold: (gold: GoldInput) => void;
-  deleteGold: (id: string) => void;
+  bullion: PreciousMetal[];
+  addBullion: (bullion: PreciousMetalInput) => void;
+  deleteBullion: (id: string) => void;
 }
 
 const TransactionsContext = createContext<TransactionsContextType | undefined>(undefined);
@@ -48,7 +48,7 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
   const [accounts, setAccounts] = useLocalStorage<Account[]>('rupee-route-accounts', initialAccounts);
   const [autoCredits, setAutoCredits] = useLocalStorage<AutoCredit[]>('rupee-route-autocredits', initialAutoCredits);
   const [lendings, setLendings] = useLocalStorage<Lending[]>('rupee-route-lendings', []);
-  const [gold, setGold] = useLocalStorage<Gold[]>('rupee-route-gold', []);
+  const [bullion, setBullion] = useLocalStorage<PreciousMetal[]>('rupee-route-bullion', []);
 
   const addTransaction = (transaction: TransactionInput) => {
     const newTransaction: Transaction = {
@@ -156,29 +156,29 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
   
-  const addGold = (goldData: GoldInput) => {
-    const newGold: Gold = {
-      ...goldData,
+  const addBullion = (bullionData: PreciousMetalInput) => {
+    const newBullion: PreciousMetal = {
+      ...bullionData,
       id: new Date().getTime().toString(),
     };
-    setGold(prev => [...prev, newGold]);
+    setBullion(prev => [...prev, newBullion]);
 
     addTransaction({
       type: 'expense',
-      amount: goldData.purchasePrice,
+      amount: bullionData.purchasePrice,
       category: 'Investment',
-      date: goldData.purchaseDate,
+      date: bullionData.purchaseDate,
       paymentMethod: 'Bank',
-      notes: `Gold Purchase: ${goldData.weightInGrams}g ${goldData.type}`,
+      notes: `${bullionData.metal} Purchase: ${bullionData.weightInGrams}g ${bullionData.form}`,
     });
   };
 
-  const deleteGold = (id: string) => {
-    setGold(prev => prev.filter(g => g.id !== id));
+  const deleteBullion = (id: string) => {
+    setBullion(prev => prev.filter(g => g.id !== id));
   };
 
   return (
-    <TransactionsContext.Provider value={{ transactions, addTransaction, deleteTransaction, accounts, setAccounts, autoCredits, addAutoCredit, addScheduledTransaction, lendings, addLending, updateLendingStatus, deleteLending, gold, addGold, deleteGold }}>
+    <TransactionsContext.Provider value={{ transactions, addTransaction, deleteTransaction, accounts, setAccounts, autoCredits, addAutoCredit, addScheduledTransaction, lendings, addLending, updateLendingStatus, deleteLending, bullion, addBullion, deleteBullion }}>
       {children}
     </TransactionsContext.Provider>
   );
