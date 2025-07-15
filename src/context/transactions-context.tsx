@@ -3,9 +3,8 @@
 "use client";
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import type { Transaction, AutoCredit, Lending } from '@/lib/types';
+import type { Transaction, AutoCredit, Lending, Account } from '@/lib/types';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import { initialTransactions } from '@/lib/data';
 
 type TransactionInput = Omit<Transaction, 'id'>;
 type AutoCreditInput = Omit<AutoCredit, 'id'>;
@@ -16,6 +15,8 @@ interface TransactionsContextType {
   transactions: Transaction[];
   addTransaction: (transaction: TransactionInput) => void;
   deleteTransaction: (id: string) => void;
+  accounts: Account[];
+  setAccounts: (value: Account[] | ((val: Account[]) => Account[])) => void;
   autoCredits: AutoCredit[];
   addAutoCredit: (autoCredit: AutoCreditInput) => void;
   addScheduledTransaction: (payload: { transaction: TransactionInput, autoCredit: AutoCreditInput }) => void;
@@ -31,8 +32,15 @@ const initialAutoCredits: AutoCredit[] = [
     { id: '2', name: 'Rent Payment', amount: 15000, frequency: 'Monthly', nextDate: new Date('2024-08-01').toISOString() },
 ];
 
+const initialAccounts: Account[] = [
+    { id: '1', name: 'HDFC Bank', type: 'Bank', bankName: 'HDFC Bank', balance: 125000 },
+    { id: '2', name: 'PayTM Wallet', type: 'Wallet', balance: 5000 },
+    { id: '3', name: 'ICICI Bank', type: 'Bank', bankName: 'ICICI Bank', balance: 75000 },
+];
+
 export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
   const [transactions, setTransactions] = useLocalStorage<Transaction[]>('rupee-route-transactions', []);
+  const [accounts, setAccounts] = useLocalStorage<Account[]>('rupee-route-accounts', initialAccounts);
   const [autoCredits, setAutoCredits] = useLocalStorage<AutoCredit[]>('rupee-route-autocredits', initialAutoCredits);
   const [lendings, setLendings] = useLocalStorage<Lending[]>('rupee-route-lendings', []);
 
@@ -42,9 +50,42 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
       id: new Date().getTime().toString(),
     };
     setTransactions(prev => [newTransaction, ...prev]);
+
+    // Adjust account balance if an account is linked
+    if (transaction.accountId) {
+      setAccounts(prevAccounts =>
+        prevAccounts.map(account => {
+          if (account.id === transaction.accountId) {
+            const newBalance = transaction.type === 'income'
+              ? account.balance + transaction.amount
+              : account.balance - transaction.amount;
+            return { ...account, balance: newBalance };
+          }
+          return account;
+        })
+      );
+    }
   };
 
   const deleteTransaction = (id: string) => {
+    const transactionToDelete = transactions.find(t => t.id === id);
+    if (!transactionToDelete) return;
+    
+    // Revert account balance if an account was linked
+    if (transactionToDelete.accountId) {
+        setAccounts(prevAccounts =>
+            prevAccounts.map(account => {
+                if (account.id === transactionToDelete.accountId) {
+                    const newBalance = transactionToDelete.type === 'income'
+                        ? account.balance - transactionToDelete.amount
+                        : account.balance + transactionToDelete.amount;
+                    return { ...account, balance: newBalance };
+                }
+                return account;
+            })
+        );
+    }
+
     setTransactions(prev => prev.filter(t => t.id !== id));
   };
   
@@ -106,7 +147,7 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <TransactionsContext.Provider value={{ transactions, addTransaction, deleteTransaction, autoCredits, addAutoCredit, addScheduledTransaction, lendings, addLending, updateLendingStatus }}>
+    <TransactionsContext.Provider value={{ transactions, addTransaction, deleteTransaction, accounts, setAccounts, autoCredits, addAutoCredit, addScheduledTransaction, lendings, addLending, updateLendingStatus }}>
       {children}
     </TransactionsContext.Provider>
   );

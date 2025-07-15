@@ -38,7 +38,7 @@ export default function FixedCostsPage() {
   }, [transactions]);
 
   const handleSelectAll = (checked: boolean | 'indeterminate') => {
-    if (checked) {
+    if (checked === true) {
       setSelectedRowIds(fixedCostTransactions.map(t => t.id));
     } else {
       setSelectedRowIds([]);
@@ -58,8 +58,8 @@ export default function FixedCostsPage() {
     setSelectedRowIds([]);
   };
 
-  const isAllSelected = selectedRowIds.length > 0 && selectedRowIds.length === fixedCostTransactions.length;
-  const isSomeSelected = selectedRowIds.length > 0 && fixedCostTransactions.length > 0 && !isAllSelected;
+  const isAllSelected = fixedCostTransactions.length > 0 && selectedRowIds.length === fixedCostTransactions.length;
+  const isSomeSelected = selectedRowIds.length > 0 && !isAllSelected;
 
   return (
     <>
@@ -117,8 +117,8 @@ export default function FixedCostsPage() {
                 <TableRow>
                   <TableHead className="w-[50px]">
                     <Checkbox
-                      checked={isAllSelected ? true : isSomeSelected ? 'indeterminate' : false}
-                      onCheckedChange={(checked) => handleSelectAll(checked)}
+                      checked={isAllSelected || isSomeSelected}
+                      onCheckedChange={handleSelectAll}
                       aria-label="Select all rows"
                     />
                   </TableHead>

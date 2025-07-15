@@ -31,6 +31,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { format } from "date-fns"
 import type { Transaction } from "@/lib/types"
 import { useLocalStorage } from "@/hooks/use-local-storage"
+import { useTransactions } from "@/context/transactions-context"
 
 const formSchema = z.object({
   type: z.enum(["income", "expense"], { required_error: "Please select a transaction type." }),
@@ -39,6 +40,15 @@ const formSchema = z.object({
   date: z.date({ required_error: "Please select a date." }),
   paymentMethod: z.enum(["UPI", "Cash", "Card", "Bank"]),
   notes: z.string().optional(),
+  accountId: z.string().optional(),
+}).refine(data => {
+    if (['UPI', 'Card', 'Bank'].includes(data.paymentMethod) && !data.accountId) {
+        return false;
+    }
+    return true;
+}, {
+    message: "Please select an account for this payment method.",
+    path: ["accountId"],
 });
 
 
@@ -51,6 +61,7 @@ type AddTransactionSheetProps = {
 
 export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defaultType }: AddTransactionSheetProps) {
   const [favoriteCategories, setFavoriteCategories] = useLocalStorage<string[]>("favoriteCategories", []);
+  const { accounts } = useTransactions();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -61,6 +72,7 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
       paymentMethod: "UPI",
       notes: "",
       category: "",
+      accountId: undefined,
     },
   })
   
@@ -68,6 +80,7 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
 
   const watchedType = form.watch("type");
   const watchedCategory = form.watch("category");
+  const watchedPaymentMethod = form.watch("paymentMethod");
 
   useEffect(() => {
     if (isOpen) {
@@ -78,6 +91,7 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
         paymentMethod: "UPI",
         notes: "",
         category: "",
+        accountId: undefined,
       });
     }
   }, [isOpen, defaultType, form]);
@@ -110,6 +124,12 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
   }
   
   const isCurrentCategoryFavorite = watchedCategory && favoriteCategories.includes(watchedCategory);
+  
+  const showAccountSelector = ['UPI', 'Card', 'Bank'].includes(watchedPaymentMethod);
+  const availableAccounts = accounts.filter(acc => {
+      if (watchedPaymentMethod === 'Cash') return acc.type === 'Wallet';
+      return acc.type === 'Bank';
+  });
 
 
   return (
@@ -288,6 +308,33 @@ export function AddTransactionSheet({ isOpen, setIsOpen, onAddTransaction, defau
                 </FormItem>
               )}
             />
+            
+            {showAccountSelector && (
+                 <FormField
+                  control={form.control}
+                  name="accountId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Account</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select an account" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {availableAccounts.map(account => (
+                            <SelectItem key={account.id} value={account.id}>
+                              {account.name} (₹{account.balance.toLocaleString('en-IN')})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            )}
 
             <FormField
               control={form.control}

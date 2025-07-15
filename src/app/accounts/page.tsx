@@ -5,11 +5,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IndianRupee, Landmark, PlusCircle, Wallet, Trash2 } from "lucide-react";
-import { initialAccounts } from "@/lib/data";
 import type { Account } from "@/lib/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { AddAccountDialog } from "@/components/add-account-dialog";
-import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useTransactions } from "@/context/transactions-context";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,7 +27,7 @@ const accountIcons = {
 };
 
 export default function AccountsPage() {
-  const [accounts, setAccounts] = useLocalStorage<Account[]>('rupee-route-accounts', initialAccounts);
+  const { accounts, setAccounts } = useTransactions();
   const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
   const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
 

@@ -10,7 +10,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AddTransactionSheet } from "@/components/add-transaction-sheet";
-import { initialAccounts } from "@/lib/data";
 import type { Transaction, Account, Lending } from "@/lib/types";
 import { format, startOfMonth, endOfMonth, subMonths, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { IndianRupee, ArrowUpRight, ArrowDownLeft, PlusCircle, Landmark, Wallet, CreditCard, Pencil, Check, X, Trash2, Handshake, BadgeCheck } from 'lucide-react';
@@ -36,7 +35,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useTransactions } from "@/context/transactions-context";
-import { useLocalStorage } from "@/hooks/use-local-storage";
 import { AddLendingDialog } from "@/components/add-lending-dialog";
 import { Badge } from "@/components/ui/badge";
 
@@ -48,8 +46,7 @@ const paymentMethodIcons = {
 };
 
 export default function Dashboard() {
-  const { transactions, addTransaction, deleteTransaction, lendings, addLending, updateLendingStatus } = useTransactions();
-  const [accounts, setAccounts] = useLocalStorage<Account[]>('rupee-route-accounts', initialAccounts);
+  const { transactions, addTransaction, deleteTransaction, accounts, setAccounts, lendings, addLending, updateLendingStatus } = useTransactions();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isLendingDialogOpen, setIsLendingDialogOpen] = useState(false);
   const [savingsGoal, setSavingsGoal] = useState(25000);
@@ -156,7 +153,7 @@ export default function Dashboard() {
         amount: newAmount,
         category: 'Salary',
         date: new Date(),
-        paymentMethod: 'UPI',
+        paymentMethod: 'Bank',
         notes: 'Monthly Salary'
       });
     }

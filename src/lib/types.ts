@@ -7,6 +7,7 @@ export type Transaction = {
   date: Date | string; // Allow string for serialization in local storage
   paymentMethod: 'UPI' | 'Cash' | 'Card' | 'Bank';
   notes?: string;
+  accountId?: string;
 };
 
 export type Account = {
