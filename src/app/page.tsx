@@ -3,6 +3,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -53,6 +54,7 @@ export default function Dashboard() {
   const [savingsInput, setSavingsInput] = useState(savingsGoal.toString());
   const [isEditingAccounts, setIsEditingAccounts] = useState(false);
   const [editedAccountBalances, setEditedAccountBalances] = useState<Record<string, string>>({});
+  const router = useRouter();
 
   const [isIncomeDialogOpen, setIsIncomeDialogOpen] = useState(false);
   const [incomeInput, setIncomeInput] = useState("");
@@ -234,7 +236,7 @@ export default function Dashboard() {
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Monthly Expenses</CardTitle>
               <div className="flex items-center">
-                  <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => setIsSheetOpen(true)}>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => router.push('/all-transactions')}>
                       <PlusCircle className="h-4 w-4" />
                       <span className="sr-only">Add Expense</span>
                   </Button>
