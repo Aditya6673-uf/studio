@@ -23,6 +23,7 @@ interface TransactionsContextType {
   lendings: Lending[];
   addLending: (lending: LendingInput) => void;
   updateLendingStatus: (id: string, status: 'Paid') => void;
+  deleteLending: (id: string) => void;
 }
 
 const TransactionsContext = createContext<TransactionsContextType | undefined>(undefined);
@@ -121,6 +122,10 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
       notes: `Lent to ${lendingData.personName}${lendingData.notes ? `: ${lendingData.notes}` : ''}`,
     });
   };
+  
+  const deleteLending = (id: string) => {
+    setLendings(prev => prev.filter(l => l.id !== id));
+  };
 
   const updateLendingStatus = (id: string, status: 'Paid') => {
     let lendingToUpdate: Lending | undefined;
@@ -147,7 +152,7 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <TransactionsContext.Provider value={{ transactions, addTransaction, deleteTransaction, accounts, setAccounts, autoCredits, addAutoCredit, addScheduledTransaction, lendings, addLending, updateLendingStatus }}>
+    <TransactionsContext.Provider value={{ transactions, addTransaction, deleteTransaction, accounts, setAccounts, autoCredits, addAutoCredit, addScheduledTransaction, lendings, addLending, updateLendingStatus, deleteLending }}>
       {children}
     </TransactionsContext.Provider>
   );

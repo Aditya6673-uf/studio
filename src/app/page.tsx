@@ -46,7 +46,7 @@ const paymentMethodIcons = {
 };
 
 export default function Dashboard() {
-  const { transactions, addTransaction, deleteTransaction, accounts, setAccounts, lendings, addLending, updateLendingStatus } = useTransactions();
+  const { transactions, addTransaction, deleteTransaction, accounts, setAccounts, lendings, addLending, updateLendingStatus, deleteLending } = useTransactions();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isLendingDialogOpen, setIsLendingDialogOpen] = useState(false);
   const [savingsGoal, setSavingsGoal] = useState(25000);
@@ -378,7 +378,7 @@ export default function Dashboard() {
                     <TableHead>To</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Amount</TableHead>
-                    <TableHead className="text-center w-[100px]">Action</TableHead>
+                    <TableHead className="text-center">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -397,13 +397,13 @@ export default function Dashboard() {
                         <TableCell className="text-right font-medium">
                           <IndianRupee className="inline h-4 w-4" />{lending.amount.toLocaleString('en-IN')}
                         </TableCell>
-                        <TableCell className="text-center">
+                        <TableCell className="flex justify-center items-center gap-2">
                           {lending.status === 'Pending' && (
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button variant="outline" size="sm">
+                                <Button variant="outline" size="sm" className="h-8">
                                   <BadgeCheck className="mr-2 h-4 w-4" />
-                                  Mark as Paid
+                                  Paid
                                 </Button>
                               </AlertDialogTrigger>
                               <AlertDialogContent>
@@ -422,6 +422,27 @@ export default function Dashboard() {
                               </AlertDialogContent>
                             </AlertDialog>
                           )}
+                           <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive/70 hover:text-destructive hover:bg-destructive/10">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Lending Record?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete this lending record? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => deleteLending(lending.id)}>
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                         </TableCell>
                       </TableRow>
                     ))
