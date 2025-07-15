@@ -37,7 +37,7 @@ export default function FixedCostsPage() {
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [transactions]);
 
-  const handleSelectAll = (checked: boolean) => {
+  const handleSelectAll = (checked: boolean | 'indeterminate') => {
     if (checked) {
       setSelectedRowIds(fixedCostTransactions.map(t => t.id));
     } else {
@@ -117,8 +117,8 @@ export default function FixedCostsPage() {
                 <TableRow>
                   <TableHead className="w-[50px]">
                     <Checkbox
-                      checked={isAllSelected || isSomeSelected}
-                      onCheckedChange={(checked) => handleSelectAll(!!checked)}
+                      checked={isAllSelected ? true : isSomeSelected ? 'indeterminate' : false}
+                      onCheckedChange={(checked) => handleSelectAll(checked)}
                       aria-label="Select all rows"
                     />
                   </TableHead>
