@@ -1,15 +1,15 @@
 
-
 "use client";
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import type { Transaction, AutoCredit, Lending, Account, PreciousMetal } from '@/lib/types';
+import type { Transaction, AutoCredit, Lending, Account, PreciousMetal, FixedDeposit } from '@/lib/types';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 
 type TransactionInput = Omit<Transaction, 'id'>;
 type AutoCreditInput = Omit<AutoCredit, 'id'>;
 type LendingInput = Omit<Lending, 'id' | 'status'>;
 type PreciousMetalInput = Omit<PreciousMetal, 'id'>;
+type FixedDepositInput = Omit<FixedDeposit, 'id'>;
 
 
 interface TransactionsContextType {
@@ -28,6 +28,9 @@ interface TransactionsContextType {
   bullion: PreciousMetal[];
   addBullion: (bullion: PreciousMetalInput) => void;
   deleteBullion: (id: string) => void;
+  fixedDeposits: FixedDeposit[];
+  addFixedDeposit: (fd: FixedDepositInput) => void;
+  deleteFixedDeposit: (id: string) => void;
 }
 
 const TransactionsContext = createContext<TransactionsContextType | undefined>(undefined);
@@ -49,6 +52,7 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
   const [autoCredits, setAutoCredits] = useLocalStorage<AutoCredit[]>('rupee-route-autocredits', initialAutoCredits);
   const [lendings, setLendings] = useLocalStorage<Lending[]>('rupee-route-lendings', []);
   const [bullion, setBullion] = useLocalStorage<PreciousMetal[]>('rupee-route-bullion', []);
+  const [fixedDeposits, setFixedDeposits] = useLocalStorage<FixedDeposit[]>('rupee-route-fixed-deposits', []);
 
   const addTransaction = (transaction: TransactionInput) => {
     const newTransaction: Transaction = {
@@ -177,8 +181,28 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
     setBullion(prev => prev.filter(g => g.id !== id));
   };
 
+  const addFixedDeposit = (fdData: FixedDepositInput) => {
+    const newFd: FixedDeposit = {
+      ...fdData,
+      id: new Date().getTime().toString(),
+    };
+    setFixedDeposits(prev => [...prev, newFd]);
+    addTransaction({
+      type: 'expense',
+      amount: fdData.principal,
+      category: 'Investment',
+      date: fdData.startDate,
+      paymentMethod: 'Bank',
+      notes: `FD with ${fdData.bankName}`,
+    });
+  };
+
+  const deleteFixedDeposit = (id: string) => {
+    setFixedDeposits(prev => prev.filter(fd => fd.id !== id));
+  };
+
   return (
-    <TransactionsContext.Provider value={{ transactions, addTransaction, deleteTransaction, accounts, setAccounts, autoCredits, addAutoCredit, addScheduledTransaction, lendings, addLending, updateLendingStatus, deleteLending, bullion, addBullion, deleteBullion }}>
+    <TransactionsContext.Provider value={{ transactions, addTransaction, deleteTransaction, accounts, setAccounts, autoCredits, addAutoCredit, addScheduledTransaction, lendings, addLending, updateLendingStatus, deleteLending, bullion, addBullion, deleteBullion, fixedDeposits, addFixedDeposit, deleteFixedDeposit }}>
       {children}
     </TransactionsContext.Provider>
   );

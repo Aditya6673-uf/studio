@@ -8,9 +8,9 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recha
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useTransactions } from "@/context/transactions-context";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import type { RealEstate, Loan } from "@/lib/types";
+import type { RealEstate, Loan, FixedDeposit } from "@/lib/types";
 
-const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))'];
+const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -32,7 +32,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 
 
 export default function NetWorthPage() {
-  const { accounts, bullion } = useTransactions();
+  const { accounts, bullion, fixedDeposits } = useTransactions();
   const [properties] = useLocalStorage<RealEstate[]>('rupee-route-real-estate', []);
   const [loans] = useLocalStorage<Loan[]>('rupee-route-loans', []);
 
@@ -40,8 +40,9 @@ export default function NetWorthPage() {
     const totalAccountBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
     const totalBullionValue = bullion.reduce((sum, item) => sum + item.purchasePrice, 0);
     const totalRealEstateValue = properties.reduce((sum, prop) => sum + prop.currentValue, 0);
+    const totalFdValue = fixedDeposits.reduce((sum, fd) => sum + fd.principal, 0);
     
-    const totalAssets = totalAccountBalance + totalBullionValue + totalRealEstateValue;
+    const totalAssets = totalAccountBalance + totalBullionValue + totalRealEstateValue + totalFdValue;
 
     const totalLiabilities = loans.reduce((sum, loan) => sum + (loan.principal - loan.paid), 0);
 
@@ -49,6 +50,7 @@ export default function NetWorthPage() {
       { name: 'Cash & Bank', value: totalAccountBalance },
       { name: 'Bullion', value: totalBullionValue },
       { name: 'Real Estate', value: totalRealEstateValue },
+      { name: 'Fixed Deposits', value: totalFdValue },
     ].filter(item => item.value > 0);
 
     return {
@@ -57,7 +59,7 @@ export default function NetWorthPage() {
       netWorth: totalAssets - totalLiabilities,
       assetData,
     };
-  }, [accounts, bullion, properties, loans]);
+  }, [accounts, bullion, properties, loans, fixedDeposits]);
 
   return (
     <main className="flex-1 overflow-y-auto p-4 md:p-8">

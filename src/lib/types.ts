@@ -75,3 +75,13 @@ export type PreciousMetal = {
   purchaseDate: Date | string;
   purchasePrice: number;
 };
+
+export type FixedDeposit = {
+    id: string;
+    bankName: string;
+    principal: number;
+    interestRate: number;
+    maturityDate: Date | string;
+    maturityAmount: number;
+    startDate: Date | string;
+};
