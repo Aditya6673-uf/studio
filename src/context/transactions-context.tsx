@@ -23,7 +23,6 @@ interface TransactionsContextType {
   autoCredits: AutoCredit[];
   addAutoCredit: (autoCredit: AutoCreditInput) => void;
   deleteAutoCredit: (id: string) => void;
-  addScheduledTransaction: (payload: { transaction: TransactionInput, autoCredit: AutoCreditInput }) => void;
   lendings: Lending[];
   addLending: (lending: LendingInput) => void;
   updateLendingStatus: (id: string, status: 'Paid') => void;
@@ -37,6 +36,7 @@ interface TransactionsContextType {
   loans: Loan[];
   addLoan: (loan: LoanInput) => void;
   deleteLoan: (id: string) => void;
+  deleteInsurance: (policyId: string, policyName: string) => void;
 }
 
 const TransactionsContext = createContext<TransactionsContextType | undefined>(undefined);
@@ -60,6 +60,7 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
   const [bullion, setBullion] = useLocalStorage<PreciousMetal[]>('rupee-route-bullion', []);
   const [fixedDeposits, setFixedDeposits] = useLocalStorage<FixedDeposit[]>('rupee-route-fixed-deposits', []);
   const [loans, setLoans] = useLocalStorage<Loan[]>('rupee-route-loans', []);
+  // Note: Insurance is managed via useLocalStorage directly in its page component for now.
 
   useEffect(() => {
     const processAutoCredits = () => {
@@ -202,11 +203,6 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
     setAutoCredits(prev => prev.filter(ac => ac.id !== id));
   };
 
-  const addScheduledTransaction = ({ transaction, autoCredit }: { transaction: TransactionInput, autoCredit: AutoCreditInput }) => {
-    addTransaction(transaction);
-    addAutoCredit(autoCredit);
-  };
-
   const addLending = (lendingData: LendingInput) => {
     const newLending: Lending = {
       ...lendingData,
@@ -335,8 +331,16 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
       }
   };
 
+  const deleteInsurance = (policyId: string, policyName: string) => {
+    // This function will primarily delete the associated auto-credit.
+    // The insurance policy itself is managed in the InsurancePage component's local storage.
+    const premiumName = `${policyName} Premium`;
+    setAutoCredits(prev => prev.filter(ac => ac.name !== premiumName));
+  };
+
+
   return (
-    <TransactionsContext.Provider value={{ transactions, addTransaction, deleteTransaction, accounts, setAccounts, autoCredits, addAutoCredit, deleteAutoCredit, addScheduledTransaction, lendings, addLending, updateLendingStatus, deleteLending, bullion, addBullion, deleteBullion, fixedDeposits, addFixedDeposit, deleteFixedDeposit, loans, addLoan, deleteLoan }}>
+    <TransactionsContext.Provider value={{ transactions, addTransaction, deleteTransaction, accounts, setAccounts, autoCredits, addAutoCredit, deleteAutoCredit, lendings, addLending, updateLendingStatus, deleteLending, bullion, addBullion, deleteBullion, fixedDeposits, addFixedDeposit, deleteFixedDeposit, loans, addLoan, deleteLoan, deleteInsurance }}>
       {children}
     </TransactionsContext.Provider>
   );
