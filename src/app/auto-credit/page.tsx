@@ -5,16 +5,27 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PiggyBank, PlusCircle, IndianRupee } from "lucide-react";
+import { PiggyBank, PlusCircle, IndianRupee, Trash2 } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import type { AutoCredit } from "@/lib/types";
 import { AddAutoCreditDialog } from "@/components/add-autocredit-dialog";
 import { format } from "date-fns";
 import { useTransactions } from "@/context/transactions-context";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function AutoCreditPage() {
-  const { autoCredits, addAutoCredit } = useTransactions();
+  const { autoCredits, addAutoCredit, deleteAutoCredit } = useTransactions();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   return (
@@ -48,6 +59,7 @@ export default function AutoCreditPage() {
                   <TableHead>Amount</TableHead>
                   <TableHead>Frequency</TableHead>
                   <TableHead>Next Payment</TableHead>
+                  <TableHead className="w-[50px]"><span className="sr-only">Actions</span></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -57,17 +69,41 @@ export default function AutoCreditPage() {
                     const isValidDate = nextDate && !isNaN(nextDate.getTime());
                     return (
                         <TableRow key={item.id}>
-                        <TableCell className="font-medium">{item.name}</TableCell>
-                        <TableCell><Badge variant="outline">{item.category}</Badge></TableCell>
-                        <TableCell className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{item.amount.toLocaleString('en-IN')}</TableCell>
-                        <TableCell>{item.frequency}</TableCell>
-                        <TableCell>{isValidDate ? format(nextDate, 'dd MMM, yyyy') : 'N/A'}</TableCell>
+                          <TableCell className="font-medium">{item.name}</TableCell>
+                          <TableCell><Badge variant="outline">{item.category}</Badge></TableCell>
+                          <TableCell className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{item.amount.toLocaleString('en-IN')}</TableCell>
+                          <TableCell>{item.frequency}</TableCell>
+                          <TableCell>{isValidDate ? format(nextDate, 'dd MMM, yyyy') : 'N/A'}</TableCell>
+                          <TableCell>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <Trash2 className="h-4 w-4" />
+                                  <span className="sr-only">Delete Auto Credit</span>
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete this scheduled payment.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => deleteAutoCredit(item.id)}>
+                                    Continue
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </TableCell>
                         </TableRow>
                     );
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
+                    <TableCell colSpan={6} className="h-24 text-center">
                       No automatic credits set up yet.
                     </TableCell>
                   </TableRow>

@@ -22,6 +22,7 @@ interface TransactionsContextType {
   setAccounts: (value: Account[] | ((val: Account[]) => Account[])) => void;
   autoCredits: AutoCredit[];
   addAutoCredit: (autoCredit: AutoCreditInput) => void;
+  deleteAutoCredit: (id: string) => void;
   addScheduledTransaction: (payload: { transaction: TransactionInput, autoCredit: AutoCreditInput }) => void;
   lendings: Lending[];
   addLending: (lending: LendingInput) => void;
@@ -197,6 +198,10 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
     setAutoCredits(prev => [...prev, newAutoCredit]);
   };
 
+  const deleteAutoCredit = (id: string) => {
+    setAutoCredits(prev => prev.filter(ac => ac.id !== id));
+  };
+
   const addScheduledTransaction = ({ transaction, autoCredit }: { transaction: TransactionInput, autoCredit: AutoCreditInput }) => {
     addTransaction(transaction);
     addAutoCredit(autoCredit);
@@ -331,7 +336,7 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <TransactionsContext.Provider value={{ transactions, addTransaction, deleteTransaction, accounts, setAccounts, autoCredits, addAutoCredit, addScheduledTransaction, lendings, addLending, updateLendingStatus, deleteLending, bullion, addBullion, deleteBullion, fixedDeposits, addFixedDeposit, deleteFixedDeposit, loans, addLoan, deleteLoan }}>
+    <TransactionsContext.Provider value={{ transactions, addTransaction, deleteTransaction, accounts, setAccounts, autoCredits, addAutoCredit, deleteAutoCredit, addScheduledTransaction, lendings, addLending, updateLendingStatus, deleteLending, bullion, addBullion, deleteBullion, fixedDeposits, addFixedDeposit, deleteFixedDeposit, loans, addLoan, deleteLoan }}>
       {children}
     </TransactionsContext.Provider>
   );
