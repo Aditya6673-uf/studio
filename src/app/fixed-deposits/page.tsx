@@ -73,7 +73,8 @@ export default function FixedDepositsPage() {
                       <TableHead>Interest Rate</TableHead>
                       <TableHead>Maturity Date</TableHead>
                       <TableHead>Maturity Amount</TableHead>
-                      <TableHead className="w-[50px]"><span className="sr-only">Actions</span></TableHead>
+                      <TableHead>Total Return</TableHead>
+                      <TableHead className="w-[50px] text-right"><span className="sr-only">Actions</span></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -91,7 +92,11 @@ export default function FixedDepositsPage() {
                             <IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />
                             {fd.maturityAmount.toLocaleString('en-IN')}
                           </TableCell>
-                           <TableCell>
+                          <TableCell className="flex items-center font-medium text-green-600">
+                             <IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />
+                             {(fd.maturityAmount - fd.principal).toLocaleString('en-IN')}
+                          </TableCell>
+                           <TableCell className="text-right">
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -119,7 +124,7 @@ export default function FixedDepositsPage() {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={6} className="h-24 text-center">
+                        <TableCell colSpan={7} className="h-24 text-center">
                           No fixed deposits added yet.
                         </TableCell>
                       </TableRow>
