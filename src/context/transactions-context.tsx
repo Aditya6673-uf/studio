@@ -1,10 +1,10 @@
 
 "use client";
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useEffect } from 'react';
 import type { Transaction, AutoCredit, Lending, Account, PreciousMetal, FixedDeposit, Loan } from '@/lib/types';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import { addMonths } from 'date-fns';
+import { addMonths, isPast, addYears, addQuarters } from 'date-fns';
 
 type TransactionInput = Omit<Transaction, 'id'>;
 type AutoCreditInput = Omit<AutoCredit, 'id'>;
@@ -41,8 +41,8 @@ interface TransactionsContextType {
 const TransactionsContext = createContext<TransactionsContextType | undefined>(undefined);
 
 const initialAutoCredits: AutoCredit[] = [
-    { id: '1', name: 'Mutual Fund SIP', amount: 5000, frequency: 'Monthly', nextDate: new Date('2024-08-05').toISOString() },
-    { id: '2', name: 'Rent Payment', amount: 15000, frequency: 'Monthly', nextDate: new Date('2024-08-01').toISOString() },
+    { id: '1', name: 'Mutual Fund SIP', amount: 5000, frequency: 'Monthly', nextDate: new Date('2024-08-05').toISOString(), category: 'SIP' },
+    { id: '2', name: 'Rent Payment', amount: 15000, frequency: 'Monthly', nextDate: new Date('2024-08-01').toISOString(), category: 'Rent' },
 ];
 
 const initialAccounts: Account[] = [
@@ -59,6 +59,89 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
   const [bullion, setBullion] = useLocalStorage<PreciousMetal[]>('rupee-route-bullion', []);
   const [fixedDeposits, setFixedDeposits] = useLocalStorage<FixedDeposit[]>('rupee-route-fixed-deposits', []);
   const [loans, setLoans] = useLocalStorage<Loan[]>('rupee-route-loans', []);
+
+  useEffect(() => {
+    const processAutoCredits = () => {
+      const now = new Date();
+      let updatedAutoCredits = [...autoCredits];
+      let newTransactions: Transaction[] = [];
+
+      autoCredits.forEach(ac => {
+        let nextDueDate = new Date(ac.nextDate);
+        while (isPast(nextDueDate)) {
+          // Create a transaction for the due payment
+          const newTx: Transaction = {
+            id: `${ac.id}-${nextDueDate.getTime()}`,
+            type: 'expense',
+            amount: ac.amount,
+            category: ac.category,
+            date: nextDueDate,
+            paymentMethod: 'Bank', // Assume bank, could be improved
+            notes: ac.name,
+            accountId: ac.accountId,
+          };
+          newTransactions.push(newTx);
+
+          // Update the next due date
+          switch (ac.frequency) {
+            case 'Monthly':
+              nextDueDate = addMonths(nextDueDate, 1);
+              break;
+            case 'Quarterly':
+                nextDueDate = addQuarters(nextDueDate, 1);
+                break;
+            case 'Yearly':
+              nextDueDate = addYears(nextDueDate, 1);
+              break;
+            case 'One-Time':
+              // It's a one-time payment, so we mark it as processed by pushing date far in future
+              nextDueDate = addYears(now, 100); 
+              break;
+          }
+        }
+        
+        // Update the auto-credit item with the new nextDate
+        const acIndex = updatedAutoCredits.findIndex(item => item.id === ac.id);
+        if (acIndex !== -1) {
+          updatedAutoCredits[acIndex] = {
+            ...updatedAutoCredits[acIndex],
+            nextDate: nextDueDate.toISOString()
+          };
+        }
+      });
+      
+      if (newTransactions.length > 0) {
+        // Use a Set to ensure we don't add duplicate transactions if this runs multiple times
+        setTransactions(prev => {
+            const existingTxIds = new Set(prev.map(tx => tx.id));
+            const uniqueNewTxs = newTransactions.filter(tx => !existingTxIds.has(tx.id));
+            if (uniqueNewTxs.length === 0) return prev;
+
+            // Adjust balances for new transactions
+            setAccounts(prevAccounts => {
+              let tempAccounts = [...prevAccounts];
+              uniqueNewTxs.forEach(tx => {
+                if (tx.accountId) {
+                  tempAccounts = tempAccounts.map(account => {
+                    if (account.id === tx.accountId) {
+                      return { ...account, balance: account.balance - tx.amount };
+                    }
+                    return account;
+                  });
+                }
+              });
+              return tempAccounts;
+            });
+            
+            return [...prev, ...uniqueNewTxs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        });
+        setAutoCredits(updatedAutoCredits);
+      }
+    };
+
+    processAutoCredits();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on initial load
 
   const addTransaction = (transaction: TransactionInput) => {
     const newTransaction: Transaction = {
@@ -220,6 +303,8 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
         amount: loanData.emi,
         frequency: 'Monthly',
         nextDate: addMonths(new Date(loanData.startDate), 1),
+        category: 'EMI',
+        accountId: loanData.accountId,
     });
 
     // Also record the loan amount as an income transaction
@@ -235,8 +320,14 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const deleteLoan = (id: string) => {
-      setLoans(prev => prev.filter(loan => loan.id !== id));
-      // Optionally, find and remove the associated auto-credit EMI payment
+      const loanToDelete = loans.find(loan => loan.id === id);
+      if (loanToDelete) {
+        // Remove the loan
+        setLoans(prev => prev.filter(loan => loan.id !== id));
+        // Remove the associated auto-credit for the EMI
+        const emiName = `${loanToDelete.name} EMI`;
+        setAutoCredits(prev => prev.filter(ac => ac.name !== emiName));
+      }
   };
 
   return (

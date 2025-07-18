@@ -11,6 +11,7 @@ import type { AutoCredit } from "@/lib/types";
 import { AddAutoCreditDialog } from "@/components/add-autocredit-dialog";
 import { format } from "date-fns";
 import { useTransactions } from "@/context/transactions-context";
+import { Badge } from "@/components/ui/badge";
 
 export default function AutoCreditPage() {
   const { autoCredits, addAutoCredit } = useTransactions();
@@ -43,6 +44,7 @@ export default function AutoCreditPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Description</TableHead>
+                  <TableHead>Category</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Frequency</TableHead>
                   <TableHead>Next Payment</TableHead>
@@ -56,6 +58,7 @@ export default function AutoCreditPage() {
                     return (
                         <TableRow key={item.id}>
                         <TableCell className="font-medium">{item.name}</TableCell>
+                        <TableCell><Badge variant="outline">{item.category}</Badge></TableCell>
                         <TableCell className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{item.amount.toLocaleString('en-IN')}</TableCell>
                         <TableCell>{item.frequency}</TableCell>
                         <TableCell>{isValidDate ? format(nextDate, 'dd MMM, yyyy') : 'N/A'}</TableCell>
@@ -64,7 +67,7 @@ export default function AutoCreditPage() {
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
+                    <TableCell colSpan={5} className="h-24 text-center">
                       No automatic credits set up yet.
                     </TableCell>
                   </TableRow>

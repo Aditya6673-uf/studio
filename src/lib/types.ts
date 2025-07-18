@@ -36,6 +36,8 @@ export type AutoCredit = {
   amount: number;
   frequency: 'Monthly' | 'Quarterly' | 'Yearly' | 'One-Time';
   nextDate: Date | string;
+  category: string;
+  accountId?: string;
 };
 
 export type Insurance = {

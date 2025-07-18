@@ -34,8 +34,10 @@ import type { AutoCredit } from "@/lib/types";
 const formSchema = z.object({
   name: z.string().min(1, { message: "Please enter a name." }),
   amount: z.coerce.number().positive({ message: "Amount must be positive." }),
+  category: z.string().min(1, { message: "Please enter a category." }),
   frequency: z.enum(["Monthly", "Quarterly", "Yearly", "One-Time"], { required_error: "Please select a frequency." }),
   nextDate: z.date({ required_error: "Please select a date." }),
+  accountId: z.string().optional(),
 });
 
 type AddAutoCreditDialogProps = {
@@ -52,6 +54,7 @@ export function AddAutoCreditDialog({ isOpen, setIsOpen, onAddAutoCredit }: AddA
     defaultValues: {
       name: "",
       amount: undefined,
+      category: "",
       frequency: "Monthly",
       nextDate: new Date(),
     },
@@ -82,6 +85,19 @@ export function AddAutoCreditDialog({ isOpen, setIsOpen, onAddAutoCredit }: AddA
                   <FormLabel>Payment Name</FormLabel>
                   <FormControl>
                     <Input placeholder="e.g., Mutual Fund SIP" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Investment, Rent" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
