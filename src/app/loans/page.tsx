@@ -5,12 +5,23 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { HandCoins, PlusCircle, IndianRupee } from "lucide-react";
+import { HandCoins, PlusCircle, IndianRupee, Trash2 } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { AddLoanDialog } from "@/components/add-loan-dialog";
 import type { Loan } from "@/lib/types";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { format } from "date-fns";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const initialLoans: Loan[] = [
     { id: '1', name: 'Car Loan', principal: 500000, paid: 120000, interestRate: 8.5, startDate: new Date('2022-08-01').toISOString(), term: 5 },
@@ -29,6 +40,10 @@ export default function LoansPage() {
       startDate: loanData.startDate instanceof Date ? loanData.startDate.toISOString() : loanData.startDate,
     };
     setLoans(prev => [...prev, newLoan]);
+  };
+  
+  const handleDeleteLoan = (id: string) => {
+      setLoans(prev => prev.filter(loan => loan.id !== id));
   };
 
   return (
@@ -63,6 +78,7 @@ export default function LoansPage() {
                   <TableHead>Interest Rate</TableHead>
                   <TableHead>Start Date</TableHead>
                   <TableHead>Term</TableHead>
+                  <TableHead className="w-[50px]"><span className="sr-only">Actions</span></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -80,12 +96,36 @@ export default function LoansPage() {
                         <TableCell>{loan.interestRate.toFixed(2)}%</TableCell>
                         <TableCell>{isValidDate ? format(startDate, 'dd MMM, yyyy') : 'N/A'}</TableCell>
                         <TableCell>{loan.term} years</TableCell>
+                        <TableCell>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Delete Loan</span>
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete this loan record.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteLoan(loan.id)}>
+                                  Continue
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </TableCell>
                       </TableRow>
                     );
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center">
+                    <TableCell colSpan={7} className="h-24 text-center">
                       No loans added yet.
                     </TableCell>
                   </TableRow>
