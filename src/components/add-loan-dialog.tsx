@@ -37,7 +37,11 @@ const formSchema = z.object({
   interestRate: z.coerce.number().min(0, { message: "Interest rate cannot be negative." }),
   startDate: z.date({ required_error: "Please select a start date." }),
   term: z.coerce.number().positive({ message: "Loan term must be a positive number of years." }),
+}).refine(data => data.principal >= data.paid, {
+    message: "Amount paid cannot be greater than the principal.",
+    path: ["paid"],
 });
+
 
 type AddLoanDialogProps = {
   isOpen: boolean
