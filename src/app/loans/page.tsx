@@ -9,7 +9,7 @@ import { HandCoins, PlusCircle, IndianRupee, Trash2 } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { AddLoanDialog } from "@/components/add-loan-dialog";
 import type { Loan } from "@/lib/types";
-import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useTransactions } from "@/context/transactions-context";
 import { format } from "date-fns";
 import {
   AlertDialog,
@@ -23,28 +23,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-const initialLoans: Loan[] = [
-    { id: '1', name: 'Car Loan', principal: 500000, paid: 120000, interestRate: 8.5, startDate: new Date('2022-08-01').toISOString(), term: 5 },
-    { id: '2', name: 'Personal Loan', principal: 100000, paid: 100000, interestRate: 12.0, startDate: new Date('2023-01-15').toISOString(), term: 1 },
-];
-
 export default function LoansPage() {
-  const [loans, setLoans] = useLocalStorage<Loan[]>('rupee-route-loans', initialLoans);
+  const { loans, addLoan, deleteLoan } = useTransactions();
   const [isAddLoanOpen, setIsAddLoanOpen] = useState(false);
-
-  const handleAddLoan = (loanData: Omit<Loan, 'id'>) => {
-    const newLoan: Loan = {
-      ...loanData,
-      id: new Date().getTime().toString(),
-      // Ensure date is stored as a string for consistent serialization
-      startDate: loanData.startDate instanceof Date ? loanData.startDate.toISOString() : loanData.startDate,
-    };
-    setLoans(prev => [...prev, newLoan]);
-  };
-  
-  const handleDeleteLoan = (id: string) => {
-      setLoans(prev => prev.filter(loan => loan.id !== id));
-  };
 
   return (
     <>
@@ -74,6 +55,7 @@ export default function LoansPage() {
                 <TableRow>
                   <TableHead>Loan Name</TableHead>
                   <TableHead>Principal</TableHead>
+                  <TableHead>EMI</TableHead>
                   <TableHead>Amount Paid</TableHead>
                   <TableHead>Interest Rate</TableHead>
                   <TableHead>Start Date</TableHead>
@@ -84,7 +66,6 @@ export default function LoansPage() {
               <TableBody>
                 {loans.length > 0 ? (
                   loans.map(loan => {
-                    // Ensure startDate is a valid Date object before formatting
                     const startDate = loan.startDate ? new Date(loan.startDate) : null;
                     const isValidDate = startDate && !isNaN(startDate.getTime());
 
@@ -92,6 +73,7 @@ export default function LoansPage() {
                       <TableRow key={loan.id}>
                         <TableCell className="font-medium">{loan.name}</TableCell>
                         <TableCell><div className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{loan.principal.toLocaleString('en-IN')}</div></TableCell>
+                        <TableCell><div className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{loan.emi.toLocaleString('en-IN')}</div></TableCell>
                         <TableCell><div className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{loan.paid.toLocaleString('en-IN')}</div></TableCell>
                         <TableCell>{loan.interestRate.toFixed(2)}%</TableCell>
                         <TableCell>{isValidDate ? format(startDate, 'dd MMM, yyyy') : 'N/A'}</TableCell>
@@ -108,12 +90,12 @@ export default function LoansPage() {
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  This action cannot be undone. This will permanently delete this loan record.
+                                  This action cannot be undone. This will permanently delete this loan record and its scheduled payments.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteLoan(loan.id)}>
+                                <AlertDialogAction onClick={() => deleteLoan(loan.id)}>
                                   Continue
                                 </AlertDialogAction>
                               </AlertDialogFooter>
@@ -125,7 +107,7 @@ export default function LoansPage() {
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center">
+                    <TableCell colSpan={8} className="h-24 text-center">
                       No loans added yet.
                     </TableCell>
                   </TableRow>
@@ -138,7 +120,7 @@ export default function LoansPage() {
       <AddLoanDialog
         isOpen={isAddLoanOpen}
         setIsOpen={setIsAddLoanOpen}
-        onAddLoan={handleAddLoan}
+        onAddLoan={addLoan}
       />
     </>
   );

@@ -2,14 +2,16 @@
 "use client";
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import type { Transaction, AutoCredit, Lending, Account, PreciousMetal, FixedDeposit } from '@/lib/types';
+import type { Transaction, AutoCredit, Lending, Account, PreciousMetal, FixedDeposit, Loan } from '@/lib/types';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import { addMonths } from 'date-fns';
 
 type TransactionInput = Omit<Transaction, 'id'>;
 type AutoCreditInput = Omit<AutoCredit, 'id'>;
 type LendingInput = Omit<Lending, 'id' | 'status'>;
 type PreciousMetalInput = Omit<PreciousMetal, 'id'>;
 type FixedDepositInput = Omit<FixedDeposit, 'id'>;
+type LoanInput = Omit<Loan, 'id'>;
 
 
 interface TransactionsContextType {
@@ -31,6 +33,9 @@ interface TransactionsContextType {
   fixedDeposits: FixedDeposit[];
   addFixedDeposit: (fd: FixedDepositInput) => void;
   deleteFixedDeposit: (id: string) => void;
+  loans: Loan[];
+  addLoan: (loan: LoanInput) => void;
+  deleteLoan: (id: string) => void;
 }
 
 const TransactionsContext = createContext<TransactionsContextType | undefined>(undefined);
@@ -53,6 +58,7 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
   const [lendings, setLendings] = useLocalStorage<Lending[]>('rupee-route-lendings', []);
   const [bullion, setBullion] = useLocalStorage<PreciousMetal[]>('rupee-route-bullion', []);
   const [fixedDeposits, setFixedDeposits] = useLocalStorage<FixedDeposit[]>('rupee-route-fixed-deposits', []);
+  const [loans, setLoans] = useLocalStorage<Loan[]>('rupee-route-loans', []);
 
   const addTransaction = (transaction: TransactionInput) => {
     const newTransaction: Transaction = {
@@ -201,8 +207,40 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
     setFixedDeposits(prev => prev.filter(fd => fd.id !== id));
   };
 
+  const addLoan = (loanData: LoanInput) => {
+    const newLoan: Loan = {
+      ...loanData,
+      id: new Date().getTime().toString(),
+    };
+    setLoans(prev => [...prev, newLoan]);
+
+    // Schedule the recurring EMI payment
+    addAutoCredit({
+        name: `${loanData.name} EMI`,
+        amount: loanData.emi,
+        frequency: 'Monthly',
+        nextDate: addMonths(new Date(loanData.startDate), 1),
+    });
+
+    // Also record the loan amount as an income transaction
+    addTransaction({
+        type: 'income',
+        amount: loanData.principal,
+        category: 'Loan',
+        date: loanData.startDate,
+        paymentMethod: 'Bank',
+        notes: `Loan taken: ${loanData.name}`,
+        accountId: loanData.accountId,
+    });
+  };
+
+  const deleteLoan = (id: string) => {
+      setLoans(prev => prev.filter(loan => loan.id !== id));
+      // Optionally, find and remove the associated auto-credit EMI payment
+  };
+
   return (
-    <TransactionsContext.Provider value={{ transactions, addTransaction, deleteTransaction, accounts, setAccounts, autoCredits, addAutoCredit, addScheduledTransaction, lendings, addLending, updateLendingStatus, deleteLending, bullion, addBullion, deleteBullion, fixedDeposits, addFixedDeposit, deleteFixedDeposit }}>
+    <TransactionsContext.Provider value={{ transactions, addTransaction, deleteTransaction, accounts, setAccounts, autoCredits, addAutoCredit, addScheduledTransaction, lendings, addLending, updateLendingStatus, deleteLending, bullion, addBullion, deleteBullion, fixedDeposits, addFixedDeposit, deleteFixedDeposit, loans, addLoan, deleteLoan }}>
       {children}
     </TransactionsContext.Provider>
   );

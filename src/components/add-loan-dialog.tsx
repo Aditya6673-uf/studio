@@ -25,10 +25,12 @@ import { Input } from "@/components/ui/input"
 import type { Loan } from "@/lib/types"
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 import { cn } from "@/lib/utils"
-import { format } from "date-fns"
+import { format, addMonths } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 import { Calendar } from "./ui/calendar"
 import React from "react"
+import { useTransactions } from "@/context/transactions-context"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Please enter a loan name." }),
@@ -37,6 +39,7 @@ const formSchema = z.object({
   interestRate: z.coerce.number().min(0, { message: "Interest rate cannot be negative." }),
   startDate: z.date({ required_error: "Please select a start date." }),
   term: z.coerce.number().positive({ message: "Loan term must be a positive number of years." }),
+  accountId: z.string({ required_error: "Please select an account to debit the EMI from." })
 }).refine(data => data.principal >= data.paid, {
     message: "Amount paid cannot be greater than the principal.",
     path: ["paid"],
@@ -51,6 +54,8 @@ type AddLoanDialogProps = {
 
 export function AddLoanDialog({ isOpen, setIsOpen, onAddLoan }: AddLoanDialogProps) {
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
+  const { accounts } = useTransactions();
+  const bankAccounts = accounts.filter(acc => acc.type === 'Bank');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -61,11 +66,22 @@ export function AddLoanDialog({ isOpen, setIsOpen, onAddLoan }: AddLoanDialogPro
       interestRate: undefined,
       startDate: new Date(),
       term: undefined,
+      accountId: undefined,
     },
   })
 
+  const calculateEMI = (principal: number, annualRate: number, termInYears: number): number => {
+    if (!principal || !annualRate || !termInYears) return 0;
+    const monthlyRate = annualRate / (12 * 100);
+    const termInMonths = termInYears * 12;
+    if (monthlyRate === 0) return principal / termInMonths;
+    const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, termInMonths)) / (Math.pow(1 + monthlyRate, termInMonths) - 1);
+    return parseFloat(emi.toFixed(2));
+  };
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onAddLoan(values);
+    const emi = calculateEMI(values.principal, values.interestRate, values.term);
+    onAddLoan({...values, emi});
     form.reset();
     setIsOpen(false);
   }
@@ -76,7 +92,7 @@ export function AddLoanDialog({ isOpen, setIsOpen, onAddLoan }: AddLoanDialogPro
         <DialogHeader>
           <DialogTitle>Add New Loan</DialogTitle>
           <DialogDescription>
-            Enter the details for your new loan.
+            Enter the details for your new loan. Monthly EMIs will be scheduled automatically.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -193,6 +209,30 @@ export function AddLoanDialog({ isOpen, setIsOpen, onAddLoan }: AddLoanDialogPro
                       />
                     </PopoverContent>
                   </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="accountId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Debit EMI From</FormLabel>
+                   <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a bank account" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {bankAccounts.map(account => (
+                        <SelectItem key={account.id} value={account.id}>
+                            {account.name} (₹{account.balance.toLocaleString('en-IN')})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

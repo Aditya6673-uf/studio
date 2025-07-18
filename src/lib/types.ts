@@ -26,6 +26,8 @@ export type Loan = {
   interestRate: number;
   startDate: Date | string;
   term: number; // in years
+  emi: number;
+  accountId: string;
 };
 
 export type AutoCredit = {
