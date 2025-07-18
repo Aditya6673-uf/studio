@@ -73,7 +73,7 @@ export default function LoansPage() {
                       <TableRow key={loan.id}>
                         <TableCell className="font-medium">{loan.name}</TableCell>
                         <TableCell><div className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{loan.principal.toLocaleString('en-IN')}</div></TableCell>
-                        <TableCell><div className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{loan.emi.toLocaleString('en-IN')}</div></TableCell>
+                        <TableCell><div className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{(loan.emi || 0).toLocaleString('en-IN')}</div></TableCell>
                         <TableCell><div className="flex items-center"><IndianRupee className="h-4 w-4 mr-1 inline-flex shrink-0" />{loan.paid.toLocaleString('en-IN')}</div></TableCell>
                         <TableCell>{loan.interestRate.toFixed(2)}%</TableCell>
                         <TableCell>{isValidDate ? format(startDate, 'dd MMM, yyyy') : 'N/A'}</TableCell>
