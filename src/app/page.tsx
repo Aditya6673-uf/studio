@@ -236,7 +236,7 @@ export default function Dashboard() {
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Monthly Expenses</CardTitle>
               <div className="flex items-center">
-                  <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => router.push('/all-transactions')}>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => setIsSheetOpen(true)}>
                       <PlusCircle className="h-4 w-4" />
                       <span className="sr-only">Add Expense</span>
                   </Button>
