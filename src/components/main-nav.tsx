@@ -15,7 +15,6 @@ const navItems = [
   { href: '/', label: 'Dashboard', icon: Home },
   { href: '/reports', label: 'Reports', icon: BarChart },
   { href: '/accounts', label: 'Accounts', icon: Landmark },
-  { href: '/fixed-costs', label: 'Fixed Costs', icon: Repeat },
   { href: '/all-transactions', label: 'All Transactions', icon: List },
   { href: '/loans', label: 'Loans', icon: HandCoins },
   { href: '/auto-credit', label: 'Auto Credit', icon: PiggyBank },
