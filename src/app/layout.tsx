@@ -10,6 +10,7 @@ import { Logo } from '@/components/logo';
 import { MainNav } from '@/components/main-nav';
 import { UserNav } from '@/components/user-nav';
 import { useState, useEffect } from 'react';
+import Script from 'next/script';
 import { LoginDialog } from '@/components/login-dialog';
 import { WelcomeDialog } from '@/components/welcome-dialog';
 import { TransactionsProvider } from '@/context/transactions-context';
@@ -61,6 +62,20 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet" />
+        
+        <Script id="ad-script-1" strategy="afterInteractive">
+          {`
+            atOptions = {
+              'key' : '1efdad234697f49c71165476f9a14e03',
+              'format' : 'iframe',
+              'height' : 300,
+              'width' : 160,
+              'params' : {}
+            };
+          `}
+        </Script>
+        <Script src="//www.highperformanceformat.com/1efdad234697f49c71165476f9a14e03/invoke.js" strategy="afterInteractive" />
+        <Script src="//pl27248838.profitableratecpm.com/23/6c/55/236c55810360395ae76edc9087e9ce10.js" strategy="afterInteractive" />
       </head>
       <body className="font-body antialiased" suppressHydrationWarning>
         {!isAuthenticated ? (
