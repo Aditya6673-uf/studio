@@ -8,8 +8,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Camera, Trash2 } from 'lucide-react';
+import { Camera, Trash2, IndianRupee } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Logo } from '@/components/logo';
 
 export default function ProfilePage() {
   const [avatarSrc, setAvatarSrc] = useState("");
@@ -55,7 +56,10 @@ export default function ProfilePage() {
             <div className="relative group mb-4">
               <Avatar className="h-24 w-24">
                 <AvatarImage src={avatarSrc} alt="@aditya" />
-                <AvatarFallback>AD</AvatarFallback>
+                <AvatarFallback>
+                    <span className='sr-only'>Aditya</span>
+                    <IndianRupee className='h-10 w-10 text-primary' />
+                </AvatarFallback>
               </Avatar>
               <div
                 className="absolute inset-0 flex h-24 w-24 items-center justify-center gap-4 rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100"
